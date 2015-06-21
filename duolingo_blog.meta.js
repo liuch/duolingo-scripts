@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name        Duo-Blog
-// @namespace   https://github.com/liuch/duolingo-scripts
-// @include     https://www.duolingo.com/*
-// @version     0.1
-// @grant       none
-// @description This script allows to make notes into your activity stream.
-// @updateURL   https://github.com/liuch/duolingo-scripts/raw/master/duolingo_blog.meta.js
-// @downloadURL https://github.com/liuch/duolingo-scripts/raw/master/duolingo_blog.user.js
+// @name           Duo-Blog
+// @namespace      https://github.com/liuch/duolingo-scripts
+// @include        https://www.duolingo.com/*
+// @version        0.1.2
+// @grant          none
+// @description    This script allows you to make notes into your activity stream.
+// @description:ru Этот скрипт позволит вам создавать заметки в своей ленте.
+// @updateURL      https://github.com/liuch/duolingo-scripts/raw/master/duolingo_blog.meta.js
+// @downloadURL    https://github.com/liuch/duolingo-scripts/raw/master/duolingo_blog.user.js
 // ==/UserScript==
-
