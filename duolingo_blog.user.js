@@ -2,7 +2,7 @@
 // @name           Duo-Blog
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.3
+// @version        0.1.4
 // @grant          none
 // @description    This script allows you to make notes into your activity stream.
 // @description:ru Этот скрипт позволит вам создавать заметки в своей ленте.
@@ -53,6 +53,14 @@ function f($) {
 			oldUpdateActivity : v.prototype.updateActivity,
 			updateActivity    : newStreamUpdActFunc
 		});})(duo.StreamView);
+
+		// UI translations
+		if (duo.ui_translations["Write a note"] === undefined) {
+			if (duo.user.attributes.ui_language == "ru")
+				duo.ui_translations["Write a note"] = "Оставить запись";
+			else if (duo.user.attributes.ui_language == "uk")
+				duo.ui_translations["Write a note"] = "Залишити запис";
+		}
 
 		if ($("#stream-nav").hasClass("active") && duo.streamRouter)
 			duo.streamRouter.stream(); // !!! dirty hack !!!
