@@ -2,7 +2,7 @@
 // @name           Duo-Blog
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.2.1
+// @version        0.2.2
 // @grant          none
 // @description    This script allows you to make notes into your activity stream.
 // @description:ru Этот скрипт позволит вам создавать заметки в своей ленте.
@@ -55,13 +55,15 @@ function f($) {
 		});})(duo.StreamView);
 
 		// *** Direct event links
-		duo.templates["stream-post"] = duo.templates["stream-post"].replace("{{datetime_string}}</span>", '{{datetime_string}}</span><a class="blue-link" href="/event/{{id}}">#</a>');
+		var lk = '<a class="left" style="margin-right:5px;" href="/event/{{id}}"><span class="icon icon-link" /></a>';
+
+		duo.templates["stream-post"] = duo.templates["stream-post"].replace('<header class="stream-item-header">{{#own}}<span class="left">', '<header class="stream-item-header">' + lk + '{{#own}}<span>');
 		// StreamPostEventView inject
 		duo.StreamPostEventView = (function(v){return v.extend({
 			template : duo.templates["stream-post"]
 		});})(duo.StreamPostEventView);
 
-		duo.templates["comment-event"] = duo.templates["comment-event"].replace("{{datetime_string}}</span>", '{{datetime_string}}</span><a class="blue-link" href="/event/{{id}}">#</a>');
+		duo.templates["comment-event"] = duo.templates["comment-event"].replace('<header class="stream-item-header"><span class="left">', '<header class="stream-item-header">' + lk + '<span>');
 		// CommentEventView inject
 		duo.CommentEventView = (function(v){return v.extend({
 			template : duo.templates["comment-event"]
