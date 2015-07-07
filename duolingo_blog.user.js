@@ -2,7 +2,7 @@
 // @name           Duo-Blog
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.2.2
+// @version        0.2.3
 // @grant          none
 // @description    This script allows you to make notes into your activity stream.
 // @description:ru Этот скрипт позволит вам создавать заметки в своей ленте.
@@ -55,19 +55,32 @@ function f($) {
 		});})(duo.StreamView);
 
 		// *** Direct event links
+		var ta = {"stream-post":"StreamPostEventView", "comment-event":"CommentEventView", "level-event":"LevelEventView", "follow-event":"FollowEventView",
+							"welcome-event":"WelcomeEventView", "lesson-event":"LessonEventView", "translation-event":"TranslationEventView", "test-event":"TestEventView",
+							"unlock-event":"UnlockEventView", "translator-promotion-event":"TranslatorPromotionEventView"};
 		var lk = '<a class="left" style="margin-right:5px;" href="/event/{{id}}"><span class="icon icon-link" /></a>';
-
-		duo.templates["stream-post"] = duo.templates["stream-post"].replace('<header class="stream-item-header">{{#own}}<span class="left">', '<header class="stream-item-header">' + lk + '{{#own}}<span>');
-		// StreamPostEventView inject
-		duo.StreamPostEventView = (function(v){return v.extend({
-			template : duo.templates["stream-post"]
-		});})(duo.StreamPostEventView);
-
-		duo.templates["comment-event"] = duo.templates["comment-event"].replace('<header class="stream-item-header"><span class="left">', '<header class="stream-item-header">' + lk + '<span>');
-		// CommentEventView inject
-		duo.CommentEventView = (function(v){return v.extend({
-			template : duo.templates["comment-event"]
-		});})(duo.CommentEventView);
+		var fail_tmpl = function(n) {
+			console.log("--- !Duo-Blog: " + n);
+		};
+		var repl_tmpl = function(tn) {
+			var s = duo.templates[tn].replace(new RegExp('^(.*<header class="stream-item-header">)({{#own}})?<span class="left">(.*)$','g'), '$1' + lk + '$2<span>$3');
+			if (s.length != duo.templates[tn].length) {
+				duo.templates[tn] = s;
+			} else {
+				fail_tmpl(tn);
+			}
+			return s;
+		};
+		for (n in ta) {
+			if (duo[ta[n]] !== undefined && duo.templates[n] !== undefined)
+			{
+				duo[ta[n]] = (function(v){return v.extend({
+					template : repl_tmpl(n)
+				});})(duo[ta[n]]);
+			} else {
+				fail_tmpl(ta[n]);
+			}
+		}
 
 		// *** UI translations
 		if (duo.ui_translations["Write a note"] === undefined) {
