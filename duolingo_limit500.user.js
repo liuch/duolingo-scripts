@@ -2,7 +2,7 @@
 // @name           DuoLimit500
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.1
+// @version        0.2.1
 // @grant          none
 // @description    This script warns you when you exceed the limit on the length of the activity stream message.
 // @description:ru Этот скрипт предупредит вас, когда вы превысите лимит длины сообщения при отправке в ленте.
@@ -23,47 +23,34 @@ function inject(f) { //Inject the script into the document
 inject(f);
 
 function f($) {
-	var started = !1;
-	function start() {
-		if (started || !duo || !duo.templates || !duo.templates.events || !duo.ProfileView || !duo.EventsView)
-			return;
-
-		console.log("--- *Duo500 ---");
-		// Here is replacing the events template
-		var l = duo.templates.events.length;
-		duo.templates.events = duo.templates.events.replace("</div></div></li>", '</div></div><span id="msg-chars-cnt" style="margin-left:3px;font-size:90%">0/500</span></li>');
-		if (l == duo.templates.events.length) {
-			console.log("--- !Duo500 ---");
-			return;
+	var updateCounter = function() {
+		var n = $.trim($("#stream-post").val()).length;
+		if (n <= 500) {
+			$("#stream-post-btn").removeClass("btn-red").addClass("btn-green");
+			$("#msg-chars-cnt").css("color", "");
+		} else {
+			$("#stream-post-btn,").removeClass("btn-green").addClass("btn-red");
+			$("#msg-chars-cnt").css("color", "red");
 		}
+		$("#msg-chars-cnt").text("" + n + "/500");
+	};
 
-		// EventsView inject
-		duo.EventsView = (function(v){return v.extend({
-			template  : duo.templates.events
-		});})(duo.EventsView);
+	function start(e, r, o) {
+		if (!duo)
+			return;
 
-		// ProfileView inject
-		var newEnablePosting = function() {
-			var n = $.trim(this.$(".post-activity .post").val()).length;
-			if (n <= 500)
-				this.$("#stream-post-btn").removeClass("btn-red").addClass("btn-green");
-			else
-				this.$("#stream-post-btn").removeClass("btn-green").addClass("btn-red");
-			$("#msg-chars-cnt").text("" + n + "/500");
-			if (this.oldEnablePosting)
-				this.oldEnablePosting();
-		};
-		duo.ProfileView = (function(v){return v.extend({
-			oldEnablePosting : v.prototype.enablePosting,
-			enablePosting    : newEnablePosting
-		});})(duo.ProfileView);
-
-		started = !0;
-		console.log("--- /Duo500 ---");
+		var x = new RegExp("^/activity/[0-9]+\\?");
+		if (x.exec(o.url) && $("#msg-chars-cnt").length == 0) {
+			var el = $("#stream-post").parent().parent().parent();
+			if (el.length) {
+				el.append('<span id="msg-chars-cnt" style="margin-left:3px;font-size:90%">0/500</span>');
+				$("#stream-post").bind("keyup", updateCounter).bind("input", updateCounter);
+			}
+		}
 	}
 
-	start();
-	$(document).ready(function() {
-		start();
+	$(document).ajaxComplete(function(e, r, o) {
+		start(e, r, o);
 	});
 }
+
