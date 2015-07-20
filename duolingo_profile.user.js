@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.1
+// @version        0.2.1
 // @grant          none
 // @description    This script displays additional information in the users profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -23,37 +23,57 @@ function inject(f) { //Inject the script into the document
 inject(f);
 
 function f($) {
-	function start() {
-		if (!duo || !duo.user || !duo.templates || !duo.templates.profile)
-			return;
-
-		console.log("--- *DuoProfile ---");
-
-		var l = duo.templates.profile.length
-		duo.templates.profile = duo.templates.profile.replace("{{username}}</h1><h2 ", "{{username}}</h1></h2>{{#created}}<p class=\"gray\">{{#_i}}Registered:{{/_i}} {{created}}</p>{{/created}}<h2 ");
-		if (l == duo.templates.profile) {
-			console.log("--- !DuoProfile ---");
-			return;
+	var trs = {
+		"Registered:" : {
+			"ru" : "Зарегистрирован(а):",
+			"uk" : "Зареєстрований(а):"
 		}
-
-		// duo.ProfileView inject
-		duo.ProfileView = (function(v){return v.extend({
-			template  : duo.templates.profile
-		});})(duo.ProfileView);
-
-		// UI translations
-		if (duo.ui_translations["Registered:"] === undefined) {
-			if (duo.user.attributes.ui_language == "ru")
-				duo.ui_translations["Registered:"] = "Зарегистрирован(а):";
-			else if (duo.user.attributes.ui_language == "uk")
-				duo.ui_translations["Registered:"] = "Зареєстрований(а):";
-		}
-
-		console.log("--- /DuoProfile ---");
+	}
+	function tr(t) {
+		if (duo.user !== undefined && duo.user.attributes.ui_language !== undefined && trs[t] !== undefined && trs[t][duo.user.attributes.ui_language] != undefined)
+			return trs[t][duo.user.attributes.ui_language];
+		return t;
 	}
 
-	$(document).ready(function() {
-		start();
+	var attrs = {id: 0, created: ""};
+
+	function start(e, r, o) {
+		if (!duo || !duo.user)
+			return;
+
+		var x = new RegExp("^/users/(.+)\\?");
+		var n = x.exec(o.url);
+		if (n && document.location.pathname.substr(1) == n[1]) {
+			var j = $.parseJSON(r.responseText);
+			attrs.id      = j.id || 0;
+			attrs.created = j.created || "n/a";
+		} else {
+			var x = new RegExp("^/translation_tiers/([0-9]+)\\?");
+			n = x.exec(o.url);
+			if (!n)
+				return;
+			if (n[1] != attrs.id) {
+				if (n[1] != duo.user.id)
+					return;
+				attrs.id      = duo.user.id;
+				attrs.created = duo.user.attributes.created || "n/a";
+			}
+		}
+
+		var el = $(".profile-header").find(".profile-header-username");
+		if (el.length) {
+			if (attrs.id) {
+				var t = tr('Registered:') + ' ' + $.trim(attrs.created);
+				if ($("#created-info").length)
+					$("#created-info").text(t);
+				else
+					$('<p id="created-info" class="gray">' + t + '</p>').insertAfter(el);
+			}
+		}
+	}
+
+	$(document).ajaxComplete(function(e, r, o) {
+		start(e, r, o);
 	});
 }
 
