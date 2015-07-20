@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.2.1
+// @version        0.2.2
 // @grant          none
 // @description    This script adds the direct links for discussion comments, translation sentences, and activity stream events
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах, на предложения в переводах и на события в ленте
@@ -61,7 +61,7 @@ function f($) {
 		// Translation links
 		x = new RegExp("^/wiki_translation_sentence/[a-z0-9]+/[a-z0-9]+/(get_sentence|get_revisions)");
 		if (x.exec(o.url)) {
-			x = new RegExp("^/translation/([a-z0-9]+)$");
+			x = new RegExp("^/translation/([a-z0-9]+)($|\\$)");
 			var id = x.exec(document.location.pathname);
 			if (id) {
 				id = id[1];
