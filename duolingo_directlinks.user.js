@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.2.3
+// @version        0.2.4
 // @grant          none
 // @description    This script adds the direct links for discussion comments, translation sentences, and activity stream events
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах, на предложения в переводах и на события в ленте
@@ -34,6 +34,23 @@ function f($) {
 			return trs[t][duo.user.attributes.ui_language];
 		return t;
 	}
+
+	function makeCommentLink(id, j) {
+		var n_id = j.id;
+		var l = "/comment/" + id + "$comment_id=" + n_id;
+		var el = $("#nested-comment-" + n_id).children("span").children("header");
+		if (el.length && !el.find(".icon-link").length) {
+			el.prepend('<a style="margin-right:5px;" href="' + l + '"><span class="icon icon-link" /></a>');
+		}
+	}
+	var processNestedComments = function(id, j) {
+		if (j["comments"] !== undefined && j.comments.length) {
+			for (var i in j.comments) {
+				makeCommentLink(id, j.comments[i]);
+				processNestedComments(id, j.comments[i]);
+			}
+		}
+	};
 
 	function start(e, r, o) {
 		if (!duo)
@@ -71,6 +88,24 @@ function f($) {
 				if (el.length && !el.find(".icon-link").length) {
 					var idx = el.parent().parent().parent().attr("id").replace("sentence-sidebar-", "");
 					el.append('<a class="right" href="/translation/' + id + '$index=' + idx + '"><span class="icon icon-link" style="margin-right:5px;" />' + tr('Direct link') + '</a>');
+				}
+			}
+			return;
+		}
+
+		// Discussion links
+		x = new RegExp("^/comments/[0-9]+($|\\?|/reply)");
+		if (x.exec(o.url)) {
+			x = new RegExp("^/comment/([0-9]+)($|\\$)");
+			var id = x.exec(document.location.pathname);
+			if (id) {
+				id = id[1];
+				var j = $.parseJSON(r.responseText);
+				if (j) {
+					if (o.type == "PUT")
+						makeCommentLink(id, j);
+					else
+						processNestedComments(id, j);
 				}
 			}
 		}
