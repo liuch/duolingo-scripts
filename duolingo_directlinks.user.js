@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.2.4
+// @version        0.2.5
 // @grant          none
 // @description    This script adds the direct links for discussion comments, translation sentences, and activity stream events
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах, на предложения в переводах и на события в ленте
@@ -35,6 +35,14 @@ function f($) {
 		return t;
 	}
 
+	function makeEventLink(j) {
+		if (j["id"] !== undefined) {
+			var h = $("#comment-box-" + j.id).parents(".stream-item").children(".stream-item-header");
+			if (h.length && !h.find(".icon-link").length)
+				h.prepend('<a class="left" style="margin-right:5px;" href="/event/' + j.id + '"><span class="icon icon-link" /></a>');
+		}
+	}
+
 	function makeCommentLink(id, j) {
 		var n_id = j.id;
 		var l = "/comment/" + id + "$comment_id=" + n_id;
@@ -57,19 +65,16 @@ function f($) {
 			return;
 
 		// Activity links
-		var x = new RegExp("^/(activity|stream)/[0-9]+\\?");
-		if (x.exec(o.url)) {
+		var x = new RegExp("^/(activity|stream|events)/[0-9]+(\\?|/like$)");
+		var a = x.exec(o.url);
+		if (a) {
 			var j = $.parseJSON(r.responseText);
-			if (j.events) {
-				var id = 0, h = null;
-				for (var i = 0; i < j.events.length; ++i) {
-					id = j.events[i].id;
-					if (id) {
-						h = $("#comment-box-" + id).parents(".stream-item").children(".stream-item-header");
-						if (h.length) {
-							h.prepend('<a class="left" style="margin-right:5px;" href="/event/' + id + '"><span class="icon icon-link" /></a>');
-						}
-					}
+			if (j) {
+				if (a[1] == "events") {
+					makeEventLink(j);
+				} else if (j && j["events"] !== undefined) {
+					for (var i = 0; i < j.events.length; ++i)
+						makeEventLink(j.events[i]);
 				}
 			}
 			return;
