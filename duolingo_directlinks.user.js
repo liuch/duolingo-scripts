@@ -45,9 +45,9 @@ function f($) {
 
 	function makeCommentLink(id, j) {
 		var n_id = j.id;
-		var l = "/comment/" + id + "$comment_id=" + n_id;
 		var el = $("#nested-comment-" + n_id).children("span").children("header");
 		if (el.length && !el.find(".icon-link").length) {
+			var l = "/comment/" + id + "$comment_id=" + n_id;
 			el.prepend('<a style="margin-right:5px;" href="' + l + '"><span class="icon icon-link" /></a>');
 		}
 	}
