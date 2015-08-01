@@ -72,7 +72,7 @@ function f($) {
 			if (j) {
 				if (a[1] == "events") {
 					makeEventLink(j);
-				} else if (j && j["events"] !== undefined) {
+				} else if (j["events"] !== undefined) {
 					for (var i = 0; i < j.events.length; ++i)
 						makeEventLink(j.events[i]);
 				}
