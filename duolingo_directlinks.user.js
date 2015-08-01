@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.2.7
+// @version        0.2.8
 // @grant          none
 // @description    This script adds the direct links for discussion comments, translation sentences, and activity stream events
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах, на предложения в переводах и на события в ленте
@@ -67,10 +67,12 @@ function f($) {
 		// Activity links
 		var x = new RegExp("^/(activity|stream|events)/[0-9]+(\\?|/like$)");
 		var a = x.exec(o.url);
+		if (!a && o.url == "/post")
+			a = [o.url, o.url.substr(1)];
 		if (a) {
 			var j = $.parseJSON(r.responseText);
 			if (j) {
-				if (a[1] == "events") {
+				if (a[1] == "events" || a[1] == "post") {
 					makeEventLink(j);
 				} else if (j["events"] !== undefined) {
 					for (var i = 0; i < j.events.length; ++i)
