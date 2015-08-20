@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.2.2
+// @version        0.2.3
 // @grant          none
 // @description    This script displays additional information in the users profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -35,35 +35,42 @@ function f($) {
 		return t;
 	}
 
-	var attrs = {id: 0, created: ""};
+	var attrs = { id: 0, created: "" };
+	var u_reg = new RegExp("^/users/(.+)\\?");
+	var p_reg = new RegExp("^/([^$]+)($|\\$)");
+	var t_reg = new RegExp("^/translation_tiers/([0-9]+)\\?");
 
 	function start(e, r, o) {
 		if (!duo || !duo.user)
 			return;
+		if (o.url == "/diagnostics/js_error")
+			return;
 
-		var x = new RegExp("^/users/(.+)\\?");
-		var n = x.exec(o.url);
-		if (n && document.location.pathname.substr(1) == n[1]) {
+		var n = u_reg.exec(o.url);
+		if (n) {
+			var s = p_reg.exec(document.location.pathname);
+			if (!s || s[1] != n[1])
+				return;
 			var j = $.parseJSON(r.responseText);
-			attrs.id      = j.id || 0;
-			attrs.created = j.created || "n/a";
+			attrs.id       = j.id || 0;
+			attrs.created  = j.created || "n/a";
 		} else {
-			var x = new RegExp("^/translation_tiers/([0-9]+)\\?");
-			n = x.exec(o.url);
+			n = t_reg.exec(o.url);
 			if (!n)
 				return;
 			if (n[1] != attrs.id) {
 				if (n[1] != duo.user.id)
 					return;
-				attrs.id      = duo.user.id;
-				attrs.created = duo.user.attributes.created || "n/a";
+				attrs.id       = duo.user.id;
+				attrs.created  = duo.user.attributes.created || "n/a";
 			}
 		}
 
 		var el = $(".profile-header").find(".profile-header-username");
+		var t;
 		if (el.length) {
 			if (attrs.id) {
-				var t = tr('Registered:') + ' ' + $.trim(attrs.created);
+				t = tr('Registered:') + ' ' + $.trim(attrs.created);
 				if ($("#created-info").length)
 					$("#created-info").text(t);
 				else
