@@ -2,7 +2,7 @@
 // @name           Duo-Blog
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.3.1
+// @version        0.3.2
 // @grant          none
 // @description    This script allows you to make notes into your activity stream.
 // @description:ru Этот скрипт позволит вам создавать заметки в своей ленте.
@@ -41,6 +41,8 @@ function f($) {
 
 	function start(e, r, o) {
 		if (!duo || !duo.user)
+			return;
+		if (o.url == "/diagnostics/js_error")
 			return;
 
 		var x = new RegExp("^/activity/([0-9]+)\\?");
