@@ -2,7 +2,7 @@
 // @name           DuoLimit500
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.2.2
+// @version        0.2.3
 // @grant          none
 // @description    This script warns you when you exceed the limit on the length of the activity stream message.
 // @description:ru Этот скрипт предупредит вас, когда вы превысите лимит длины сообщения при отправке в ленте.
@@ -42,6 +42,8 @@ function f($) {
 
 	function start(e, r, o) {
 		if (!duo)
+			return;
+		if (o.url == "/diagnostics/js_error")
 			return;
 
 		var x = new RegExp("^/activity/[0-9]+\\?");
