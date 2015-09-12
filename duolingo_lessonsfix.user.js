@@ -2,7 +2,7 @@
 // @name           DuoLessonsFix
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.1
+// @version        0.1.2
 // @grant          none
 // @description    TODO
 // @description:ru TODO
@@ -77,7 +77,7 @@ function f($) {
 		if (sess_obj && x.exec(o.url)) {
 			var el = $(".practice-intro-screen");
 			if (el.length)
-				el.append('<div id="fix-timer-message" style="margin-top:1.2em;"><span class="red right">☑ Timer is under control</span></div>');
+				el.append('<div id="fix-timer-message" style="margin-top:1.2em;"><span class="red right">\u2611 Timer is under control</span></div>');
 		}
 
 		if (document.location.pathname == "/practice") {
