@@ -2,7 +2,7 @@
 // @name           DuoLessonsFix
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.2
+// @version        0.1.3
 // @grant          none
 // @description    TODO
 // @description:ru TODO

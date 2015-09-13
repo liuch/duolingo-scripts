@@ -2,7 +2,7 @@
 // @name           DuoLessonsFix
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.2
+// @version        0.1.3
 // @grant          none
 // @description    TODO
 // @description:ru TODO
@@ -41,7 +41,7 @@ function f($) {
 		var obj = arguments[1];
 		if (typeof obj  == "object" && obj.timer_view) {
 			var i = 0;
-			if (!obj.next_original) {
+			if (!obj.next_original && obj.next) {
 				obj.next_original = obj.next;
 				obj.next = next_f;
 				++i;
@@ -80,11 +80,11 @@ function f($) {
 				el.append('<div id="fix-timer-message" style="margin-top:1.2em;"><span class="red right">\u2611 Timer is under control</span></div>');
 		}
 
-		if (document.location.pathname == "/practice") {
+		if (document.location.pathname == "/practice" || document.location.pathname.substr(0, 7) == "/skill/") {
 			if (sess_obj)
 				sess_used = true;
 
-			x = new RegExp("^/session_element_solutions/practice/.*");
+			x = new RegExp("^/session_element_solutions/(skill_)?practice/.*");
 			if (x.exec(o.url)) {
 				if (sess_obj && sess_obj.timer_view && !sess_obj.timer_view.paused) {
 					sess_obj.timer_view.pause();
