@@ -2,7 +2,7 @@
 // @name           DuoLessonsFix
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.3
+// @version        0.1.4
 // @grant          none
 // @description    This script pauses the timer between exercises in the timed practice.
 // @description:ru Этот скрипт ставит таймер на паузу между заданиями в тренировке на время.
