@@ -53,10 +53,6 @@ function f($) {
 	};
 
 	var free_res = function() {
-		//if (orig_bind)
-		//	_.bind = orig_bind;
-		//orig_bind = null;
-
 		sess_obj  = null;
 		sess_used = false;
 	};
@@ -73,18 +69,11 @@ function f($) {
 		if (o.url == "/diagnostics/js_error")
 			return;
 
-		var x = new RegExp("^/sessions/[0-9]+\\?");
-		if (sess_obj && x.exec(o.url)) {
-			var el = $(".practice-intro-screen");
-			if (el.length)
-				el.append('<div id="fix-timer-message" style="margin-top:1.2em;"><span class="red right">\u2611 Timer is under control</span></div>');
-		}
-
 		if (document.location.pathname == "/practice" || document.location.pathname.substr(0, 7) == "/skill/") {
 			if (sess_obj)
 				sess_used = true;
 
-			x = new RegExp("^/session_element_solutions/(skill_)?practice/.*");
+			var x = new RegExp("^/session_element_solutions/(skill_)?practice/.*");
 			if (x.exec(o.url)) {
 				if (sess_obj && sess_obj.timer_view && !sess_obj.timer_view.paused) {
 					sess_obj.timer_view.pause();
