@@ -13,6 +13,9 @@
 * [DuoLimit500](https://github.com/liuch/duolingo-scripts/raw/master/duolingo_limit500.user.js)
   * This script warns you when you exceed the limit on the length of the activity stream message.
   * Этот скрипт предупредит вас, когда вы превысите лимит длины сообщения при отправке в ленте.
+* [DuoMoreLingots](https://github.com/liuch/duolingo-scripts/raw/master/duolingo_morelingots.user.js)
+  * This script allows you to give more than one lingot in two clicks.
+  * Этот скрипт позволяет давать больше одного лингота за раз.
 * [DuoProfile](https://github.com/liuch/duolingo-scripts/raw/master/duolingo_profile.user.js)
   * This script displays additional information in the users profile.
   * Этот скрипт показывает дополнительную информацию в профиле пользователей.
