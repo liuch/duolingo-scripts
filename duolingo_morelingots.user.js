@@ -2,7 +2,7 @@
 // @name           DuoMoreLingots
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.1
+// @version        0.1.2
 // @grant          none
 // @description    This script allows you to give more than one lingot in two clicks.
 // @description:ru Этот скрипт позволяет давать больше одного лингота за раз.
@@ -67,7 +67,7 @@ function f($) {
 
 	var lover = function(id, root) {
 		var love = parseInt(prompt("How many lingots would you like to give away?", "1"));
-		if (love > 0 && (love <= 10 || confirm("Sure you want to give " + love + " lingots away?")))
+		if (love > 0 && (love <= 10 || confirm("Are you sure want to give " + love + " lingots away?")))
 			set_interval_limited(id, root, love, 200);
 		return false;
 	};
