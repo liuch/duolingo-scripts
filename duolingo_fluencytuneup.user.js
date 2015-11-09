@@ -2,7 +2,7 @@
 // @name           DuoFluencyTuneup
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.2
+// @version        0.1.3
 // @grant          none
 // @description    Fluency score tune up
 // @description:ru Настройка отображения fluency score
@@ -42,16 +42,16 @@ function f($) {
 	var fluency_split = function(f, d) {
 		var factor = Math.pow(10, d);
 		var res = {};
-		var i = d ? Math.round(f * 100 * factor) : Math.floor(f * 100);
-		res.left  = Math.floor(i / factor);
-		res.right = i - res.left * factor;
+		var i = (d ? Math.round(f * 100 * factor) : Math.floor(f * 100)) / factor;
+		res.left  = "" + Math.floor(i);
+		res.right = i.toFixed(d).replace(/^[0-9]+/, "");
 		return res;
 	};
 
 	function fluency_str(f_s) {
-		var res = "" + f_s.left;
+		var res = f_s.left;
 		if (f_s.right)
-			res += "." + f_s.right;
+			res += f_s.right;
 		return res;
 	}
 
@@ -63,7 +63,7 @@ function f($) {
 			shs.text(d.left);
 			shs.append('<span class="fluency-score-percent">%</span>');
 			if (digits > 0)
-				shs.append('<span class="fluency-fraction" style="font-size:50%;display:block;margin-top:0.2em;" title="' + (fluency_score * 100) + '">.' + d.right + '</span>');
+				shs.append('<span class="fluency-fraction" style="font-size:50%;display:block;margin-top:0.2em;" title="' + (fluency_score * 100) + '">' + d.right + '</span>');
 		}
 	}
 
