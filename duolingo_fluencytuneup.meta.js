@@ -2,7 +2,7 @@
 // @name           DuoFluencyTuneup
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.3
+// @version        0.1.4
 // @grant          none
 // @description    Fluency score tune up
 // @description:ru Настройка отображения fluency score

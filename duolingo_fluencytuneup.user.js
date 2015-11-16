@@ -2,7 +2,7 @@
 // @name           DuoFluencyTuneup
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.3
+// @version        0.1.4
 // @grant          none
 // @description    Fluency score tune up
 // @description:ru Настройка отображения fluency score
@@ -23,7 +23,7 @@ function inject(f) { //Inject the script into the document
 inject(f);
 
 function f($) {
-	var fluency_score = null;
+	var fluency_score = -1;
 	var digits = 2;
 	if (duo && duo.getCookie) {
 		digits = duo.getCookie().fluency_tuneup_digits;
@@ -93,7 +93,7 @@ function f($) {
 	}
 
 	var fix_displaying = function() {
-		if (fluency_score && digits >= 0) {
+		if (fluency_score > 0 && digits >= 0) {
 			make_menu();
 			if (digits > 0)
 				update_shield();
@@ -111,4 +111,8 @@ function f($) {
 	};
 
 	duo.formatFluencyScore = fluency_f;
+	if (duo && duo.user && duo.user.attributes.learning_language) {
+		fluency_score = duo.user.attributes.language_data[duo.user.attributes.learning_language].fluency_score;
+		fix_displaying();
+	}
 }
