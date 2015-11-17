@@ -2,7 +2,7 @@
 // @name           DuoFluencyTuneup
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.4
+// @version        0.1.5
 // @grant          none
 // @description    Fluency score tune up
 // @description:ru Настройка отображения fluency score
@@ -42,7 +42,7 @@ function f($) {
 	var fluency_split = function(f, d) {
 		var factor = Math.pow(10, d);
 		var res = {};
-		var i = (d ? Math.round(f * 100 * factor) : Math.floor(f * 100)) / factor;
+		var i = Math.floor(f * 100 * factor) / factor;
 		res.left  = "" + Math.floor(i);
 		res.right = i.toFixed(d).replace(/^[0-9]+/, "");
 		return res;
