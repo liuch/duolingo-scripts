@@ -2,7 +2,7 @@
 // @name           DuoFluencyTuneup
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.5
+// @version        0.1.6
 // @grant          none
 // @description    Fluency score tune up
 // @description:ru Настройка отображения fluency score
@@ -56,6 +56,8 @@ function f($) {
 	}
 
 	function update_shield() {
+		if (!duo || duo.view != "home")
+			return;
 		var shs = $(".fluency-score-shield-silver");
 		if (shs.length) {
 			shs.empty();
