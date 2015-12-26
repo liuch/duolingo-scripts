@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.3.4
+// @version        0.3.5
 // @grant          none
 // @description    This script adds the direct links for discussion comments, translation sentences, and activity stream events
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах, на предложения в переводах и на события в ленте
@@ -79,6 +79,7 @@ function f($) {
 			}
 		}
 	};
+	var last_root_comment_id = null;
 
 	function start(e, r, o) {
 		if (!duo)
@@ -123,18 +124,38 @@ function f($) {
 		}
 
 		// Discussion links
+		var modal = false;
 		x = new RegExp("^/comments/[0-9]+($|\\?|/reply|/upvote|/downvote|/love)");
 		a = x.exec(o.url);
+		if (!a) {
+			x = new RegExp("^/sentence/[0-9a-f]+\\?");
+			a = x.exec(o.url);
+			modal = true;
+		}
 		if (a) {
-			x = new RegExp("^/comment/([0-9]+)($|\\$)");
-			var id = x.exec(document.location.pathname);
-			if (id) {
-				id = id[1];
-				var j = $.parseJSON(r.responseText);
-				if (j) {
-					if (a[1] == "/upvote" || a[1] == "/downvote" || a[1] == "/reply")
+			var j = $.parseJSON(r.responseText);
+			if (j) {
+				var id = null;
+				var practice = (document.location.pathname == "/practice");
+				if (!modal) {
+					if (!practice) {
+						x = new RegExp("^/comment/([0-9]+)($|\\$)");
+						id = x.exec(document.location.pathname);
+						if (id)
+							id = id[1];
+					} else
+						id = last_root_comment_id;
+				} else if (document.location.pathname == "/practice") {
+					if (j.comment) {
+						j = j.comment;
+						id = j.id;
+					}
+				}
+				last_root_comment_id = id;
+				if (id) {
+					if (!modal && (a[1] == "/upvote" || a[1] == "/downvote" || a[1] == "/reply"))
 						makeCommentLink(id, j);
-					else if (o.type == "PUT" || a[1] == "/love")
+					else if (!modal && (o.type == "PUT" || a[1] == "/love"))
 						j = {comments: [j]};
 					processNestedComments(id, j);
 					makeDiscussionLink(document.location.protocol + "//" + document.location.host, id);
