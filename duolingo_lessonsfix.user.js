@@ -2,7 +2,7 @@
 // @name           DuoLessonsFix
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.4
+// @version        0.1.5
 // @grant          none
 // @description    This script pauses the timer between exercises in the timed practice.
 // @description:ru Этот скрипт ставит таймер на паузу между заданиями в тренировке на время.
@@ -37,17 +37,69 @@ function f($) {
 		}
 	};
 
+	var curr_discussion_index = -1;
+
+	var show_discussion = function(v) {
+		if (sess_obj && sess_obj.displayDiscussion && v.data.model.has("position")) {
+			var model = v.data.model;
+			model.set({position: v.data.idx});
+			if (model.get("session_elements").length == 0) {
+				var ta = model.get("session_elements");
+				var es = model.get("session_element_solutions");
+				for (var i = 0; i < es.length; i++)
+					ta.add(es[i][0]);
+				model.set("session_elements", ta);
+			}
+			if (curr_discussion_index != v.data.idx) {
+				$("#discussion-modal").remove();
+				curr_discussion_index = v.data.idx;
+			}
+			sess_obj.displayDiscussion();
+		}
+	};
+
+	var review_f = function() {
+		var res;
+		if (this.review_original) {
+			sess_obj.loading_comments = false; // <-- It fixes the bug in the code of duolingo
+			res = this.review_original(arguments);
+			var inner = $("#review-page > div > .slide-in > ul > li > .popover > .inner");
+			if (inner.length) {
+				var es = this.model.get("session_element_solutions");
+				var t;
+				for (var i = 0; i < inner.length; i++) {
+					t = es[i][0].get("type");
+					if (t && (t == "translate" || t == "listen" || t == "judge" || t == "form"))
+					if (inner.eq(i).find(".icon-link").length == 0) {
+						var o = $('<div><a href="javascript:;"><span class="icon icon-link" style="margin-right:5px;"/>Discussion link</a></div>');
+						o.click({model: this.model, idx: i}, show_discussion);
+						inner.eq(i).append(o);
+					}
+				}
+			}
+		}
+		return res;
+	};
+
 	var hook = function() {
 		var obj = arguments[1];
-		if (typeof obj  == "object" && obj.timer_view) {
+		if (typeof obj == "object") {
 			var i = 0;
-			if (!obj.next_original && obj.next) {
-				obj.next_original = obj.next;
-				obj.next = next_f;
-				++i;
+			if (obj.timer_view) {
+				if (!obj.next_original && obj.next) {
+					obj.next_original = obj.next;
+					obj.next = next_f;
+					i++;
+				}
+			} else if (sess_obj && obj.className == "slide-session-end") {
+				if (!obj.review_original && obj.showReviewModal) {
+					obj.review_original = obj.showReviewModal;
+					obj.showReviewModal = review_f;
+				}
 			}
-			if (!sess_obj || !i)
+			if (i) {
 				sess_obj = obj;
+			}
 		}
 		return orig_bind.apply(this, arguments);
 	};
