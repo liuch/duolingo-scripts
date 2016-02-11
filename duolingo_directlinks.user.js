@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.3.7
+// @version        0.3.8
 // @grant          none
 // @description    This script adds the direct links for discussion comments, translation sentences, and activity stream events
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах, на предложения в переводах и на события в ленте
@@ -162,7 +162,7 @@ function f($) {
 						}
 					} else
 						id = last_root_comment_id;
-				} else if (document.location.pathname == "/practice") {
+				} else if (document.location.pathname == "/practice" || document.location.pathname.startsWith("/skill/")) {
 					if (j.comment) {
 						j = j.comment;
 						id = j.id;
