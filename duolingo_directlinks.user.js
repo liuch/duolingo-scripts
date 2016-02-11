@@ -83,6 +83,9 @@ function f($) {
 		}
 	};
 	var last_root_comment_id = null;
+	var act_reg = null;
+	var tr_sen_reg = null, tr_rep_reg = null, tr_art_reg = null;
+	var ds_sub_reg = null, ds_sen_reg = null, ds_lnk_reg = null, ds_mrk_reg = null;
 
 	function start(e, r, o) {
 		if (!duo)
@@ -91,8 +94,9 @@ function f($) {
 			return;
 
 		// Activity links
-		var x = new RegExp("^/(activity|stream|events)/[0-9]+(\\?|/like$)");
-		var a = x.exec(o.url);
+		if (!act_reg)
+			act_reg = new RegExp("^/(activity|stream|events)/[0-9]+(\\?|/like$)");
+		var a = act_reg.exec(o.url);
 		if (!a && o.url == "/post")
 			a = [o.url, o.url.substr(1)];
 		if (a) {
@@ -109,12 +113,13 @@ function f($) {
 		}
 
 		// Translation links
-		x = new RegExp("^/wiki_translation_sentence/[a-z0-9]+/[a-z0-9]+/(get_sentence|get_revisions|[a-z0-9]+/rate)");
-		if (!x.exec(o.url))
-			x = new RegExp("^/wiki_translations/report_translator_cheating/[0-9]+$");
-		if (x.exec(o.url)) {
-			x = new RegExp("^/translation/([a-z0-9]+)($|\\$)");
-			var id = x.exec(document.location.pathname);
+		if (!tr_sen_reg) {
+			tr_sen_reg = new RegExp("^/wiki_translation_sentence/[a-z0-9]+/[a-z0-9]+/(get_sentence|get_revisions|[a-z0-9]+/rate)");
+			tr_rep_reg = new RegExp("^/wiki_translations/report_translator_cheating/[0-9]+$");
+			tr_art_reg = new RegExp("^/translation/([a-z0-9]+)($|\\$)");
+		}
+		if (tr_sen_reg.exec(o.url) || tr_rep_reg.exec(o.url)) {
+			var id = tr_art_reg.exec(document.location.pathname);
 			if (id) {
 				id = id[1];
 				var el = $(".document-sentence-sidebar :visible").find(".report-translator-cheating-wrapper").eq(0);
@@ -127,12 +132,16 @@ function f($) {
 		}
 
 		// Discussion links
+		if (!ds_sub_reg) {
+			ds_sub_reg = new RegExp("^/comments/[0-9]+($|\\?|/reply|/upvote|/downvote|/love)");
+			ds_sen_reg = new RegExp("^/sentence/[0-9a-f]+\\?");
+			ds_lnk_reg = new RegExp("^/comment/([0-9]+)($|\\$)");
+			ds_mrk_reg = new RegExp("[\\$&]comment_id=([0-9]+)($|&)");
+		}
 		var modal = false;
-		x = new RegExp("^/comments/[0-9]+($|\\?|/reply|/upvote|/downvote|/love)");
-		a = x.exec(o.url);
+		a = ds_sub_reg.exec(o.url);
 		if (!a) {
-			x = new RegExp("^/sentence/[0-9a-f]+\\?");
-			a = x.exec(o.url);
+			a = ds_sen_reg.exec(o.url);
 			modal = true;
 		}
 		if (a) {
@@ -142,11 +151,10 @@ function f($) {
 				var practice = (document.location.pathname == "/practice");
 				if (!modal) {
 					if (!practice) {
-						x = new RegExp("^/comment/([0-9]+)($|\\$)");
-						id = x.exec(document.location.pathname);
+						id = ds_lnk_reg.exec(document.location.pathname);
 						if (id) {
 							if (id[2] != "") {
-								var ci = (new RegExp("[\\$&]comment_id=([0-9]+)($|&)")).exec(document.location.pathname);
+								var ci = ds_mrk_reg.exec(document.location.pathname);
 								if (ci)
 									markComment(ci[1])
 							}
