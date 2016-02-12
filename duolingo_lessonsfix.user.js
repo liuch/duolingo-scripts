@@ -2,7 +2,7 @@
 // @name           DuoLessonsFix
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.5
+// @version        0.1.6
 // @grant          none
 // @description    This script pauses the timer between exercises in the timed practice.
 // @description:ru Этот скрипт ставит таймер на паузу между заданиями в тренировке на время.
@@ -85,7 +85,7 @@ function f($) {
 		var obj = arguments[1];
 		if (typeof obj == "object") {
 			var i = 0;
-			if (obj.timer_view) {
+			if (typeof obj.quitSession == "function") {
 				if (!obj.next_original && obj.next) {
 					obj.next_original = obj.next;
 					obj.next = next_f;
@@ -115,18 +115,19 @@ function f($) {
 		_.bind = hook;
 	}
 
+	var sol_url_reg = new RegExp("^/session_element_solutions/(skill_)?practice/.*");
+
 	function start(e, r, o) {
 		if (!duo)
 			return;
 		if (o.url == "/diagnostics/js_error")
 			return;
 
-		if (document.location.pathname == "/practice" || document.location.pathname.substr(0, 7) == "/skill/") {
+		if (document.location.pathname == "/practice" || document.location.pathname.startsWith("/skill/")) {
 			if (sess_obj)
 				sess_used = true;
 
-			var x = new RegExp("^/session_element_solutions/(skill_)?practice/.*");
-			if (x.exec(o.url)) {
+			if (sol_url_reg.exec(o.url)) {
 				if (sess_obj && sess_obj.timer_view && !sess_obj.timer_view.paused) {
 					sess_obj.timer_view.pause();
 				}
