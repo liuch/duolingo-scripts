@@ -2,7 +2,7 @@
 // @name           Duo-Blog
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.3.2
+// @version        0.3.3
 // @grant          none
 // @description    This script allows you to make notes into your activity stream.
 // @description:ru Этот скрипт позволит вам создавать заметки в своей ленте.
@@ -39,29 +39,36 @@ function f($) {
 		return t;
 	}
 
+	function show_form() {
+			var el = $("#stream-container .activity-stream");
+			if (el.length) {
+				if (!el.find("#stream-post").length) {
+					var s = '<li class="stream-item">';
+					s += '<a href="#" class="avatar avatar-medium"><span class="icon-comment-medium" /></a>';
+					s += '<span class="stream-item-type default"></span><ul class="stream-item-comment-list" style="margin-top: -10px;"><li><div class="post-activity stream-item-comment-new"><div class="col-input"><textarea id="stream-post" style="" class="post textarea-white textarea-block textarea-autogrow" placeholder="' + tr('Write a note') + '" dir="auto"></textarea></div><div class="col-btn"><button id="stream-post-btn" class="btn btn-green" disabled="disabled">' + tr('Post') + '</button></div></div></li></ul></li>';
+					el.prepend(s);
+				}
+			}
+	}
+
+	var reg_list = [ new RegExp("^/activity/([0-9]+)\\?"), new RegExp("^/translation_tiers/([0-9]+)\\?") ];
+
 	function start(e, r, o) {
 		if (!duo || !duo.user)
 			return;
 		if (o.url == "/diagnostics/js_error")
 			return;
 
-		var x = new RegExp("^/activity/([0-9]+)\\?");
-		var a = x.exec(o.url);
-		if (a && parseInt(a[1]) == duo.user.id && document.location.pathname.substr(1) == duo.user.attributes.username) {
-			//var el = $("#stream-container ul .activity-stream");
-			var el = $("#stream-container .activity-stream");
-			if (el.length) {
-				var s = '<li class="stream-item">';
-				s += '<a href="#" class="avatar avatar-medium"><span class="icon-comment-medium" /></a>';
-				//'{{>avatar_medium}}'
-				s += '<span class="stream-item-type default"></span><ul class="stream-item-comment-list" style="margin-top: -10px;"><li><div class="post-activity stream-item-comment-new"><div class="col-input"><textarea id="stream-post" style="" class="post textarea-white textarea-block textarea-autogrow" placeholder="' + tr('Write a note') + '" dir="auto"></textarea></div><div class="col-btn"><button id="stream-post-btn" class="btn btn-green" disabled="disabled">' + tr('Post') + '</button></div></div></li></ul></li>';
-				el.prepend(s);
-			}
-		}
+		var a = null;
+		reg_list.forEach(function(x) {
+			if (!a)
+				a = x.exec(o.url);
+		});
+		if (a && parseInt(a[1]) == duo.user.id && document.location.pathname.substr(1) == duo.user.attributes.username)
+			show_form();
 	}
 
 	$(document).ajaxComplete(function(e, r, o) {
 		start(e, r, o);
 	});
 }
-
