@@ -2,7 +2,7 @@
 // @name           DuoLessonsFix
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.6
+// @version        0.1.7
 // @grant          none
 // @description    This script pauses the timer between exercises in the timed practice.
 // @description:ru Этот скрипт ставит таймер на паузу между заданиями в тренировке на время.
@@ -28,6 +28,17 @@ function f($) {
 	var orig_bind = null;
 	var sess_obj  = null;
 	var sess_used = false;
+
+	var trs = {
+		"Discuss sentence" : {
+			"ru" : "Обсудить"
+		}
+	};
+	function tr(t) {
+		if (duo.user && duo.user.attributes.ui_language && trs[t] !== undefined && trs[t][duo.user.attributes.ui_language] != undefined)
+			return trs[t][duo.user.attributes.ui_language];
+		return t;
+	}
 
 	var next_f = function() {
 		if (sess_obj && sess_obj.next_original) {
@@ -66,12 +77,16 @@ function f($) {
 			var inner = $("#review-page > div > .slide-in > ul > li > .popover > .inner");
 			if (inner.length) {
 				var es = this.model.get("session_element_solutions");
-				var t;
+				var t, num, ds;
 				for (var i = 0; i < inner.length; i++) {
 					t = es[i][0].get("type");
 					if (t && (t == "translate" || t == "listen" || t == "judge" || t == "form"))
 					if (inner.eq(i).find(".icon-link").length == 0) {
-						var o = $('<div><a href="javascript:;"><span class="icon icon-link" style="margin-right:5px;"/>Discussion link</a></div>');
+						ds = tr("Discuss sentence");
+						num = es[i][0].get("num_comments");
+						if (num)
+							ds = ds + " (" + num + ")";
+						var o = $('<div><a href="javascript:;"><span class="icon icon-link" style="margin-right:5px;"/>' + ds + '</a></div>');
 						o.click({model: this.model, idx: i}, show_discussion);
 						inner.eq(i).append(o);
 					}
