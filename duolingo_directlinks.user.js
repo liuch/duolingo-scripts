@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.3.8
+// @version        0.3.9
 // @grant          none
 // @description    This script adds the direct links for discussion comments, translation sentences, and activity stream events
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах, на предложения в переводах и на события в ленте
@@ -122,10 +122,15 @@ function f($) {
 			var id = tr_art_reg.exec(document.location.pathname);
 			if (id) {
 				id = id[1];
-				var el = $(".document-sentence-sidebar :visible").find(".report-translator-cheating-wrapper").eq(0);
-				if (el.length && !el.find(".icon-link").length) {
-					var idx = el.parent().parent().parent().attr("id").replace("sentence-sidebar-", "");
-					el.append('<a class="right" style="clear:right;" href="/translation/' + id + '$index=' + idx + '"><span class="icon icon-link" style="margin-right:5px;" />' + tr('Direct link') + '</a>');
+				var el = $(".document-sentence-sidebar :visible");
+				if (el.length) {
+					el = el.find(".report-translator-cheating-wrapper").eq(0);
+					if (!el.length)
+						el = $(".wiki-textarea-container").eq(0)
+					if (el.length && !el.find(".icon-link").length) {
+						var idx = el.parent().parent().parent().attr("id").replace("sentence-sidebar-", "");
+						el.append('<a class="right" style="clear:right;" href="/translation/' + id + '$index=' + idx + '"><span class="icon icon-link" style="margin-right:5px;" />' + tr('Direct link') + '</a>');
+					}
 				}
 			}
 			return;
