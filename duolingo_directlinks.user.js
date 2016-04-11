@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.3.9
+// @version        0.3.10
 // @grant          none
 // @description    This script adds the direct links for discussion comments, translation sentences, and activity stream events
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах, на предложения в переводах и на события в ленте
@@ -85,7 +85,7 @@ function f($) {
 	var last_root_comment_id = null;
 	var act_reg = null;
 	var tr_sen_reg = null, tr_rep_reg = null, tr_art_reg = null;
-	var ds_sub_reg = null, ds_sen_reg = null, ds_lnk_reg = null, ds_mrk_reg = null;
+	var ds_sub_reg = null, ds_sen_reg = null, ds_trn_reg = null, ds_lnk_reg = null, ds_mrk_reg = null;
 
 	function start(e, r, o) {
 		if (!duo)
@@ -140,6 +140,7 @@ function f($) {
 		if (!ds_sub_reg) {
 			ds_sub_reg = new RegExp("^/comments/[0-9]+($|\\?|/reply|/upvote|/downvote|/love)");
 			ds_sen_reg = new RegExp("^/sentence/[0-9a-f]+\\?");
+			ds_trn_reg = new RegExp("^/translation/[0-9a-f]+($|\\$)");
 			ds_lnk_reg = new RegExp("^/comment/([0-9]+)($|\\$)");
 			ds_mrk_reg = new RegExp("[\\$&]comment_id=([0-9]+)($|&)");
 		}
@@ -164,6 +165,10 @@ function f($) {
 									markComment(ci[1])
 							}
 							id = id[1];
+						} else {
+							id = ds_trn_reg.exec(document.location.pathname);
+							if (id)
+								id = j.id
 						}
 					} else
 						id = last_root_comment_id;
