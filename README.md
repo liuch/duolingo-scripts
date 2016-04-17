@@ -24,7 +24,7 @@
 1. Install the respective extension for your browser (may require browser restart):
  * Firefox, Tor: [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/)
  * Chrome/Chromium: [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
- * Safari: [Violentmonkey](https://addons.opera.com/ru/extensions/details/violent-monkey/)
+ * Opera: [Violentmonkey](https://addons.opera.com/ru/extensions/details/violent-monkey/)
  * Safari: [JavaScript Blocker](http://javascript-blocker.toggleable.com/)
  * Internet Explorer: My condolences to you.
 2. Get the userscript in the list above.
