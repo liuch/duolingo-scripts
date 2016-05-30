@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.3.10
+// @version        0.3.11
 // @grant          none
 // @description    This script adds the direct links for discussion comments, translation sentences, and activity stream events
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах, на предложения в переводах и на события в ленте
@@ -83,8 +83,9 @@ function f($) {
 		}
 	};
 	var last_root_comment_id = null;
+	var last_article_id = "";
 	var act_reg = null;
-	var tr_sen_reg = null, tr_rep_reg = null, tr_art_reg = null;
+	var tr_doc_reg = null, tr_sen_reg = null, tr_rep_reg = null, tr_art_reg = null, tr_sen_idx = null;
 	var ds_sub_reg = null, ds_sen_reg = null, ds_trn_reg = null, ds_lnk_reg = null, ds_mrk_reg = null;
 
 	function start(e, r, o) {
@@ -114,14 +115,27 @@ function f($) {
 
 		// Translation links
 		if (!tr_sen_reg) {
+			tr_doc_reg = new RegExp("^/wiki_translations/([a-z0-9]+)($|\\?)");
 			tr_sen_reg = new RegExp("^/wiki_translation_sentence/[a-z0-9]+/[a-z0-9]+/(get_sentence|get_revisions|[a-z0-9]+/rate)");
 			tr_rep_reg = new RegExp("^/wiki_translations/report_translator_cheating/[0-9]+$");
-			tr_art_reg = new RegExp("^/translation/([a-z0-9]+)($|\\$)");
+			tr_art_reg = new RegExp("^/translation/([a-z0-9]+)($|\\$.*)");
+			tr_sen_idx = new RegExp("[\\$&]index=([1-9][0-9]*)");
+		}
+		if (tr_doc_reg.exec(o.url)) {
+			last_article_id = "";
+			return;
 		}
 		if (tr_sen_reg.exec(o.url) || tr_rep_reg.exec(o.url)) {
 			var id = tr_art_reg.exec(document.location.pathname);
 			if (id) {
+				var sen_idx = id[2];
 				id = id[1];
+				if (id != last_article_id) {
+					sen_idx = sen_idx && tr_sen_idx.exec(sen_idx);
+					if (sen_idx)
+						$("html, body").animate({scrollTop: $("#sentence-" + sen_idx[1]).offset().top - 250}, 1000);
+					last_article_id = id;
+				}
 				var el = $(".document-sentence-sidebar :visible");
 				if (el.length) {
 					el = el.find(".report-translator-cheating-wrapper").eq(0);
