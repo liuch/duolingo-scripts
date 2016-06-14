@@ -2,7 +2,7 @@
 // @name           DuoMoreLingots
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.2
+// @version        0.1.3
 // @grant          none
 // @description    This script allows you to give more than one lingot in two clicks.
 // @description:ru Этот скрипт позволяет давать больше одного лингота за раз.
@@ -25,7 +25,7 @@ inject(f);
 
 function f($) {
 
-	var cache = { id: 0, el: null};
+	var cache = { id: 0, el: null, top_el: null };
 
 	function find_love_el(id, root, path) {
 		if (root)
@@ -50,11 +50,17 @@ function f($) {
 			cache.id = id;
 			cache.el = el;
 		}
+		if (!cache.top_el)
+			cache.top_el = $("#topbar").find("#num_lingots");
 		el.text(love);
+		cache.top_el.text(" " + duo.user.attributes.rupees);
 	};
 
 	var send_one = function(id, root) {
-		$.post("/comments/" + id + "/love", function(d) {"love" in d && update_comment(id, d.love, root);});
+		if (duo.user.attributes.rupees > 0) {
+			$.post("/comments/" + id + "/love", function(d) {"love" in d && update_comment(id, d.love, root);});
+			--duo.user.attributes.rupees;
+		}
 	};
 
 	function set_interval_limited(id, root, n, t) {
@@ -98,7 +104,7 @@ function f($) {
 	};
 
 	function ajax_complete(e, r, o) {
-		if (!duo)
+		if (!duo || !duo.user)
 			return;
 		if (o.url == "/diagnostics/js_error")
 			return;
