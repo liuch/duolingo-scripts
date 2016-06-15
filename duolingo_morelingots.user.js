@@ -2,7 +2,7 @@
 // @name           DuoMoreLingots
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.3
+// @version        0.1.4
 // @grant          none
 // @description    This script allows you to give more than one lingot in two clicks.
 // @description:ru Этот скрипт позволяет давать больше одного лингота за раз.
@@ -84,7 +84,7 @@ function f($) {
 			var id = null;
 			var root = false;
 			if (el.tagName == "SPAN") {
-				id = document.location.pathname.match( /^\/comment\/([0-9]+)($|\\$)/)[1];
+				id = document.location.pathname.match(/^\/comment\/([0-9]+)($|\$)/)[1];
 				root = true;
 			} else if (el.tagName == "DIV") {
 				var i = 4;
