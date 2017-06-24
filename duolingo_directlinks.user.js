@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.3.11
+// @version        0.3.12
 // @grant          none
 // @description    This script adds the direct links for discussion comments, translation sentences, and activity stream events
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах, на предложения в переводах и на события в ленте
@@ -152,7 +152,7 @@ function f($) {
 
 		// Discussion links
 		if (!ds_sub_reg) {
-			ds_sub_reg = new RegExp("^/comments/[0-9]+($|\\?|/reply|/upvote|/downvote|/love)");
+			ds_sub_reg = new RegExp("^(https://duolingo-forum-prod.duolingo.com)?/comments/[0-9]+($|\\?|/reply|/upvote|/downvote|/love)");
 			ds_sen_reg = new RegExp("^/sentence/[0-9a-f]+\\?");
 			ds_trn_reg = new RegExp("^/translation/[0-9a-f]+($|\\$)");
 			ds_lnk_reg = new RegExp("^/comment/([0-9]+)($|\\$)");
@@ -194,9 +194,9 @@ function f($) {
 				}
 				last_root_comment_id = id;
 				if (id) {
-					if (!modal && (a[1] == "/upvote" || a[1] == "/downvote" || a[1] == "/reply"))
+					if (!modal && (a[2] == "/upvote" || a[2] == "/downvote" || a[2] == "/reply"))
 						makeCommentLink(id, j);
-					else if (!modal && (o.type == "PUT" || a[1] == "/love"))
+					else if (!modal && (o.type == "PUT" || a[2] == "/love"))
 						j = {comments: [j]};
 					processNestedComments(id, j);
 					makeDiscussionLink(document.location.protocol + "//" + document.location.host, id);
