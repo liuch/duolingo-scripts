@@ -2,7 +2,7 @@
 // @name           DuoMoreLingots
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.1.5
+// @version        0.1.6
 // @grant          none
 // @description    This script allows you to give more than one lingot in two clicks.
 // @description:ru Этот скрипт позволяет давать больше одного лингота за раз.
