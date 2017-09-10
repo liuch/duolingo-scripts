@@ -219,5 +219,5 @@ function f() {
 		}
 	}
 
-	setTimeout(set_observe, 0);
+	setTimeout(set_observe, 100);
 }
