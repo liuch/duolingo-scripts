@@ -161,7 +161,7 @@ function f() {
 				d_el = document.createElement("span");
 				d_el.setAttribute("id", "dp-steak-today");
 				d_el.setAttribute("class", "RWiDH _3wurl cCL9P");
-				d_el.setAttribute("style", "margin:10px 0 0 -13px;");
+				d_el.setAttribute("style", "margin:9px 0 0 -11px;");
 				b_el.parentNode.insertBefore(d_el, b_el);
 			}
 		}
