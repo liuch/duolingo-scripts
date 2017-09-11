@@ -63,7 +63,7 @@ inject(f);
 function f() {
 	var u_req;
 	var p_reg = new RegExp("^/([a-zA-Z0-9._-]+)$");
-	var u_dat = { id: 0, username: "", created: "", freeze: "", lingots: 0, st_today: false, blockers: 0, blocking: 0 };
+	var u_dat = {};
 	var React, ReactDOM;
 	var upd_dom = 0;
 
@@ -91,26 +91,6 @@ function f() {
 				return uname;
 			}
 		}
-	}
-
-	function get_user_data(uname) {
-		if (uname == u_dat.user_name)
-			return;
-
-		if (!u_req)
-			u_req = fc_ext_func.HttpQuery.create({ baseURL: "https://www.duolingo.com/users", headers: { "Content-Type": "application/json; charset=UTF-8" } });
-
-		u_req.get(uname).then(function(d) {
-			u_dat.id       = d.data.id || 0;
-			u_dat.created  = d.data.created && d.data.created.trim() || "n/a";
-			u_dat.username = d.data.username && d.data.username.trim() || "n/a";
-			u_dat.freeze   = d.data.inventory && d.data.inventory.streak_freeze || "";
-			u_dat.lingots  = d.data.rupees || 0;
-			u_dat.st_today = d.data.streak_extended_today || false;
-			u_dat.blockers = d.data.blockers && d.data.blockers.length || 0;
-			u_dat.blocking = d.data.blocking && d.data.blocking.length || 0;
-			update_profile_view();
-		});
 	}
 
 	function FreezeElement() {
@@ -197,6 +177,45 @@ function f() {
 		}
 	}
 
+	function clear_data() {
+		u_dat.id       = 0;
+		u_dat.username = "";
+		u_dat.created  = "";
+		u_dat.freeze   = "";
+		u_dat.lingots  = 0;
+		u_dat.st_today = false;
+		u_dat.blockers = 0;
+		u_dat.blocking = 0;
+	}
+
+	function get_user_data(uname) {
+		if (uname == u_dat.user_name)
+			return;
+
+		clear_data();
+		u_dat.user_name = uname;
+		if (!u_req)
+			u_req = fc_ext_func.HttpQuery.create({ baseURL: "https://www.duolingo.com/users", headers: { "Content-Type": "application/json; charset=UTF-8" } });
+
+		try {
+			u_req.get(uname).then(function(d) {
+				u_dat.id       = d.data.id || 0;
+				u_dat.created  = d.data.created && d.data.created.trim() || "n/a";
+				u_dat.username = d.data.username && d.data.username.trim() || "n/a";
+				u_dat.freeze   = d.data.inventory && d.data.inventory.streak_freeze || "";
+				u_dat.lingots  = d.data.rupees || 0;
+				u_dat.st_today = d.data.streak_extended_today || false;
+				u_dat.blockers = d.data.blockers && d.data.blockers.length || 0;
+				u_dat.blocking = d.data.blocking && d.data.blocking.length || 0;
+				window.fc_callback = window.fc_callback && (window.fc_callback + 1) || 1;
+				update_profile_view();
+			});
+		}
+		catch (e) {
+			console.error("Failed to get the user data");
+		}
+	}
+
 	function try_update() {
 		if (!fc_ext_func || !fc_ext_func.HttpQuery || !fc_ext_func.React || !fc_ext_func.ReactDOM)
 			return;
@@ -219,5 +238,6 @@ function f() {
 		}
 	}
 
+	clear_data();
 	setTimeout(set_observe, 100);
 }
