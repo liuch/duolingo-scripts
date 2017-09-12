@@ -126,27 +126,35 @@ function f() {
 
 	function update_profile_view() {
 		var b_el = document.querySelector("h1[data-test='profile-username']");
-		var d_el = document.getElementById("dp-created-info");
-		if (b_el && !d_el) {
-			d_el = document.createElement("p");
-			d_el.setAttribute("id", "dp-created-info");
-			d_el.appendChild(document.createTextNode(tr("Registered:") + " " + u_dat.created));
-			d_el.setAttribute("style", "color:gray;");
-			b_el.parentNode.insertBefore(d_el, b_el.nextSibling);
+		var d_el;
+		if (b_el) {
+			d_el = document.getElementById("dp-created-info");
+			if (u_dat.created.length) {
+				if (!d_el) {
+					d_el = document.createElement("p");
+					d_el.setAttribute("id", "dp-created-info");
+					d_el.appendChild(document.createTextNode(tr("Registered:") + " " + u_dat.created));
+					d_el.setAttribute("style", "color:gray;");
+					b_el.parentNode.insertBefore(d_el, b_el.nextSibling);
+				}
+			}
+			else if (d_el)
+				d_el.remove();
 		}
 		b_el = document.querySelector("._2_lzu>.a5SW0>.-Esnq>._32wO4");
-		d_el = document.getElementById("dp-steak-today");
-		if (u_dat.st_today) {
-			if (b_el && !d_el) {
-				d_el = document.createElement("span");
-				d_el.setAttribute("id", "dp-steak-today");
-				d_el.setAttribute("class", "RWiDH _3wurl cCL9P");
-				d_el.setAttribute("style", "margin:9px 0 0 -11px;");
-				b_el.parentNode.insertBefore(d_el, b_el);
-			}
+		if (b_el) {
+			d_el = document.getElementById("dp-steak-today");
+			if (u_dat.st_today) {
+				if (!d_el) {
+					d_el = document.createElement("span");
+					d_el.setAttribute("id", "dp-steak-today");
+					d_el.setAttribute("class", "RWiDH _3wurl cCL9P");
+					d_el.setAttribute("style", "margin:9px 0 0 -11px;");
+					b_el.parentNode.insertBefore(d_el, b_el);
+				}
+			} else if (d_el)
+				d_el.remove();
 		}
-		else if (d_el)
-			d_el.remove();
 
 		var c_el = document.getElementById("dp-container1");
 		if (!c_el) {
@@ -189,8 +197,10 @@ function f() {
 	}
 
 	function get_user_data(uname) {
-		if (uname == u_dat.user_name)
+		if (uname == u_dat.user_name) {
+			update_profile_view();
 			return;
+		}
 
 		clear_data();
 		u_dat.user_name = uname;
