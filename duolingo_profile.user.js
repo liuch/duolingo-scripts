@@ -86,7 +86,7 @@ function f() {
 	function isProfilePage() {
 		var r = p_reg.exec(document.location.pathname);
 		if (r) {
-			if (document.querySelector("._2_lzu>.a5SW0>.-Esnq")) {
+			if (document.querySelector("._2_lzu>.a5SW0>._2QmPh")) {
 				var uname = r[1];
 				return uname;
 			}
@@ -111,15 +111,15 @@ function f() {
 		};
 		return React.createElement("div", null, [
 			React.createElement("span", { className: "_1m3JK", style: style1 }),
-			React.createElement("span", { className: "_32wO4", style: style2 }, (new Date(u_dat.freeze.replace(" ", "T"))).toLocaleDateString())
+			React.createElement("span", { className: "_1cHvL", style: style2 }, (new Date(u_dat.freeze.replace(" ", "T"))).toLocaleDateString())
 		]);
 	}
 
 	function LingotsElement() {
 		return React.createElement("div", null, [
 			React.createElement("span", { className: "_1yWWS _3SHvM cCL9P" }),
-			React.createElement("span", { className: "_32wO4" }, [
-				React.createElement("strong", null, u_dat.lingots)
+			React.createElement("span", { className: "_1cHvL" }, [
+				React.createElement("strong", null, u_dat.lingots === null ? "-" : u_dat.lingots)
 			])
 		]);
 	}
@@ -141,7 +141,7 @@ function f() {
 			else if (d_el)
 				d_el.remove();
 		}
-		b_el = document.querySelector("._2_lzu>.a5SW0>.-Esnq>._32wO4");
+		b_el = document.querySelector("._2_lzu>.a5SW0>._2QmPh>._1cHvL");
 		if (b_el) {
 			d_el = document.getElementById("dp-steak-today");
 			if (u_dat.st_today) {
@@ -190,7 +190,7 @@ function f() {
 		u_dat.username = "";
 		u_dat.created  = "";
 		u_dat.freeze   = "";
-		u_dat.lingots  = 0;
+		u_dat.lingots  = null;
 		u_dat.st_today = false;
 		u_dat.blockers = 0;
 		u_dat.blocking = 0;
