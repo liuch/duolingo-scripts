@@ -126,6 +126,7 @@ function f() {
 
 	function update_profile_view() {
 		var b_el = document.querySelector("h1[data-test='profile-username']");
+		var c_el;
 		var d_el;
 		if (b_el) {
 			d_el = document.getElementById("dp-created-info");
@@ -154,7 +155,7 @@ function f() {
 				}
 			} else if (d_el)
 				d_el.remove();
-			var c_el = document.getElementById("dp-container1");
+			c_el = document.getElementById("dp-container1");
 			if (!c_el) {
 				c_el = document.createElement("div");
 				c_el.setAttribute("id", "dp-container1");
