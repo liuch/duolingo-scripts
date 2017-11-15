@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.4.5
+// @version        0.4.6
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -125,7 +125,7 @@ function f() {
 			React.createElement("h2", { style: { "margin-bottom": "10px" } }, tr("Streak")),
 			React.createElement("span", { className: "_62zln _1L-uo cCL9P" }),
 			React.createElement("span", { className: "_1cHvL", id: "dp_streak_days" }, [
-				React.createElement("strong", null, u_dat.streak === null ? "-" : u_dat.streak),
+				React.createElement("strong", null, u_dat.streak),
 				" " + tr("days")
 			])
 		]);
@@ -257,7 +257,7 @@ function f() {
 				u_dat.id       = d.data.id || 0;
 				u_dat.created  = d.data.created && d.data.created.trim() || "n/a";
 				u_dat.username = d.data.username && d.data.username.trim() || "n/a";
-				u_dat.streak   = d.data.site_streak || null;
+				u_dat.streak   = d.data.site_streak || 0;
 				u_dat.freeze   = d.data.inventory && d.data.inventory.streak_freeze || "";
 				u_dat.lingots  = d.data.rupees || 0;
 				u_dat.st_today = d.data.streak_extended_today || false;
