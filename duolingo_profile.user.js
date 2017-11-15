@@ -71,6 +71,9 @@ function f() {
 			"ru" : "Зарегистрирован(а):",
 			"uk" : "Зареєстрований(а):"
 		},
+		"Streak" : {
+			"ru" : "Ударный режим"
+		},
 		"Storage" : {
 			"ru" : "Склад"
 		}
@@ -82,14 +85,17 @@ function f() {
 		return t;
 	}
 
-	function isProfilePage() {
-		var r = p_reg.exec(document.location.pathname);
-		if (r) {
-			if (document.querySelector("._2_lzu>.a5SW0>._2QmPh")) {
-				var uname = r[1];
-				return uname;
-			}
-		}
+	function getUserName() {
+		var res = p_reg.exec(document.location.pathname);
+		return res && res[1] || null;
+	}
+
+	function getProfileVersion() {
+		if (document.querySelector("._2RO1n>div>h1[data-test='profile-username']"))
+			return 1;
+		if (document.querySelector("._2RO1n>._1klx2>.sG_Iu>h1[data-test='profile-username']"))
+			return 2;
+		return 0;
 	}
 
 	function FreezeElement() {
@@ -114,6 +120,27 @@ function f() {
 		]);
 	}
 
+	function StreakElement() {
+		return React.createElement("div", null, [
+			React.createElement("h2", { style: { "margin-bottom": "10px" } }, tr("Streak")),
+			React.createElement("span", { className: "_62zln _1L-uo cCL9P" }),
+			React.createElement("span", { className: "_1cHvL", id: "dp_streak_days" }, [
+				React.createElement("strong", null, u_dat.streak === null ? "-" : u_dat.streak),
+				" " + tr("days")
+			])
+		]);
+	}
+
+	function StorageElement() {
+		var elem  = "h3";
+		var props = null;
+		if (u_dat.version == 2) {
+			elem  = "h2";
+			props = { style: { "margin-bottom": "10px" } };
+		}
+		return React.createElement(elem, props, tr("Storage"));
+	}
+
 	function LingotsElement() {
 		return React.createElement("div", null, [
 			React.createElement("span", { className: "_1yWWS _3SHvM cCL9P" }),
@@ -124,9 +151,10 @@ function f() {
 	}
 
 	function update_profile_view() {
-		var b_el = document.querySelector("h1[data-test='profile-username']");
 		var c_el;
 		var d_el;
+		// Created
+		var b_el = document.querySelector("h1[data-test='profile-username']");
 		if (b_el) {
 			d_el = document.getElementById("dp-created-info");
 			if (u_dat.created.length) {
@@ -141,7 +169,21 @@ function f() {
 			else if (d_el)
 				d_el.remove();
 		}
-		b_el = document.querySelector("._2_lzu>.a5SW0>._2QmPh>._1cHvL");
+		// Streak, Freeze and Lingots
+		if (u_dat.version == 2) {
+			b_el = document.querySelector("._2_lzu>.a5SW0>h2");
+			if (b_el) {
+				c_el = document.getElementById("dp-container0");
+				if (!c_el) {
+					c_el = document.createElement("div");
+					c_el.setAttribute("id", "dp-container0");
+					b_el.parentNode.insertBefore(c_el, b_el);
+					ReactDOM.render(StreakElement(), c_el);
+				}
+			}
+			b_el = document.getElementById("dp_streak_days");
+		} else
+			b_el = document.querySelector("._2_lzu>.a5SW0>._2QmPh>._1cHvL");
 		if (b_el) {
 			d_el = document.getElementById("dp-steak-today");
 			if (u_dat.st_today) {
@@ -163,12 +205,13 @@ function f() {
 			ReactDOM.render(React.createElement("div", null, [
 				FreezeElement(),
 				React.createElement("div", { className: "_2QmPh" }, [
-					React.createElement("h3", null, tr("Storage")),
+					StorageElement(),
 					LingotsElement()
-				])
+				]),
+				React.createElement("div", (u_dat.version == 2) && { className: "_2QmPh" } || null)
 			]), c_el);
 		}
-
+		// Blockinig / Blockers
 		b_el = document.querySelector("._2_lzu>.a5SW0>._1JZEb");
 		if (b_el) {
 			c_el = document.getElementById("dp-container2");
@@ -185,9 +228,11 @@ function f() {
 	}
 
 	function clear_data() {
+		u_dat.version  = 0;
 		u_dat.id       = 0;
 		u_dat.username = "";
 		u_dat.created  = "";
+		u_dat.streak   = null;
 		u_dat.freeze   = "";
 		u_dat.lingots  = null;
 		u_dat.st_today = false;
@@ -195,7 +240,7 @@ function f() {
 		u_dat.blocking = 0;
 	}
 
-	function get_user_data(uname) {
+	function get_user_data(uname, version) {
 		if (uname == u_dat.user_name) {
 			update_profile_view();
 			return;
@@ -208,9 +253,11 @@ function f() {
 
 		try {
 			u_req.get(uname).then(function(d) {
+				u_dat.version  = version;
 				u_dat.id       = d.data.id || 0;
 				u_dat.created  = d.data.created && d.data.created.trim() || "n/a";
 				u_dat.username = d.data.username && d.data.username.trim() || "n/a";
+				u_dat.streak   = d.data.site_streak || null;
 				u_dat.freeze   = d.data.inventory && d.data.inventory.streak_freeze || "";
 				u_dat.lingots  = d.data.rupees || 0;
 				u_dat.st_today = d.data.streak_extended_today || false;
@@ -230,9 +277,12 @@ function f() {
 
 		React = fc_ext_func.React;
 		ReactDOM = fc_ext_func.ReactDOM;
-		var user_name = isProfilePage();
+		var user_name = getUserName();
 		if (user_name) {
-			get_user_data(user_name);
+			var profile_ver = getProfileVersion();
+			if (profile_ver > 0) {
+				get_user_data(user_name, profile_ver);
+			}
 		}
 	}
 
