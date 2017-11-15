@@ -65,7 +65,6 @@ function f() {
 	var p_reg = new RegExp("^/([a-zA-Z0-9._-]+)$");
 	var u_dat = {};
 	var React, ReactDOM;
-	var upd_dom = 0;
 
 	var trs = {
 		"Registered:" : {
@@ -217,7 +216,6 @@ function f() {
 				u_dat.st_today = d.data.streak_extended_today || false;
 				u_dat.blockers = d.data.blockers && d.data.blockers.length || 0;
 				u_dat.blocking = d.data.blocking && d.data.blocking.length || 0;
-				window.fc_callback = window.fc_callback && (window.fc_callback + 1) || 1;
 				update_profile_view();
 			});
 		}
