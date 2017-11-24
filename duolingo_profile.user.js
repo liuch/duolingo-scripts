@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.4.6
+// @version        0.5.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -61,7 +61,7 @@ function inject(f) { //Inject the script into the document
 inject(f);
 
 function f() {
-	var u_req;
+	var u_req, u_req2;
 	var p_reg = new RegExp("^/([a-zA-Z0-9._-]+)$");
 	var u_dat = {};
 	var React, ReactDOM;
@@ -150,6 +150,67 @@ function f() {
 		]);
 	}
 
+	var starNumClasses = [
+		[ "_35-xP dw2F4", "_1vlZ7 _35-xP dw2F4" ],
+		[ "ZKmUJ dw2F4", "_3OP3B ZKmUJ dw2F4" ],
+		[ "tD042 dw2F4", "CIzSZ tD042 dw2F4" ]
+	];
+	var starOnClasses = [ "_2cOts", "_28huv", "_3UINz" ];
+
+	function StarItem(num, on) {
+		var on_str = on ? starOnClasses[num-1] + " " : "";
+		return React.createElement("div", null, [
+			React.createElement("div", { className: on_str + starNumClasses[num-1][0] }),
+			React.createElement("div", { className: on_str + starNumClasses[num-1][1] })
+		])
+	}
+
+	var achievementClass = {
+		streak:      "_2wzQU",
+		completion:  "_16Aal",
+		social:      "_23nCr",
+		xp:          "_3dC1N",
+		gold_skills: "UN9bj",
+		spending:    "_3bUu2",
+		time:        "_2mfXg",
+		perfect:     "_1D0uS",
+		clubs:       "_1B8a8",
+		items:       "_1d2qa"
+	};
+
+	function AchievementItem(achievement) {
+		var item;
+		var classes = achievementClass[achievement.name];
+		if (classes) {
+			var tier = achievement.tier;
+			item = React.createElement("div", { className: "_9OUvP", style: { cursor: "default" } }, [
+				React.createElement("div", { className: "_3xN15 " + classes }, [
+					StarItem(1, tier >= 1),
+					StarItem(2, tier >= 2),
+					StarItem(3, tier >= 3)
+				])
+			]);
+		}
+		else
+			console.warn("Unknown achievement:", achievement.name);
+		return item;
+	}
+
+	function AchievementsElement() {
+		var items = [];
+		var item;
+		for (var i = 0; i < u_dat.achievements.length; ++i) {
+			item = AchievementItem(u_dat.achievements[i]);
+			if (item)
+				items.push(item);
+		}
+		return React.createElement("div", null, [
+			React.createElement("hr", { className: "_2rgts" }),
+			React.createElement("h1", { className: "_1Cjfg" }, tr("Achievements")),
+			React.createElement("div", { className: "QZc9N"}, items)
+		]);
+	}
+
 	function update_profile_view() {
 		var c_el;
 		var d_el;
@@ -168,6 +229,26 @@ function f() {
 			}
 			else if (d_el)
 				d_el.remove();
+		}
+		// Achievements
+		c_el = null;
+		if (u_dat.version == 1 || !document.querySelector("._3MT-S>div>._1E3L7>._2RO1n>._2GU1P>._1SrQO>h1._1Cjfg")) {
+			c_el = document.getElementById("dp-container-achiv");
+			if (!c_el) {
+				b_el = document.querySelector("._3MT-S>div>._1E3L7>._2RO1n");
+				if (b_el) {
+						d_el = document.createElement("div");
+						d_el.setAttribute("id", "dp-container-achiv");
+						b_el.appendChild(d_el);
+				}
+			}
+		}
+		if (c_el) {
+			if (u_dat.achievements.length)
+				ReactDOM.render(AchievementsElement(), c_el);
+			else
+				while (c_el.firstChild)
+					c_el.removeChild(c_el.firstChild);
 		}
 		// Streak, Freeze and Lingots
 		if (u_dat.version == 2) {
@@ -228,17 +309,22 @@ function f() {
 	}
 
 	function clear_data() {
-		u_dat.version  = 0;
-		u_dat.id       = 0;
-		u_dat.username = "";
-		u_dat.created  = "";
-		u_dat.streak   = null;
-		u_dat.freeze   = "";
-		u_dat.lingots  = null;
-		u_dat.st_today = false;
-		u_dat.blockers = 0;
-		u_dat.blocking = 0;
+		u_dat.version      = 0;
+		u_dat.id           = 0;
+		u_dat.username     = "";
+		u_dat.created      = "";
+		u_dat.streak       = null;
+		u_dat.freeze       = "";
+		u_dat.lingots      = null;
+		u_dat.st_today     = false;
+		u_dat.blockers     = 0;
+		u_dat.blocking     = 0;
+		u_dat.achievements = [];
 	}
+
+	var headers = {
+		"Content-Type": "application/json; charset=UTF-8"
+	};
 
 	function get_user_data(uname, version) {
 		if (uname == u_dat.user_name) {
@@ -249,7 +335,9 @@ function f() {
 		clear_data();
 		u_dat.user_name = uname;
 		if (!u_req)
-			u_req = fc_ext_func.HttpQuery.create({ baseURL: "https://www.duolingo.com/users", headers: { "Content-Type": "application/json; charset=UTF-8" } });
+			u_req = fc_ext_func.HttpQuery.create({ baseURL: "https://www.duolingo.com/users", headers: headers });
+		if (!u_req2)
+			u_req2 = fc_ext_func.HttpQuery.create({ baseURL: "https://www.duolingo.com/2017-06-30/users", headers: headers });
 
 		try {
 			u_req.get(uname).then(function(d) {
@@ -263,7 +351,10 @@ function f() {
 				u_dat.st_today = d.data.streak_extended_today || false;
 				u_dat.blockers = d.data.blockers && d.data.blockers.length || 0;
 				u_dat.blocking = d.data.blocking && d.data.blocking.length || 0;
-				update_profile_view();
+				u_req2.get("" + u_dat.id + "?fields=_achievements").then(function(d) {
+					u_dat.achievements = d.data._achievements || [];
+					update_profile_view();
+				});
 			});
 		}
 		catch (e) {
