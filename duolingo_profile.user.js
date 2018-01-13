@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.5.3
+// @version        0.5.4
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -178,12 +178,30 @@ function f() {
 		items:       "_1d2qa"
 	};
 
-	function AchievementItem(achievement) {
+	var achievementNames = {
+		items: {
+			name: "Wizard",
+			description: [
+				"", "", "", ""
+			]
+		},
+		clubs: {
+			name: "Inner Circle",
+			description: [
+				"", "", "", ""
+			]
+		}
+	};
+
+	function AchievementItem(achievement, margin) {
 		var item;
 		var classes = achievementClass[achievement.name];
 		if (classes) {
+			var cl = { className: "VHE7v" };
+			if (margin)
+				cl.style = { "margin-bottom": "10px" };
 			var tier = achievement.tier;
-			item = React.createElement("div", { className: "_9OUvP", style: { cursor: "default" } }, [
+			item = React.createElement("div", cl, [
 				React.createElement("div", { className: "_3xN15 " + classes }, [
 					StarItem(1, tier >= 1),
 					StarItem(2, tier >= 2),
@@ -200,14 +218,47 @@ function f() {
 		var items = [];
 		var item;
 		for (var i = 0; i < u_dat.achievements.length; ++i) {
-			item = AchievementItem(u_dat.achievements[i]);
+			item = AchievementItem(u_dat.achievements[i], true);
 			if (item)
 				items.push(item);
 		}
 		return React.createElement("div", null, [
 			React.createElement("hr", { className: "_2rgts" }),
 			React.createElement("h1", { className: "_1Cjfg" }, tr("Achievements")),
-			React.createElement("div", { className: "QZc9N"}, items)
+			React.createElement("div", { className: "QZc9N" }, items)
+		]);
+	}
+
+	function AchievementsElementExtra(names) {
+		var items = [];
+		var item;
+		var achv, ach_n;
+		var name, desc;
+		for (var i = 0; i < u_dat.achievements.length; ++i) {
+			if (names.indexOf(u_dat.achievements[i].name) != -1) {
+				item = AchievementItem(u_dat.achievements[i]);
+				if (item) {
+					achv = u_dat.achievements[i];
+					name = achv.name;
+					ach_n = achievementNames[name];
+					name = ach_n.name || ("Unknown (" + name + ")");
+					desc = ach_n.description[achv.tier] || "";
+					item = React.createElement("li", { className: "f4TL7" }, [
+						item,
+						React.createElement("div", { className: "_2g1FE" }),
+						React.createElement("div", { className: "_2ANoo" }, [
+							React.createElement("div", { className: "_1JLPg" }, name),
+							React.createElement("div", { className: "_3zECl" }, desc),
+							React.createElement("div", { className: "_17f4c" })
+						])
+					]);
+					items.push(item);
+				}
+			}
+		}
+		return React.createElement("div", null, [
+			React.createElement("h1", null, tr("Hidden achievements")),
+			React.createElement("ul", null, items)
 		]);
 	}
 
@@ -231,21 +282,42 @@ function f() {
 				d_el.remove();
 		}
 		// Achievements
+		var achiv_extra = [];
 		c_el = null;
 		if (u_dat.version == 1 || !document.querySelector("._3MT-S>div>._1E3L7>._2RO1n>._2GU1P>._1SrQO>h1._1Cjfg")) {
 			c_el = document.getElementById("dp-container-achiv");
 			if (!c_el) {
 				b_el = document.querySelector("._3MT-S>div>._1E3L7>._2RO1n");
 				if (b_el) {
-						d_el = document.createElement("div");
-						d_el.setAttribute("id", "dp-container-achiv");
-						b_el.appendChild(d_el);
+						c_el = document.createElement("div");
+						c_el.setAttribute("id", "dp-container-achiv");
+						b_el.appendChild(c_el);
+				}
+			}
+		}
+		else {
+			b_el = document.querySelector("._3MT-S>div>._1E3L7>._2RO1n>._2GU1P>._3jMdg>.zyezv>ul");
+			if (b_el) {
+				for (var k in achievementClass) {
+					if (!b_el.querySelector("." + achievementClass[k]))
+						achiv_extra.push(k);
+				}
+				b_el = b_el.parentElement;
+				c_el = document.getElementById("dp-container-achiv-extra");
+				if (!c_el) {
+					c_el = document.createElement("div");
+					c_el.setAttribute("id", "dp-container-achiv-extra");
+					b_el.appendChild(c_el);
 				}
 			}
 		}
 		if (c_el) {
-			if (u_dat.achievements.length)
-				ReactDOM.render(AchievementsElement(), c_el);
+			if (u_dat.achievements.length) {
+				if (achiv_extra.length == 0)
+					ReactDOM.render(AchievementsElement(), c_el);
+				else
+					ReactDOM.render(AchievementsElementExtra(achiv_extra), c_el);
+			}
 			else
 				while (c_el.firstChild)
 					c_el.removeChild(c_el.firstChild);
