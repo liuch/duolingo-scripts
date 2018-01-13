@@ -1,18 +1,21 @@
 # Userscripts For Duolingo
 
 ## The List
-* [DuoBlog](https://github.com/liuch/duolingo-scripts/raw/master/duolingo_blog.user.js)
+* [~~DuoBlog~~](https://github.com/liuch/duolingo-scripts/raw/master/duolingo_blog.user.js)
   * This script allows you to make notes into your activity stream.
   * Этот скрипт позволит вам создавать заметки в своей ленте.
+  * **NOTE: This userscript no longer works due to changes by Duolingo.**
 * [DuoDirectLinks](https://github.com/liuch/duolingo-scripts/raw/master/duolingo_directlinks.user.js)
   * This script adds the direct links for discussion comments, translation sentences, and activity stream events
   * Этот скрипт добавляет прямые ссылки на комментарии в форумах, на предложения в переводах и на события в ленте
-* [DuoLessonsFix](https://github.com/liuch/duolingo-scripts/raw/master/duolingo_lessonsfix.user.js)
+* [~~DuoLessonsFix~~](https://github.com/liuch/duolingo-scripts/raw/master/duolingo_lessonsfix.user.js)
   * This script pauses the timer between exercises in the timed practice.
   * Этот скрипт ставит таймер на паузу между заданиями в тренировке на время.
-* [DuoLimit500](https://github.com/liuch/duolingo-scripts/raw/master/duolingo_limit500.user.js)
+  * **NOTE: This userscript no longer works due to changes by Duolingo.**
+* [~~DuoLimit500~~](https://github.com/liuch/duolingo-scripts/raw/master/duolingo_limit500.user.js)
   * This script warns you when you exceed the limit on the length of the activity stream message.
   * Этот скрипт предупредит вас, когда вы превысите лимит длины сообщения при отправке в ленте.
+  * **NOTE: This userscript no longer works due to changes by Duolingo.**
 * [DuoMoreLingots](https://github.com/liuch/duolingo-scripts/raw/master/duolingo_morelingots.user.js)
   * This script allows you to give more than one lingot in two clicks.
   * Этот скрипт позволяет давать больше одного лингота за раз.
