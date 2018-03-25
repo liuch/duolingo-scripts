@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.5.4
+// @version        0.5.5
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -115,7 +115,7 @@ function f() {
 			"vertical-align": "middle"
 		};
 		return React.createElement("div", null, [
-			React.createElement("span", { className: "_1m3JK", style: style1 }),
+			React.createElement("span", { className: "_3PGD5 _1m3JK", style: style1 }),
 			React.createElement("span", { className: "_1cHvL", style: style2 }, (new Date(u_dat.freeze.replace(" ", "T"))).toLocaleDateString())
 		]);
 	}
