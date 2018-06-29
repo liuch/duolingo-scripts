@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name           DuoDiscussionTime
 // @namespace      https://github.com/liuch/duolingo-scripts
-// @include        https://www.duolingo.com/*
-// @version        0.1.1
+// @include        https://forum.duolingo.com/*
+// @version        0.2.1
 // @grant          none
 // @description    The script shows the exact time when a comment was created.
 // @description:ru Скрипт показывает точное время создания комментария.

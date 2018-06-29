@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name           DuoDiscussionTime
 // @namespace      https://github.com/liuch/duolingo-scripts
-// @include        https://www.duolingo.com/*
-// @version        0.1.1
+// @include        https://forum.duolingo.com/*
+// @version        0.2.1
 // @grant          none
 // @description    The script shows the exact time when a comment was created.
 // @description:ru Скрипт показывает точное время создания комментария.
@@ -26,30 +26,31 @@ function f() {
 	var loc_reg = new RegExp("^/comment/");
 
 	function update_comment(footer_el, date) {
-		var date_el = footer_el.find(".showing-date");
-		if (date_el.length) {
-			if (date_el.hasClass("duo-discussion-time-date"))
+		var date_el = footer_el.querySelector(".iif_C");
+		if (date_el) {
+			// post
+			if (date_el.classList.contains("duo-discussion-time-date"))
 				return;
 		} else {
-			var t = footer_el.contents().eq(1);
-			if (t[0].nodeName == "#text") {
-				var s = footer_el.contents().eq(1)[0].textContent;
-				t.remove();
-				date_el = $('<span class="showing-date"/>');
-				date_el.text(s);
-				footer_el.append(date_el);
+			// comments
+			var t = footer_el.childNodes[1];
+			if (t && t.tagName == "SPAN") {
+				date_el = t;
 			}
 		}
-		date_el.attr("data-toggle", "tooltip").attr("data-original-title", date.toLocaleString());
-		date_el.addClass("duo-discussion-time-date");
+		if (date_el) {
+			date_el.setAttribute("title", date.toLocaleString());
+			date_el.className += " duo-discussion-time-date";
+		}
 	}
 
 	function update_all_comments() {
-		var metas = $("meta[itemprop=dateCreated]");
+		var metas = document.querySelectorAll("meta[itemprop=dateCreated]");
 		var m;
 		for (var i = 0; i < metas.length; ++i) {
-			m = metas.eq(i);
-			update_comment(m.parent(), new Date(m.attr("content")));
+			m = metas[i];
+			if (m.parentElement)
+				update_comment(m.parentElement, new Date(m.getAttribute("content")));
 		}
 	}
 
