@@ -1,8 +1,9 @@
 // ==UserScript==
 // @name           DuoMoreLingots
 // @namespace      https://github.com/liuch/duolingo-scripts
-// @include        https://www.duolingo.com/*
-// @version        0.1.8
+// @include        https://forum.duolingo.com/*
+// @require        https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js
+// @version        0.2.1
 // @grant          none
 // @description    This script allows you to give more than one lingot in two clicks.
 // @description:ru Этот скрипт позволяет давать больше одного лингота за раз.
@@ -17,7 +18,7 @@ function inject(f) { //Inject the script into the document
 	script = document.createElement('script');
 	script.type = 'text/javascript';
 	script.setAttribute('name', 'duogivelingots');
-	script.textContent = '(' + f.toString() + ')(jQuery)';
+	script.textContent = '(' + f.toString() + ')($)';
 	document.head.appendChild(script);
 }
 inject(f);
@@ -25,105 +26,170 @@ inject(f);
 
 function f($) {
 
-	var cache = { id: 0, el: null, top_el: null };
+	var observe = {
+		observer: null,
+		root_el: null,
+		p_func: null,
 
-	function find_love_el(id, root, path) {
-		if (root)
-			return $(".discussion-main " + path).eq(-1);
-		return $("#body-" + id).siblings(".footer").find(path);;
-	}
-
-	var update_comment = function(id, love, root) {
-		var el = cache.el;
-		if (id != cache.id || !el) {
-			el = find_love_el(id, root, ".love-number");
-			if (!el.length) {
-				el = find_love_el(id, root, ".give-love");
-				if (!el.length)
-					return;
-				if (root)
-					el.after($('<span><span class="icon icon-lingot-small" /><span class="love-number">0</span></span>'));
-				else
-					el.after($('<span class="icon icon-lingot-micro" /><span class="love-number">0</span>'));
-				el = find_love_el(id, root, ".love-number");
-			}
-			cache.id = id;
-			cache.el = el;
-		}
-		el.text(love);
-		if (!cache.top_el)
-			cache.top_el = $("#topbar").find("#num_lingots");
-		if (duo.user.attributes.rupees > 0) {
-			--duo.user.attributes.rupees;
-			cache.top_el.text(" " + duo.user.attributes.rupees);
-		}
-	};
-
-	var send_one = function(id, root) {
-		if (duo.user.attributes.rupees > 0)
-			$.post("/comments/" + id + "/love", function(d) {"love" in d && update_comment(id, d.love, root);});
-	};
-
-	function set_interval_limited(id, root, n, t) {
-		if(n <= 0) {
-			cache.el = null;
-			return;
-		}
-		setTimeout(function() {send_one(id, root); set_interval_limited(id, root, n-1, t);}, t);
-	}
-
-	var lover = function(id, root) {
-		var love = parseInt(prompt("How many lingots would you like to give away?", "1"));
-		if (love > 0 && (love <= 10 || confirm("Are you sure want to give " + love + " lingots away?")))
-			set_interval_limited(id, root, love, 200);
-		return false;
-	};
-
-	var new_give_lingots = function() {
-		var el = this.parentElement;
-		if (el) {
-			var id = null;
-			var root = false;
-			if (el.tagName == "SPAN") {
-				id = document.location.pathname.match(/^\/comment\/([0-9]+)($|\$)/)[1];
-				root = true;
-			} else if (el.tagName == "DIV") {
-				var i = 4;
-				while (el) {
-					if (!--i) {
-						if (el.id)
-							id = el.id.match(/^comment-([0-9]+)/)[1];
-						break;
+		set: function(func) {
+			this.root_el = document.getElementsByTagName("body")[0];
+			if (this.root_el) {
+				this.p_func = func;
+				this.observer = new MutationObserver(function(mutations) {
+					if (observe.p_func) {
+						observe.stop();
+						observe.p_func()
+						observe.start();
 					}
-					el = el.parentElement;
-				}
+				});
 			}
-			if (id)
-				lover(id, root);
+		},
+
+		start: function() {
+			this.observer.observe(this.root_el, { childList: true, subtree: true });
+		},
+
+		stop: function() {
+			this.observer.disconnect();
+		}
+	};
+
+	var post_id = null;
+
+	var update_comment = function(id, link_el) {
+		var el = null;
+		if (link_el.parentElement.parentElement.children.length == 2) {
+			el = link_el.parentElement.parentElement.children[1];
+		}
+		else {
+			var span1 = document.createElement("span");
+			span1.setAttribute("class", "_5j_V-");
+			var span2 = document.createElement("span");
+			span2.setAttribute("class", "_2ySWm _3SHvM cCL9P");
+			span1.appendChild(span2);
+			span1.appendChild(document.createTextNode("0"));
+			link_el.parentElement.parentElement.appendChild(span1);
+			el = span1;
+		}
+		if (el) {
+			el.childNodes[1].nodeValue = parseInt(el.childNodes[1].nodeValue) + 1;
+		}
+	};
+
+	function get_toolbar_element() {
+		return document.querySelector("div._3mmdn>div>a.XHOsr._3xRJe");
+	}
+
+	function total_lingots() {
+		var lingots = 0;
+		var el = get_toolbar_element();
+		if (el) {
+			lingots = parseInt(el.childNodes[1].nodeValue);
+		}
+		return lingots;
+	}
+
+	function decrement_total_lingots() {
+		var el = get_toolbar_element();
+		if (el) {
+			var num = parseInt(el.childNodes[1].nodeValue) || 0;
+			if (num > 0) {
+				num -= 1;
+			}
+			el.childNodes[1].nodeValue = num;
+		}
+	}
+
+	function update_view(id, el) {
+		observe.stop()
+		decrement_total_lingots();
+		update_comment(id, el);
+		observe.start();
+	}
+
+	var send_one = function(id, el) {
+		if (total_lingots() > 0) {
+			$.ajax({
+				type: 'POST',
+				url: 'https://forum-api.duolingo.com/comments/' + id + '/love',
+				xhrFields: {withCredentials: true}
+			}).done(function () {
+				update_view(id, el);
+			});
+		}
+	};
+
+	function set_interval_limited(id, num, timeout, el) {
+		if (num <= 0) {
+			return;
+		}
+		setTimeout(function() {
+			send_one(id, el);
+			set_interval_limited(id, num - 1, timeout, el);
+		}, timeout);
+	}
+
+	var lover = function(id, el) {
+		var num = parseInt(prompt("How many lingots would you like to give away?", "1"));
+		if (num > 0 && (num <= 10 || confirm("Are you sure want to give " + num + " lingots away?"))) {
+			set_interval_limited(id, num, 200, el);
 		}
 		return false;
 	};
 
-	var main_reg = null;
+	var new_give_lingots = function(el) {
+		var id = null;
+		var e = el.closest("div.uMmEI>div[id]");
+		if (e) {
+			id = e.getAttribute("id");
+		}
+		else if (el.closest("div._3eQwU")) {
+			id = post_id;
+		}
 
-	function ajax_complete(e, r, o) {
-		if (!duo || !duo.user)
-			return;
-		if (o.url == "/diagnostics/js_error")
-			return;
+		if (id) {
+			lover(id, el);
+		}
+	};
 
-		if (!main_reg)
-			main_reg = new RegExp("^(https://forum-api.duolingo.com)?/comments/[0-9]+($|\\?|/reply|/upvote|/downvote|/love)");
-		var a = main_reg.exec(o.url);
+	function capture_click() {
+		$(document).on("click", "a.dml-givelingots", function () {
+			new_give_lingots(this);
+			return false;
+		});
+	}
+
+	function remove_listener(el) {
+		var parent = el.parentElement;
+		var text = el.text;
+		el.remove();
+		el = document.createElement("a");
+		el.setAttribute("href", "#");
+		el.setAttribute("class", "_2xNPC dml-givelingots");
+		el.appendChild(document.createTextNode(text));
+		parent.appendChild(el);
+	}
+
+	var loc_reg = new RegExp("^/comment/([0-9]+)($|\$)");
+
+	function try_update() {
+		var a = loc_reg.exec(document.location.pathname);
 		if (a) {
-			$("#app").undelegate(".give-love", "click");
-			$("#app").delegate(".give-love", "click", new_give_lingots);
-			$(".discussion-comments-list-item").undelegate(".give-love", "click");
-			$(".discussion-comments-list-item").delegate(".give-love", "click", new_give_lingots);
+			post_id = a[1];
+			var el_list = document.querySelectorAll("span._5j_V->a._2xNPC:not(.dml-givelingots)");
+			for (var i = 0; i < el_list.length; i++) {
+				remove_listener(el_list[i]);
+			}
+		}
+		else {
+			post_id = null;
 		}
 	}
 
-	$(document).ajaxComplete(function(e, r, o) {
-		ajax_complete(e, r, o);
-	});
+	setTimeout(function() {
+		try_update();
+		capture_click();
+		observe.set(try_update);
+		observe.start();
+	}, 100);
 }

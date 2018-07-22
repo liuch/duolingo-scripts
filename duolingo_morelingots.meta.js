@@ -1,8 +1,9 @@
 // ==UserScript==
 // @name           DuoMoreLingots
 // @namespace      https://github.com/liuch/duolingo-scripts
-// @include        https://www.duolingo.com/*
-// @version        0.1.8
+// @include        https://forum.duolingo.com/*
+// @require        https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js
+// @version        0.2.1
 // @grant          none
 // @description    This script allows you to give more than one lingot in two clicks.
 // @description:ru Этот скрипт позволяет давать больше одного лингота за раз.
