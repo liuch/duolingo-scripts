@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.5.5
+// @version        0.5.6
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -98,25 +98,27 @@ function f() {
 		return 0;
 	}
 
+	var style1 = {
+		width: "18px",
+		height: "25px",
+		margin: "0",
+		float: "none",
+		"background-position": "-80px -6px",
+		"background-size": "180px auto",
+		"vertical-align": "middle"
+	};
+	var style2 = {
+		"vertical-align": "middle",
+		"margin-left": "0.5em"
+	};
+
 	function FreezeElement() {
 		if (!u_dat.freeze.length)
 			return null;
 
-		var style1 = {
-			width: "18px",
-			height: "25px",
-			margin: "0",
-			float: "none",
-			"background-position": "-80px -6px",
-			"background-size": "180px auto",
-			"vertical-align": "middle"
-		};
-		var style2 = {
-			"vertical-align": "middle"
-		};
 		return React.createElement("div", null, [
 			React.createElement("span", { className: "_3PGD5 _1m3JK", style: style1 }),
-			React.createElement("span", { className: "_1cHvL", style: style2 }, (new Date(u_dat.freeze.replace(" ", "T"))).toLocaleDateString())
+			React.createElement("span", { style: style2 }, (new Date(u_dat.freeze.replace(" ", "T"))).toLocaleDateString())
 		]);
 	}
 
@@ -124,7 +126,7 @@ function f() {
 		return React.createElement("div", null, [
 			React.createElement("h2", { style: { "margin-bottom": "10px" } }, tr("Streak")),
 			React.createElement("span", { className: "_62zln _1L-uo cCL9P" }),
-			React.createElement("span", { className: "_1cHvL", id: "dp_streak_days" }, [
+			React.createElement("span", { style: style2, id: "dp_streak_days" }, [
 				React.createElement("strong", null, u_dat.streak),
 				" " + tr("days")
 			])
@@ -144,7 +146,7 @@ function f() {
 	function LingotsElement() {
 		return React.createElement("div", null, [
 			React.createElement("span", { className: "_1yWWS _3SHvM cCL9P" }),
-			React.createElement("span", { className: "_1cHvL" }, [
+			React.createElement("span", { style: style2 }, [
 				React.createElement("strong", null, u_dat.lingots === null ? "-" : u_dat.lingots)
 			])
 		]);
