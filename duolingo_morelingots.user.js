@@ -2,8 +2,7 @@
 // @name           DuoMoreLingots
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://forum.duolingo.com/*
-// @require        https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js
-// @version        0.2.1
+// @version        0.3.1
 // @grant          none
 // @description    This script allows you to give more than one lingot in two clicks.
 // @description:ru Этот скрипт позволяет давать больше одного лингота за раз.
@@ -18,13 +17,13 @@ function inject(f) { //Inject the script into the document
 	script = document.createElement('script');
 	script.type = 'text/javascript';
 	script.setAttribute('name', 'duogivelingots');
-	script.textContent = '(' + f.toString() + ')($)';
+	script.textContent = '(' + f.toString() + ')()';
 	document.head.appendChild(script);
 }
 inject(f);
 
 
-function f($) {
+function f() {
 
 	var observe = {
 		observer: null,
@@ -109,11 +108,10 @@ function f($) {
 
 	var send_one = function(id, el) {
 		if (total_lingots() > 0) {
-			$.ajax({
-				type: 'POST',
-				url: 'https://forum-api.duolingo.com/comments/' + id + '/love',
-				xhrFields: {withCredentials: true}
-			}).done(function () {
+			fetch("https://forum-api.duolingo.com/comments/" + id + "/love", {
+				method: 'POST',
+				credentials: 'include'
+			}).then(function() {
 				update_view(id, el);
 			});
 		}
@@ -131,7 +129,7 @@ function f($) {
 
 	var lover = function(id, el) {
 		var num = parseInt(prompt("How many lingots would you like to give away?", "1"));
-		if (num > 0 && (num <= 10 || confirm("Are you sure want to give " + num + " lingots away?"))) {
+		if (num > 0 && (num <= 10 || confirm("Do you really want to give " + num + " lingots away?"))) {
 			set_interval_limited(id, num, 200, el);
 		}
 		return false;
@@ -153,9 +151,13 @@ function f($) {
 	};
 
 	function capture_click() {
-		$(document).on("click", "a.dml-givelingots", function () {
-			new_give_lingots(this);
-			return false;
+		document.addEventListener("click", function(event) {
+			var el = event.target;
+			if (el && el.nodeName == "A" && el.classList.contains("dml-givelingots")) {
+				new_give_lingots(el);
+			}
+			event.stopPropagation();
+			event.preventDefault();
 		});
 	}
 
@@ -164,7 +166,7 @@ function f($) {
 		var text = el.text;
 		el.remove();
 		el = document.createElement("a");
-		el.setAttribute("href", "#");
+		el.setAttribute("href", "javascript:;");
 		el.setAttribute("class", "_2xNPC dml-givelingots");
 		el.appendChild(document.createTextNode(text));
 		parent.appendChild(el);
@@ -193,3 +195,4 @@ function f($) {
 		observe.start();
 	}, 100);
 }
+
