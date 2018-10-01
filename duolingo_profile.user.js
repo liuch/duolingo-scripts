@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.5.6
+// @version        0.6.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -12,44 +12,6 @@
 // @license        MIT License
 // @run-at         document-start
 // ==/UserScript==
-
-(function () {
-	var wp_func = [];
-	var wp_data = {};
-
-	function get_exports(key) {
-		if (wp_data[key])
-			return wp_data[key].exports;
-		var e = wp_data[key] = { exports: {}, id: key, loaded: false };
-		wp_func[key].call(e.exports, e, e.exports, get_exports);
-		e.loaded = true;
-		return e.exports;
-	}
-
-	var ext_keys = [
-		[ "mtWMg", "HttpQuery" ],
-		[ "U7vGf", "React" ],
-		[ "O27J2", "ReactDOM" ]
-	];
-	window.fc_ext_func = {};
-
-	window.webpackJsonp = function(c_m, pack_data) {
-		if (ext_keys.length) {
-			for (var i in pack_data)
-				wp_func[i] = pack_data[i];
-
-			var tmp_array = [];
-			for (i = 0; i < ext_keys.length; i++) {
-				var f = ext_keys[i];
-				if (wp_func[f[0]])
-					window.fc_ext_func[f[1]] = get_exports(f[0]);
-				else
-					tmp_array.push(f);
-			}
-			ext_keys = tmp_array;
-		}
-	};
-}());
 
 function inject(f) { //Inject the script into the document
 	var script = document.createElement('script');
@@ -61,10 +23,36 @@ function inject(f) { //Inject the script into the document
 inject(f);
 
 function f() {
-	var u_req, u_req2;
+	var observe = {
+		observer: null,
+		root_el: null,
+		p_func: null,
+
+		set: function(func) {
+			this.root_el = document.getElementsByTagName("body")[0];
+			if (this.root_el) {
+				this.p_func = func;
+				this.observer = new MutationObserver(function(mutations) {
+					if (observe.p_func) {
+						observe.stop();
+						observe.p_func()
+						observe.start();
+					}
+				});
+			}
+		},
+
+		start: function() {
+			this.observer.observe(this.root_el, { childList: true, subtree: true });
+		},
+
+		stop: function() {
+			this.observer.disconnect();
+		}
+	};
+
 	var p_reg = new RegExp("^/([a-zA-Z0-9._-]+)$");
 	var u_dat = {};
-	var React, ReactDOM;
 
 	var trs = {
 		"Registered:" : {
@@ -98,58 +86,62 @@ function f() {
 		return 0;
 	}
 
-	var style1 = {
-		width: "18px",
-		height: "25px",
-		margin: "0",
-		float: "none",
-		"background-position": "-80px -6px",
-		"background-size": "180px auto",
-		"vertical-align": "middle"
-	};
-	var style2 = {
-		"vertical-align": "middle",
-		"margin-left": "0.5em"
-	};
+	var style1 = "width:18px;height:25px;margin:0;float:none;background-position:-80px -6px;background-size:180px auto;vertical-align:middle;";
+	var style2 = "vertical-align:middle;margin-left:0.5em;";
 
-	function FreezeElement() {
-		if (!u_dat.freeze.length)
-			return null;
-
-		return React.createElement("div", null, [
-			React.createElement("span", { className: "_3PGD5 _1m3JK", style: style1 }),
-			React.createElement("span", { style: style2 }, (new Date(u_dat.freeze.replace(" ", "T"))).toLocaleDateString())
-		]);
-	}
-
-	function StreakElement() {
-		return React.createElement("div", null, [
-			React.createElement("h2", { style: { "margin-bottom": "10px" } }, tr("Streak")),
-			React.createElement("span", { className: "_62zln _1L-uo cCL9P" }),
-			React.createElement("span", { style: style2, id: "dp_streak_days" }, [
-				React.createElement("strong", null, u_dat.streak),
-				" " + tr("days")
-			])
-		]);
-	}
-
-	function StorageElement() {
-		var elem  = "h3";
-		var props = null;
-		if (u_dat.version == 2) {
-			elem  = "h2";
-			props = { style: { "margin-bottom": "10px" } };
+	function append_freeze_elements(p_el) {
+		if (u_dat.freeze.length) {
+			var el = document.createElement("span");
+			el.setAttribute("class", "_3PGD5 _1m3JK");
+			el.setAttribute("style", style1);
+			p_el.appendChild(el);
+			el = document.createElement("span");
+			el.setAttribute("style", style2);
+			el.appendChild(document.createTextNode((new Date(u_dat.freeze.replace(" ", "T"))).toLocaleDateString()));
+			p_el.appendChild(el);
 		}
-		return React.createElement(elem, props, tr("Storage"));
 	}
 
-	function LingotsElement() {
-		return React.createElement("div", null, [
-			React.createElement("span", { className: "_1yWWS _3SHvM cCL9P" }),
-			React.createElement("span", { style: style2 }, [
-				React.createElement("strong", null, u_dat.lingots === null ? "-" : u_dat.lingots)
-			])
-		]);
+	function append_streak_elements(p_el) {
+		var el = document.createElement("h2");
+		el.setAttribute("style", "margin-bottom:10px;");
+		el.appendChild(document.createTextNode(tr("Streak")));
+		p_el.appendChild(el);
+		el = document.createElement("span");
+		el.setAttribute("class", "_62zln _1L-uo cCL9P");
+		p_el.appendChild(el);
+		el = document.createElement("span");
+		el.setAttribute("style", style2);
+		el.setAttribute("id", "dp_streak_days");
+		var el2 = document.createElement("strong");
+		el2.appendChild(document.createTextNode(u_dat.streak));
+		el.appendChild(el2);
+		el.appendChild(document.createTextNode(" " + tr("days")));
+		p_el.appendChild(el);
+	}
+
+	function append_storage_element(p_el) {
+		var el = null;
+		if (u_dat.version == 2) {
+			el = document.createElement("h2");
+			el.setAttribute("style", "margin-bottom:10px;");
+		}
+		else
+			el = document.createElement("h3");
+		el.appendChild(document.createTextNode(tr("Storage")));
+		p_el.appendChild(el);
+	}
+
+	function append_lingot_elements(p_el) {
+		var el = document.createElement("span");
+		el.setAttribute("class", "_1yWWS _3SHvM cCL9P");
+		p_el.appendChild(el);
+		el = document.createElement("span");
+		el.setAttribute("style", style2);
+		var el2 = document.createElement("strong");
+		el2.appendChild(document.createTextNode(u_dat.lingots === null ? "-" : u_dat.lingots));
+		el.appendChild(el2);
+		p_el.appendChild(el);
 	}
 
 	var starNumClasses = [
@@ -159,12 +151,16 @@ function f() {
 	];
 	var starOnClasses = [ "_2cOts", "_28huv", "_3UINz" ];
 
-	function StarItem(num, on) {
+	function create_star_element(num, on) {
+		var star_el = document.createElement("div");
 		var on_str = on ? starOnClasses[num-1] + " " : "";
-		return React.createElement("div", null, [
-			React.createElement("div", { className: on_str + starNumClasses[num-1][0] }),
-			React.createElement("div", { className: on_str + starNumClasses[num-1][1] })
-		]);
+		var el = document.createElement("div");
+		el.setAttribute("class", on_str + starNumClasses[num-1][0]);
+		star_el.appendChild(el);
+		el = document.createElement("div");
+		el.setAttribute("class", on_str + starNumClasses[num-1][1]);
+		star_el.appendChild(el);
+		return star_el;
 	}
 
 	var achievementClass = {
@@ -184,84 +180,119 @@ function f() {
 		items: {
 			name: "Wizard",
 			description: [
-				"", "", "", ""
+				"Equip a Streak Freeze",
+				"Equip a Weekend Amulet",
+				"Win a Double or Nothing wager",
+				"You won a Double or Nothing wager"
 			]
 		},
 		clubs: {
 			name: "Inner Circle",
 			description: [
-				"", "", "", ""
+				"Join or create a Club",
+				"Get to the top of your Club's leaderboard",
+				"Become your Club's weekly winner",
+				"You became your Club's weekly winner"
 			]
 		}
 	};
 
-	function AchievementItem(achievement, margin) {
+	function create_achievement_item_element(achievement, margin) {
 		var item;
 		var classes = achievementClass[achievement.name];
 		if (classes) {
-			var cl = { className: "VHE7v" };
-			if (margin)
-				cl.style = { "margin-bottom": "10px" };
 			var tier = achievement.tier;
-			item = React.createElement("div", cl, [
-				React.createElement("div", { className: "_3xN15 " + classes }, [
-					StarItem(1, tier >= 1),
-					StarItem(2, tier >= 2),
-					StarItem(3, tier >= 3)
-				])
-			]);
+			item = document.createElement("div");
+			item.setAttribute("class", "VHE7v");
+			if (margin)
+				item.setAttribute("style", "margin-bottom:10px;");
+			var el = document.createElement("div");
+			el.setAttribute("class", "_3xN15 " + classes);
+			el.appendChild(create_star_element(1, tier >= 1));
+			el.appendChild(create_star_element(2, tier >= 2));
+			el.appendChild(create_star_element(3, tier >= 3));
+			item.appendChild(el);
 		}
 		else
 			console.warn("Unknown achievement:", achievement.name);
 		return item;
 	}
 
-	function AchievementsElement() {
+	function append_achievement_elements(p_el) {
 		var items = [];
 		var item;
 		for (var i = 0; i < u_dat.achievements.length; ++i) {
-			item = AchievementItem(u_dat.achievements[i], true);
+			item = create_achievement_item_element(u_dat.achievements[i], true);
 			if (item)
 				items.push(item);
 		}
-		return React.createElement("div", null, [
-			React.createElement("hr", { className: "_2rgts" }),
-			React.createElement("h1", { className: "_1Cjfg" }, tr("Achievements")),
-			React.createElement("div", { className: "QZc9N" }, items)
-		]);
+		var el = document.createElement("hr");
+		el.setAttribute("class", "_2rgts");
+		p_el.appendChild(el);
+		el = document.createElement("h1");
+		el.setAttribute("class", "_1Cjfg");
+		el.appendChild(document.createTextNode(tr("Achievements")));
+		p_el.appendChild(el);
+		el = document.createElement("div");
+		el.setAttribute("class", "QZc9N");
+		for (var i = 0; i < items.length; ++i) {
+			el.appendChild(items[i]);
+		}
+		p_el.appendChild(el);
 	}
 
-	function AchievementsElementExtra(names) {
+	function append_extra_achievement_elements(names, p_el) {
 		var items = [];
-		var item;
+		var item, li, div1, div2;
 		var achv, ach_n;
 		var name, desc;
 		for (var i = 0; i < u_dat.achievements.length; ++i) {
 			if (names.indexOf(u_dat.achievements[i].name) != -1) {
-				item = AchievementItem(u_dat.achievements[i]);
+				item = create_achievement_item_element(u_dat.achievements[i], false);
 				if (item) {
 					achv = u_dat.achievements[i];
 					name = achv.name;
 					ach_n = achievementNames[name];
 					name = ach_n.name || ("Unknown (" + name + ")");
 					desc = ach_n.description[achv.tier] || "";
-					item = React.createElement("li", { className: "f4TL7" }, [
-						item,
-						React.createElement("div", { className: "_2g1FE" }),
-						React.createElement("div", { className: "_2ANoo" }, [
-							React.createElement("div", { className: "_1JLPg" }, name),
-							React.createElement("div", { className: "_3zECl" }, desc),
-							React.createElement("div", { className: "_17f4c" })
-						])
-					]);
-					items.push(item);
+					li = document.createElement("li");
+					li.setAttribute("class", "f4TL7");
+					li.appendChild(item);
+					div1 = document.createElement("div");
+					div1.setAttribute("class", "_2g1FE");
+					li.appendChild(div1);
+					div1 = document.createElement("div");
+					div1.setAttribute("class", "_2ANoo");
+					div2 = document.createElement("div");
+					div2.setAttribute("class", "_1JLPg");
+					div2.appendChild(document.createTextNode(name));
+					div1.appendChild(div2);
+					div2 = document.createElement("div");
+					div2.setAttribute("class", "_3zECl");
+					div2.appendChild(document.createTextNode(desc));
+					div1.appendChild(div2);
+					div2 = document.createElement("div");
+					div2.setAttribute("class", "_17f4c");
+					div1.appendChild(div2);
+					li.appendChild(div1);
+					items.push(li);
 				}
 			}
 		}
-		return React.createElement("div", null, [
-			React.createElement("h1", null, tr("Hidden achievements")),
-			React.createElement("ul", null, items)
-		]);
+		var h1 = document.createElement("h1");
+		h1.appendChild(document.createTextNode(tr("Hidden achievements")));
+		p_el.appendChild(h1);
+		var ul = document.createElement("h1");
+		for (var i = 0; i < items.length; ++i) {
+			ul.appendChild(items[i]);
+		}
+		p_el.appendChild(ul);
+	}
+
+	function remove_all_children(par) {
+		while (par.firstChild) {
+			par.removeChild(par.firstChild);
+		}
 	}
 
 	function update_profile_view() {
@@ -313,16 +344,21 @@ function f() {
 				}
 			}
 		}
+		var el;
 		if (c_el) {
+			remove_all_children(c_el);
 			if (u_dat.achievements.length) {
-				if (achiv_extra.length == 0)
-					ReactDOM.render(AchievementsElement(), c_el);
-				else
-					ReactDOM.render(AchievementsElementExtra(achiv_extra), c_el);
+				if (achiv_extra.length == 0) {
+					el = document.getElementById("dp-container-achiv-extra");
+					append_achievement_elements(c_el);
+				}
+				else {
+					el = document.getElementById("dp-container-achiv");
+					append_extra_achievement_elements(achiv_extra, c_el);
+				}
+				if (el)
+					remove_all_children(el);
 			}
-			else
-				while (c_el.firstChild)
-					c_el.removeChild(c_el.firstChild);
 		}
 		// Streak, Freeze and Lingots
 		if (u_dat.version == 2) {
@@ -333,8 +369,10 @@ function f() {
 					c_el = document.createElement("div");
 					c_el.setAttribute("id", "dp-container0");
 					b_el.parentNode.insertBefore(c_el, b_el);
-					ReactDOM.render(StreakElement(), c_el);
 				}
+				else
+					remove_all_children(c_el);
+				append_streak_elements(c_el);
 			}
 			b_el = document.getElementById("dp_streak_days");
 		} else
@@ -357,14 +395,17 @@ function f() {
 				c_el.setAttribute("id", "dp-container1");
 				b_el.parentNode.appendChild(c_el);
 			}
-			ReactDOM.render(React.createElement("div", null, [
-				FreezeElement(),
-				React.createElement("div", { className: "_2QmPh" }, [
-					StorageElement(),
-					LingotsElement()
-				]),
-				React.createElement("div", (u_dat.version == 2) && { className: "_2QmPh" } || null)
-			]), c_el);
+			append_freeze_elements(c_el);
+			el = document.createElement("div");
+			el.setAttribute("class", "_2QmPh");
+			append_storage_element(el);
+			append_lingot_elements(el);
+			c_el.appendChild(el);
+			if (u_dat.version == 2) {
+				el = document.createElement("div");
+				el.setAttribute("class", "_2QmPh");
+				c_el.appendChild(el);
+			}
 		}
 		// Blockinig / Blockers
 		b_el = document.querySelector("._2_lzu>.a5SW0>._1JZEb");
@@ -375,10 +416,19 @@ function f() {
 				c_el.setAttribute("id", "dp-container2");
 				b_el.parentNode.appendChild(c_el);
 			}
-			ReactDOM.render(React.createElement("ul", { style: { "border-top": "2px solid #dadada", display: "table", width: "100%", "margin-top": "30px" } }, [
-				React.createElement("li", { style: { display: "table-cell", padding: "12px 10px 0 0" } }, "Blocking: " + u_dat.blocking),
-				React.createElement("li", { style: { display: "table-cell", padding: "12px 10px 0 0" } }, "Blockers: " + u_dat.blockers)
-			]), c_el);
+			else
+				remove_all_children(c_el);
+			var ul_el = document.createElement("ul");
+			ul_el.setAttribute("style", "border-top:2px solid #dadada;display:table;width:100%;margin-top:30px;");
+			var li_el = document.createElement("li");
+			li_el.setAttribute("style", "display:table-cell;padding:12px 10px 0 0;");
+			li_el.appendChild(document.createTextNode(tr("Blocking") + ": " + ((u_dat.blocking == -1) && "n/a" || u_dat.blocking)));
+			ul_el.appendChild(li_el);
+			li_el = document.createElement("li");
+			li_el.setAttribute("style", "display:table-cell;padding:12px 10px 0 0;");
+			li_el.appendChild(document.createTextNode(tr("Blockers") + ": " + ((u_dat.blockers == -1) && "n/a" || u_dat.blockers)));
+			ul_el.appendChild(li_el);
+			c_el.appendChild(ul_el);
 		}
 	}
 
@@ -391,8 +441,8 @@ function f() {
 		u_dat.freeze       = "";
 		u_dat.lingots      = null;
 		u_dat.st_today     = false;
-		u_dat.blockers     = 0;
-		u_dat.blocking     = 0;
+		u_dat.blockers     = -1;
+		u_dat.blocking     = -1;
 		u_dat.achievements = [];
 	}
 
@@ -408,40 +458,44 @@ function f() {
 
 		clear_data();
 		u_dat.user_name = uname;
-		if (!u_req)
-			u_req = fc_ext_func.HttpQuery.create({ baseURL: "https://www.duolingo.com/users", headers: headers });
-		if (!u_req2)
-			u_req2 = fc_ext_func.HttpQuery.create({ baseURL: "https://www.duolingo.com/2017-06-30/users", headers: headers });
-
-		try {
-			u_req.get(uname).then(function(d) {
-				u_dat.version  = version;
-				u_dat.id       = d.data.id || 0;
-				u_dat.created  = d.data.created && d.data.created.trim() || "n/a";
-				u_dat.username = d.data.username && d.data.username.trim() || "n/a";
-				u_dat.streak   = d.data.site_streak || 0;
-				u_dat.freeze   = d.data.inventory && d.data.inventory.streak_freeze || "";
-				u_dat.lingots  = d.data.rupees || 0;
-				u_dat.st_today = d.data.streak_extended_today || false;
-				u_dat.blockers = d.data.blockers && d.data.blockers.length || 0;
-				u_dat.blocking = d.data.blocking && d.data.blocking.length || 0;
-				u_req2.get("" + u_dat.id + "?fields=_achievements").then(function(d) {
-					u_dat.achievements = d.data._achievements || [];
-					update_profile_view();
-				});
+		window.fetch("https://www.duolingo.com/users/" + uname, {
+			method: "GET",
+			headers: headers,
+			credentials: "include"
+		}).then(function(resp) {
+			if (resp.status !== 200)
+				throw new Error("Failed to fetch the user data");
+			return resp.json();
+		}).then(function(d) {
+			u_dat.version  = version;
+			u_dat.id       = d.id || 0;
+			u_dat.created  = d.created && d.created.trim() || "n/a";
+			u_dat.username = d.username && d.username.trim() || "n/a";
+			u_dat.streak   = d.site_streak || 0;
+			u_dat.freeze   = d.inventory && d.inventory.streak_freeze || "";
+			u_dat.lingots  = d.rupees || 0;
+			u_dat.st_today = d.streak_extended_today || false;
+			u_dat.blockers = !d.blockers && -1 || d.blockers.length;
+			return window.fetch("https://www.duolingo.com/2017-06-30/users/" + u_dat.id + "?fields=_achievements,blockedUserIds", {
+				method: "GET",
+				headers: headers,
+				credentials: "include"
 			});
-		}
-		catch (e) {
-			console.error("Failed to get the user data");
-		}
+		}).then(function(resp) {
+			if (resp.status !== 200)
+				throw new Error("Failed to fetch the user's achivements");
+			return resp.json();
+		}).then(function(d) {
+			u_dat.achievements = d && d._achievements || [];
+			u_dat.blocking     = !d.blockedUserIds && -1 || d.blockedUserIds.length;
+		}).catch(function(err) {
+				console.warn(err.message);
+		}).then(function(d) {
+			update_profile_view();
+		});
 	}
 
 	function try_update() {
-		if (!fc_ext_func || !fc_ext_func.HttpQuery || !fc_ext_func.React || !fc_ext_func.ReactDOM)
-			return;
-
-		React = fc_ext_func.React;
-		ReactDOM = fc_ext_func.ReactDOM;
 		var user_name = getUserName();
 		if (user_name) {
 			var profile_ver = getProfileVersion();
@@ -451,16 +505,11 @@ function f() {
 		}
 	}
 
-	function set_observe() {
-		var root_el = document.getElementsByTagName("body")[0];
-		if (root_el) {
-			var observer = new MutationObserver(function(mutations) {
-				try_update();
-			});
-			observer.observe(root_el, { childList: true, subtree: true });
-		}
-	}
-
 	clear_data();
-	setTimeout(set_observe, 100);
+	setTimeout(function() {
+		try_update();
+		observe.set(try_update);
+		observe.start();
+	}, 100);
 }
+
