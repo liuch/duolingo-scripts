@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.6.1
+// @version        0.6.2
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -20,7 +20,21 @@ function inject(f) { //Inject the script into the document
 	script.textContent = '(' + f.toString() + ')()';
 	document.head.appendChild(script);
 }
-inject(f);
+
+(function start() {
+	var tries_left = 10;
+	var try_inject = function() { // Workaround to avoid an error "TypeError: document.head is null"
+		if (document.head && document.body) {
+			inject(f);
+			tries_left = 0;
+		}
+		else {
+			tries_left -= 1;
+			setTimeout(try_inject, 100);
+		}
+	};
+	try_inject();
+})();
 
 function f() {
 	var observe = {
@@ -506,10 +520,8 @@ function f() {
 	}
 
 	clear_data();
-	setTimeout(function() {
-		try_update();
-		observe.set(try_update);
-		observe.start();
-	}, 100);
+	try_update();
+	observe.set(try_update);
+	observe.start();
 }
 
