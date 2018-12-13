@@ -2,7 +2,7 @@
 // @name           DuoMoreLingots
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://forum.duolingo.com/*
-// @version        0.3.2
+// @version        0.3.3
 // @grant          none
 // @description    This script allows you to give more than one lingot in two clicks.
 // @description:ru Этот скрипт позволяет давать больше одного лингота за раз.
@@ -172,7 +172,7 @@ function f() {
 		parent.appendChild(el);
 	}
 
-	var loc_reg = new RegExp("^/comment/([0-9]+)($|\$)");
+	var loc_reg = new RegExp("^/comment/([0-9]+)($|\\$)");
 
 	function try_update() {
 		var a = loc_reg.exec(document.location.pathname);
