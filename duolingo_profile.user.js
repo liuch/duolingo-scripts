@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.6.2
+// @version        0.6.3
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -320,10 +320,12 @@ function f() {
 				if (!d_el) {
 					d_el = document.createElement("p");
 					d_el.setAttribute("id", "dp-created-info");
-					d_el.appendChild(document.createTextNode(tr("Registered:") + " " + u_dat.created));
 					d_el.setAttribute("style", "color:gray;");
 					b_el.parentNode.insertBefore(d_el, b_el.nextSibling);
 				}
+				else
+					remove_all_children(d_el);
+				d_el.appendChild(document.createTextNode(tr("Registered:") + " " + u_dat.created));
 			}
 			else if (d_el)
 				d_el.remove();
