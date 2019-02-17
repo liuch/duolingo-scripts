@@ -2,7 +2,7 @@
 // @name           DuoDiscussionTime
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://forum.duolingo.com/*
-// @version        0.2.1
+// @version        0.3.1
 // @grant          none
 // @description    The script shows the exact time when a comment was created.
 // @description:ru Скрипт показывает точное время создания комментария.
@@ -23,22 +23,20 @@ inject(f);
 
 function f() {
 
-	var loc_reg = new RegExp("^/comment/");
+	var loc_reg = new RegExp("^/(comment|topic)/");
 
 	function update_comment(footer_el, date) {
-		var date_el = footer_el.querySelector(".iif_C");
-		if (date_el) {
-			// post
-			if (date_el.classList.contains("duo-discussion-time-date"))
-				return;
-		} else {
-			// comments
-			var t = footer_el.childNodes[1];
-			if (t && t.tagName == "SPAN") {
-				date_el = t;
+		var date_el = footer_el.querySelector(".iif_C"); // post
+		if (!date_el) {
+			date_el = footer_el.querySelector("_1xBLK"); // discussion list
+			if (!date_el) { // comments
+				var t = footer_el.childNodes[1];
+				if (t && t.tagName == "SPAN") {
+					date_el = t;
+				}
 			}
 		}
-		if (date_el) {
+		if (date_el && !date_el.classList.contains("duo-discussion-time-date")) {
 			date_el.setAttribute("title", date.toLocaleString());
 			date_el.className += " duo-discussion-time-date";
 		}
@@ -85,3 +83,4 @@ function f() {
 
 	setTimeout(set_observe, 100);
 }
+
