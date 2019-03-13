@@ -2,7 +2,7 @@
 // @name           DuoMoreLingots
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://forum.duolingo.com/*
-// @version        0.3.3
+// @version        0.3.4
 // @grant          none
 // @description    This script allows you to give more than one lingot in two clicks.
 // @description:ru Этот скрипт позволяет давать больше одного лингота за раз.
@@ -62,21 +62,23 @@ function f() {
 		}
 		else {
 			var span1 = document.createElement("span");
-			span1.setAttribute("class", "_5j_V-");
+			span1.setAttribute("class", "_1mK9q");
 			var span2 = document.createElement("span");
-			span2.setAttribute("class", "_2ySWm _3SHvM cCL9P");
+			span2.setAttribute("class", "_3wHLj _3SHvM cCL9P");
+			var span3 = document.createElement("span");
+			span3.appendChild(document.createTextNode("0"));
 			span1.appendChild(span2);
-			span1.appendChild(document.createTextNode("0"));
+			span1.appendChild(span3);
 			link_el.parentElement.parentElement.appendChild(span1);
 			el = span1;
 		}
 		if (el) {
-			el.childNodes[1].nodeValue = parseInt(el.childNodes[1].nodeValue) + 1;
+			el.childNodes[1].childNodes[0].nodeValue = parseInt(el.childNodes[1].childNodes[0].nodeValue) + 1;
 		}
 	};
 
 	function get_toolbar_element() {
-		return document.querySelector("div._3mmdn>div>a.XHOsr._3xRJe");
+		return document.querySelector("div._1Pf36>div>a._2WhUu._39cW1");
 	}
 
 	function total_lingots() {
@@ -167,7 +169,7 @@ function f() {
 		el.remove();
 		el = document.createElement("a");
 		el.setAttribute("href", "javascript:;");
-		el.setAttribute("class", "_2xNPC dml-givelingots");
+		el.setAttribute("class", "kjqhD dml-givelingots");
 		el.appendChild(document.createTextNode(text));
 		parent.appendChild(el);
 	}
@@ -178,7 +180,7 @@ function f() {
 		var a = loc_reg.exec(document.location.pathname);
 		if (a) {
 			post_id = a[1];
-			var el_list = document.querySelectorAll("span._5j_V->a._2xNPC:not(.dml-givelingots)");
+			var el_list = document.querySelectorAll("span._1mK9q>a.kjqhD:not(.dml-givelingots)");
 			for (var i = 0; i < el_list.length; i++) {
 				remove_listener(el_list[i]);
 			}
