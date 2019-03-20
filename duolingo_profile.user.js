@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.6.3
+// @version        0.6.4
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -102,6 +102,7 @@ function f() {
 
 	var style1 = "width:18px;height:25px;margin:0;float:none;background-position:-80px -6px;background-size:180px auto;vertical-align:middle;";
 	var style2 = "vertical-align:middle;margin-left:0.5em;";
+	var style3 = "width:18px;height:25px;margin:0;float:none;background-position:-345px -37px;background-size:950px auto;vertical-align:middle;";
 
 	function append_freeze_elements(p_el) {
 		if (u_dat.freeze.length) {
@@ -122,7 +123,8 @@ function f() {
 		el.appendChild(document.createTextNode(tr("Streak")));
 		p_el.appendChild(el);
 		el = document.createElement("span");
-		el.setAttribute("class", "_62zln _1L-uo cCL9P");
+		el.setAttribute("class", "cCL9P");
+		el.setAttribute("style", style3);
 		p_el.appendChild(el);
 		el = document.createElement("span");
 		el.setAttribute("style", style2);
@@ -148,7 +150,8 @@ function f() {
 
 	function append_lingot_elements(p_el) {
 		var el = document.createElement("span");
-		el.setAttribute("class", "_1yWWS _3SHvM cCL9P");
+		el.setAttribute("class", "_3vtRi Jat4n cCL9P");
+		el.setAttribute("style", "margin:0;");
 		p_el.appendChild(el);
 		el = document.createElement("span");
 		el.setAttribute("style", style2);
@@ -399,7 +402,7 @@ function f() {
 				if (!d_el) {
 					d_el = document.createElement("span");
 					d_el.setAttribute("id", "dp-steak-today");
-					d_el.setAttribute("class", "RWiDH _3wurl cCL9P");
+					d_el.setAttribute("class", "Gg8ar _26ycU cCL9P");
 					d_el.setAttribute("style", "margin:9px 0 0 -11px;");
 					b_el.parentNode.insertBefore(d_el, b_el);
 				}
