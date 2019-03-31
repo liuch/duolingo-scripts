@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.6.4
+// @version        0.7.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -41,10 +41,12 @@ function f() {
 		observer: null,
 		root_el: null,
 		p_func: null,
+		active: 0,
 
 		set: function(func) {
 			this.root_el = document.getElementsByTagName("body")[0];
 			if (this.root_el) {
+				this.active = 0;
 				this.p_func = func;
 				this.observer = new MutationObserver(function(mutations) {
 					if (observe.p_func) {
@@ -57,11 +59,15 @@ function f() {
 		},
 
 		start: function() {
-			this.observer.observe(this.root_el, { childList: true, subtree: true });
+			if (this.active === 0)
+				this.observer.observe(this.root_el, { childList: true, subtree: true });
+			this.active++;
 		},
 
 		stop: function() {
-			this.observer.disconnect();
+			this.active--;
+			if (this.active === 0)
+				this.observer.disconnect();
 		}
 	};
 
@@ -78,6 +84,12 @@ function f() {
 		},
 		"Storage" : {
 			"ru" : "Склад"
+		},
+		"Links:" : {
+			"ru" : "Ссылки:"
+		},
+		"Permanent" : {
+			"ru" : "Постоянная"
 		}
 	};
 
@@ -123,7 +135,7 @@ function f() {
 		el.appendChild(document.createTextNode(tr("Streak")));
 		p_el.appendChild(el);
 		el = document.createElement("span");
-		el.setAttribute("class", "cCL9P");
+		el.setAttribute("class", "cCL9P"); // <------- TODO: move to styles?
 		el.setAttribute("style", style3);
 		p_el.appendChild(el);
 		el = document.createElement("span");
@@ -306,6 +318,23 @@ function f() {
 		p_el.appendChild(ul);
 	}
 
+	function gen_link_element(href, ancor) {
+		var el = document.createElement("a");
+		el.setAttribute("style", "color:gray;margin-left:1em;");
+		el.setAttribute("href", href);
+		el.appendChild(document.createTextNode("\u{1F517} " + ancor));
+		return el;
+	}
+
+	function append_links(p_el) {
+		var el1 = document.createElement("span");
+		el1.setAttribute("style", "color:gray;");
+		el1.appendChild(document.createTextNode(tr("Links:")));
+		el1.appendChild(gen_link_element("https://duome.eu/" + u_dat.username, "Duome.eu"));
+		el1.appendChild(gen_link_element("https://www.duolingo.com/users/" + u_dat.id + "/redirect", tr("Permanent")));
+		p_el.appendChild(el1);
+	}
+
 	function remove_all_children(par) {
 		while (par.firstChild) {
 			par.removeChild(par.firstChild);
@@ -329,6 +358,24 @@ function f() {
 				else
 					remove_all_children(d_el);
 				d_el.appendChild(document.createTextNode(tr("Registered:") + " " + u_dat.created));
+			}
+			else if (d_el)
+				d_el.remove();
+		}
+		// Links
+		b_el = document.querySelector("div._3MT-S div div._2hEQd._1E3L7 div._2RO1n div div._2MEyI div._2IGH-");
+		if (b_el) {
+			d_el = document.getElementById("dp-duome-link");
+			if (u_dat.id) {
+				if (!d_el) {
+					d_el = document.createElement("div");
+					d_el.setAttribute("id", "dp-duome-link");
+					d_el.setAttribute("style", "margin-top:1em;");
+					b_el.appendChild(d_el);
+				}
+				else
+					remove_all_children(d_el);
+				append_links(d_el);
 			}
 			else if (d_el)
 				d_el.remove();
@@ -469,9 +516,9 @@ function f() {
 		"Content-Type": "application/json; charset=UTF-8"
 	};
 
-	function get_user_data(uname, version) {
+	function get_user_data(uname, version, callback) {
 		if (uname == u_dat.user_name) {
-			update_profile_view();
+			callback();
 			return;
 		}
 
@@ -510,7 +557,9 @@ function f() {
 		}).catch(function(err) {
 				console.warn(err.message);
 		}).then(function(d) {
-			update_profile_view();
+			observe.stop();
+			callback();
+			observe.start();
 		});
 	}
 
@@ -519,14 +568,16 @@ function f() {
 		if (user_name) {
 			var profile_ver = getProfileVersion();
 			if (profile_ver > 0) {
-				get_user_data(user_name, profile_ver);
+				get_user_data(user_name, profile_ver, update_profile_view);
 			}
 		}
 	}
 
 	clear_data();
-	try_update();
-	observe.set(try_update);
-	observe.start();
+	setTimeout(function() {
+		try_update();
+		observe.set(try_update);
+		observe.start();
+	}, 100);
 }
 
