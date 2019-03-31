@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://forum.duolingo.com/*
-// @version        0.4.3
+// @version        0.4.4
 // @grant          none
 // @description    This script adds the direct links for discussion comments
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах
@@ -45,7 +45,7 @@ function f() {
 	}
 
 	function update_post(id) {
-		var el = document.querySelector("section._3RKCq>div>div>div._3eQwU");
+		var el = document.querySelector("section._2G7st>div>div>div._3eQwU");
 		if (el) {
 			if (el.firstChild.nodeName == "H1") {
 				var title = el.firstChild.textContent.trim().replace("[", "\\[").replace("]", "\\]");
@@ -130,3 +130,4 @@ function f() {
 
 	setTimeout(set_observe, 100);
 }
+
