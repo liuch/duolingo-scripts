@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.7.1
+// @version        0.8.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -112,14 +112,14 @@ function f() {
 		return 0;
 	}
 
-	var style1 = "width:18px;height:25px;margin:0;float:none;background-position:-80px -6px;background-size:180px auto;vertical-align:middle;";
+	var style1 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;";
 	var style2 = "vertical-align:middle;margin-left:0.5em;";
-	var style3 = "width:18px;height:25px;margin:0;float:none;background-position:-345px -37px;background-size:950px auto;vertical-align:middle;";
+	var style3 = "width:26px;height:30px;background-size:30px;background-position:100%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;";
 
 	function append_freeze_elements(p_el) {
 		if (u_dat.freeze.length) {
 			var el = document.createElement("span");
-			el.setAttribute("class", "_3PGD5 _1m3JK");
+			el.setAttribute("class", "wwWR9");
 			el.setAttribute("style", style1);
 			p_el.appendChild(el);
 			el = document.createElement("span");
@@ -135,7 +135,7 @@ function f() {
 		el.appendChild(document.createTextNode(tr("Streak")));
 		p_el.appendChild(el);
 		el = document.createElement("span");
-		el.setAttribute("class", "cCL9P"); // <------- TODO: move to styles?
+		el.setAttribute("class", u_dat.st_today && "_26StQ" || "_2D777");
 		el.setAttribute("style", style3);
 		p_el.appendChild(el);
 		el = document.createElement("span");
@@ -162,7 +162,7 @@ function f() {
 
 	function append_lingot_elements(p_el) {
 		var el = document.createElement("span");
-		el.setAttribute("class", "_3vtRi Jat4n cCL9P");
+		el.setAttribute("class", "_3vtRi _1QdrW _2JUTo RFe0A");
 		el.setAttribute("style", "margin:0;");
 		p_el.appendChild(el);
 		el = document.createElement("span");
@@ -444,17 +444,6 @@ function f() {
 		} else
 			b_el = document.querySelector("._2_lzu>.a5SW0>._2QmPh>._1cHvL");
 		if (b_el) {
-			d_el = document.getElementById("dp-steak-today");
-			if (u_dat.st_today) {
-				if (!d_el) {
-					d_el = document.createElement("span");
-					d_el.setAttribute("id", "dp-steak-today");
-					d_el.setAttribute("class", "Gg8ar _26ycU cCL9P");
-					d_el.setAttribute("style", "margin:9px 0 0 -11px;");
-					b_el.parentNode.insertBefore(d_el, b_el);
-				}
-			} else if (d_el)
-				d_el.remove();
 			c_el = document.getElementById("dp-container1");
 			if (!c_el) {
 				c_el = document.createElement("div");
