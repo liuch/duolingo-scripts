@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://forum.duolingo.com/*
-// @version        0.4.4
+// @version        0.4.5
 // @grant          none
 // @description    This script adds the direct links for discussion comments
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах
