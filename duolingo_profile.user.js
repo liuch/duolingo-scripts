@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        0.8.1
+// @version        0.8.2
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -162,7 +162,7 @@ function f() {
 
 	function append_lingot_elements(p_el) {
 		var el = document.createElement("span");
-		el.setAttribute("class", "_3vtRi _1QdrW _2JUTo RFe0A");
+		el.setAttribute("class", "_3vtRi _1QdrW _1rEAJ RFe0A");
 		el.setAttribute("style", "margin:0;");
 		p_el.appendChild(el);
 		el = document.createElement("span");
