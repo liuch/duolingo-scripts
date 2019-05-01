@@ -2,7 +2,7 @@
 // @name           DuoMoreLingots
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://forum.duolingo.com/*
-// @version        0.4.1
+// @version        0.4.2
 // @grant          none
 // @description    This script allows you to give more than one lingot in two clicks.
 // @description:ru Этот скрипт позволяет давать больше одного лингота за раз.
@@ -79,14 +79,23 @@ function f() {
 	};
 
 	function get_toolbar_element() {
-		return document.querySelector("div._3mmdn>div>a.XHOsr._3xRJe");
+		var el = document.querySelector("div._3mmdn>div>a.XHOsr._3xRJe");
+		if (!el) {
+			el = document.querySelector("div.v836l.iDKFi._1SaVi>span._3gtu3._1-Eux.iDKFi>span._2-fAi._37tiN"); // new design
+			if (!el)
+				console.warn("DuoMoreLingots: Cannot find a toolbar element");
+		}
+		return el;
 	}
 
 	function total_lingots() {
 		var lingots = 0;
 		var el = get_toolbar_element();
 		if (el) {
-			lingots = parseInt(el.childNodes[1].nodeValue);
+			if (el.nodeName == "A")
+				lingots = parseInt(el.childNodes[1].nodeValue);
+			else
+				lingots = parseInt(el.childNodes[0].nodeValue); // new design
 		}
 		return lingots;
 	}
@@ -94,11 +103,14 @@ function f() {
 	function decrement_total_lingots() {
 		var el = get_toolbar_element();
 		if (el) {
-			var num = parseInt(el.childNodes[1].nodeValue) || 0;
+			var num = total_lingots();
 			if (num > 0) {
 				num -= 1;
 			}
-			el.childNodes[1].nodeValue = num;
+			if (el.nodeName == "A")
+				el.childNodes[1].nodeValue = num;
+			else
+				el.childNodes[0].nodeValue = num; // new design
 		}
 	}
 
