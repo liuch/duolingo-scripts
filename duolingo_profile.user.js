@@ -331,7 +331,7 @@ function f() {
 		el1.setAttribute("style", "color:gray;");
 		el1.appendChild(document.createTextNode(tr("Links:")));
 		el1.appendChild(gen_link_element("https://duome.eu/" + u_dat.username, "Duome.eu"));
-		el1.appendChild(gen_link_element("https://www.duolingo.com/users/" + u_dat.id + "/redirect", tr("Permanent")));
+		el1.appendChild(gen_link_element("https://www.duolingo.com/u/" + u_dat.id, tr("Permanent")));
 		p_el.appendChild(el1);
 	}
 
