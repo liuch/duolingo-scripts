@@ -200,30 +200,7 @@ function f() {
 		gold_skills: "UN9bj",
 		spending:    "_3bUu2",
 		time:        "_2mfXg",
-		perfect:     "_1D0uS",
-		clubs:       "_1B8a8",
-		items:       "_1d2qa"
-	};
-
-	var achievementNames = {
-		items: {
-			name: "Wizard",
-			description: [
-				"Equip a Streak Freeze",
-				"Equip a Weekend Amulet",
-				"Win a Double or Nothing wager",
-				"You won a Double or Nothing wager"
-			]
-		},
-		clubs: {
-			name: "Inner Circle",
-			description: [
-				"Join or create a Club",
-				"Get to the top of your Club's leaderboard",
-				"Become your Club's weekly winner",
-				"You became your Club's weekly winner"
-			]
-		}
+		perfect:     "_1D0uS"
 	};
 
 	function create_achievement_item_element(achievement, margin) {
@@ -243,7 +220,7 @@ function f() {
 			item.appendChild(el);
 		}
 		else
-			console.warn("Unknown achievement:", achievement.name);
+			console.warn("DuoProfile: Unknown achievement '" + achievement.name + "'");
 		return item;
 	}
 
@@ -268,54 +245,6 @@ function f() {
 			el.appendChild(items[i]);
 		}
 		p_el.appendChild(el);
-	}
-
-	function append_extra_achievement_elements(names, p_el) {
-		var items = [];
-		var item, li, div1, div2;
-		var achv, ach_n;
-		var name, desc;
-		for (var i = 0; i < u_dat.achievements.length; ++i) {
-			if (names.indexOf(u_dat.achievements[i].name) != -1) {
-				item = create_achievement_item_element(u_dat.achievements[i], false);
-				if (item) {
-					achv = u_dat.achievements[i];
-					name = achv.name;
-					ach_n = achievementNames[name];
-					name = ach_n.name || ("Unknown (" + name + ")");
-					desc = ach_n.description[achv.tier] || "";
-					li = document.createElement("li");
-					li.setAttribute("class", "f4TL7");
-					li.appendChild(item);
-					div1 = document.createElement("div");
-					div1.setAttribute("class", "_2g1FE");
-					li.appendChild(div1);
-					div1 = document.createElement("div");
-					div1.setAttribute("class", "_2ANoo");
-					div2 = document.createElement("div");
-					div2.setAttribute("class", "_1JLPg");
-					div2.appendChild(document.createTextNode(name));
-					div1.appendChild(div2);
-					div2 = document.createElement("div");
-					div2.setAttribute("class", "_3zECl");
-					div2.appendChild(document.createTextNode(desc));
-					div1.appendChild(div2);
-					div2 = document.createElement("div");
-					div2.setAttribute("class", "_17f4c");
-					div1.appendChild(div2);
-					li.appendChild(div1);
-					items.push(li);
-				}
-			}
-		}
-		var h1 = document.createElement("h1");
-		h1.appendChild(document.createTextNode(tr("Hidden achievements")));
-		p_el.appendChild(h1);
-		var ul = document.createElement("h1");
-		for (var i = 0; i < items.length; ++i) {
-			ul.appendChild(items[i]);
-		}
-		p_el.appendChild(ul);
 	}
 
 	function gen_link_element(href, ancor) {
@@ -381,7 +310,6 @@ function f() {
 				d_el.remove();
 		}
 		// Achievements
-		var achiv_extra = [];
 		c_el = null;
 		if (u_dat.version == 1 || !document.querySelector("._3MT-S>div>._1E3L7>._2RO1n>._2GU1P>._1SrQO>h1._1Cjfg")) {
 			c_el = document.getElementById("dp-container-achiv");
@@ -393,39 +321,15 @@ function f() {
 						b_el.appendChild(c_el);
 				}
 			}
-		}
-		else {
-			b_el = document.querySelector("._3MT-S>div>._1E3L7>._2RO1n>._2GU1P>._3jMdg>.zyezv>ul");
-			if (b_el) {
-				for (var k in achievementClass) {
-					if (!b_el.querySelector("." + achievementClass[k]))
-						achiv_extra.push(k);
-				}
-				b_el = b_el.parentElement;
-				c_el = document.getElementById("dp-container-achiv-extra");
-				if (!c_el) {
-					c_el = document.createElement("div");
-					c_el.setAttribute("id", "dp-container-achiv-extra");
-					b_el.appendChild(c_el);
-				}
-			}
-		}
-		var el;
-		if (c_el) {
-			remove_all_children(c_el);
-			if (u_dat.achievements.length) {
-				if (achiv_extra.length == 0) {
-					el = document.getElementById("dp-container-achiv-extra");
+			if (c_el) {
+				remove_all_children(c_el);
+				if (u_dat.achievements.length) {
 					append_achievement_elements(c_el);
 				}
-				else {
-					el = document.getElementById("dp-container-achiv");
-					append_extra_achievement_elements(achiv_extra, c_el);
-				}
-				if (el)
-					remove_all_children(el);
 			}
 		}
+		else if (c_el)
+			remove_all_children(c_el);
 		// Streak, Freeze and Lingots
 		if (u_dat.version == 2) {
 			b_el = document.querySelector("._2_lzu>.a5SW0>h2");
