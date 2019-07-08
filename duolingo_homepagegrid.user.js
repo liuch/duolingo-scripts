@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name         Duo-homepage-grid
 // @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  Changes the lessons layout to a big grid
+// @version      1.0
+// @description  Changes the lessons layout to a grid view
 // @author       Blaarkies
 // @match        https://www.duolingo.com/
 // ==/UserScript==
 
 let setHomepageAsGrid = () => {
-    document.styleSheets[1].addRule('.i12-l > a', 'width: 100%; overflow: hidden;');
+    document.styleSheets[1].addRule('.i12-l > a', 'width: 100%;');
     document.styleSheets[1].addRule('.i12-l > a > div > :first-child', 'transform: scale(0.6); height: 76px;');
-    document.styleSheets[1].addRule('.i12-l > a > div > :nth-child(3)', 'position: fixed;');
+    document.styleSheets[1].addRule('.i12-l > a[title=Practice]', 'width: 70px;');
     document.getElementsByClassName('LFfrA _3MLiB').item(0).style.maxWidth = 'unset';
 
     let lessonsContainer = Array.from(document.getElementsByTagName('div')).find(e => e.dataset.test == 'skill-tree');
