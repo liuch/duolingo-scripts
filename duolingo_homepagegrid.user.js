@@ -10,6 +10,7 @@
 let setHomepageAsGrid = () => {
     document.styleSheets[1].addRule('.i12-l > a', 'width: 100%; overflow: hidden;');
     document.styleSheets[1].addRule('.i12-l > a > div > :first-child', 'transform: scale(0.6); height: 76px;');
+    document.styleSheets[1].addRule('.i12-l > a > div > :nth-child(3)', 'position: fixed;');
     document.getElementsByClassName('LFfrA _3MLiB').item(0).style.maxWidth = 'unset';
 
     let lessonsContainer = Array.from(document.getElementsByTagName('div')).find(e => e.dataset.test == 'skill-tree');
@@ -34,7 +35,7 @@ let setHomepageAsGrid = () => {
 let needsToBeRefreshed = true;
 setInterval(() => {
     if (window.location.href == 'https://www.duolingo.com/') {
-        if (needsToBeRefreshed) {
+        if (needsToBeRefreshed && document.styleSheets[1]) {
             setHomepageAsGrid();
             needsToBeRefreshed = false;
         }
