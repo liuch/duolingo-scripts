@@ -567,22 +567,20 @@ function f() {
 
 		var freeze = new FreezeWidget();
 		freeze.on_change = function(wid) {
-			if (this._element) {
-				var el;
-				if (wid.is_null()) {
-					el = wid.element();
-					if (el.parentElement)
-						el.parentElement.removeChild(el);
-				}
-				else {
-					el = document.getElementById("dp_streak");
-					if (el) {
-						var next = el.nextSibling;
-						if (next)
-							el.parentElement.insertBefore(wid.element(), next);
-						else
-							el.parentElement.appendChild(wid.element());
-					}
+			var el;
+			if (wid.is_null()) {
+				el = wid.element();
+				if (el.parentElement)
+					el.parentElement.removeChild(el);
+			}
+			else {
+				el = document.getElementById("dp_streak");
+				if (el) {
+					var next = el.nextSibling;
+					if (next)
+						el.parentElement.insertBefore(wid.element(), next);
+					else
+						el.parentElement.appendChild(wid.element());
 				}
 			}
 		};
