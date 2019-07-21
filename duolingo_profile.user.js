@@ -750,10 +750,9 @@ function f() {
 		u_dat.version      = 0;
 		u_dat.user         = { id: 0, name: "" };
 		u_dat.created      = "";
-		u_dat.streak       = { today: false, number: 0 };
+		u_dat.streak       = { today: false, number: null };
 		u_dat.freeze       = "";
 		u_dat.lingots      = null;
-		u_dat.st_today     = false;
 		u_dat.block        = { blockers: null, blocking: null };
 		u_dat.achievements = [];
 	}
