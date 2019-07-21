@@ -660,7 +660,7 @@ function f() {
 	BlockingContainer.prototype.constructor = BlockingContainer;
 
 	BlockingContainer.prototype._update = function() {
-		var el = document.querySelector("._2_lzu>.a5SW0>._1JZEb");
+		var el = document.querySelector("div.LFfrA._3MLiB div div._2_lzu div.a5SW0 ul._1JZEb._1AM95");
 		if (el) {
 			if (!this._element)
 				this._create_element();
