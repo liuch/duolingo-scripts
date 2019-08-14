@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        1.0.4
+// @version        1.0.5
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -806,19 +806,21 @@ function f() {
 	}
 
 	function try_update() {
-		var uname = getUserName();
-		if (uname) {
-			ui_version = getProfileVersion();
-			if (uname != u_dat.user.name) {
-				clear_data();
-				u_dat.user.name = uname;
-				reset_profile_view();
-				get_user_data(uname, ui_version, update_profile_view);
+		ui_version = getProfileVersion();
+		if (ui_version !== 0) {
+			var uname = getUserName();
+			if (uname) {
+				if (uname != u_dat.user.name) {
+					clear_data();
+					u_dat.user.name = uname;
+					reset_profile_view();
+					get_user_data(uname, ui_version, update_profile_view);
+				}
+				else {
+					update_profile_view();
+				}
 			}
-			else {
-				update_profile_view();
-			}
-		}
+    }
 	}
 
 	clear_data();
