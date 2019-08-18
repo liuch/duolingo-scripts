@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        1.0.5
+// @version        1.1.0
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -97,6 +97,9 @@ function f() {
 		},
 		"Permanent" : {
 			"ru" : "Постоянная"
+		},
+		"Level" : {
+			"ru" : "уровень"
 		}
 	};
 
@@ -114,20 +117,20 @@ function f() {
 		this.on_change = null;
 	}
 
-	Widget.prototype.set_value = function(val) {
-		var equ = true;
-		if (this._value && val && typeof(this._value) == "object" && typeof(val) == "object") {
-			for (var prop in val) {
-				if (this._value[prop] !== val[prop]) { // must have the same property set
-					equ = false;
-					break;
+	Widget.is_equal = function(a, b) {
+		if (a && b && typeof(a) === "object" && typeof(b) === "object") {
+			for (var prop in a) {
+				if (!Widget.is_equal(a[prop], b[prop])) {
+					return false;
 				}
 			}
+			return true;
 		}
-		else if (this._value !== val) {
-			equ = false;
-		}
-		if (!equ) {
+		return (a === b);
+	}
+
+	Widget.prototype.set_value = function(val) {
+		if (!Widget.is_equal(val, this._value)) {
 			this._value = val && (typeof(val) == "object") && Object.assign({}, val) || val;
 			if (this._element)
 				this._update_element();
@@ -323,6 +326,80 @@ function f() {
 	LingotsWidget.prototype._update_element = function() {
 		var lingots = this._value === null && "?" || this._value;
 		this._element.children[1].children[0].childNodes[0].nodeValue = lingots;
+	}
+
+	// ----- CourseWidget -----
+
+	function CourseWidget(tag, element) {
+		Widget.apply(this);
+		this.tag = tag;
+		this._element = element;
+	}
+
+	CourseWidget.prototype = Object.create(Widget.prototype);
+	CourseWidget.prototype.constructor = CourseWidget;
+
+	CourseWidget.title_element = function(el) {
+		return el.querySelector("div:nth-child(2)>div");
+	}
+
+	CourseWidget.element_language = function(el) {
+		var e = CourseWidget.title_element(el);
+		if (e && e.firstChild) {
+			return e.firstChild.nodeValue;
+		}
+	}
+
+	CourseWidget.element_xp = function(el) {
+		var ex_el = el.querySelector("div:nth-child(2)>div:nth-child(2)");
+		if (ex_el && ex_el.lastChild) {
+			var xp_m = ex_el.lastChild.nodeValue.match(/(\d+)/);
+			if (xp_m) {
+				return Number(xp_m[1]);
+			}
+		}
+	}
+
+	CourseWidget.get_xp_level = function(xp) {
+		var xp_level_cutoffs = [
+			60, 120, 200, 300, 450, 750, 1125, 1650, 2250, 3e3, 3900, 4900,
+			6e3, 7500, 9e3, 10500, 12e3, 13500, 15e3, 17e3, 19e3, 22500, 26e3, 3e4
+		];
+		var level = xp_level_cutoffs.length - 1;
+		while (xp < xp_level_cutoffs[level]) {
+			level = level - 5;
+			if (level < 0) {
+				break;
+			}
+		}
+		while (level < xp_level_cutoffs.length) {
+			if (xp < xp_level_cutoffs[level]) {
+				break;
+			}
+			level += 1;
+		}
+		return level + 1;
+	}
+
+	CourseWidget.prototype._update_element = function() {
+		var t_el = CourseWidget.title_element(this._element);
+		if (this._value) {
+			if (t_el && t_el.childNodes.length === 1) {
+				t_el.appendChild(document.createTextNode(" - " + tr("Level") + " " + CourseWidget.get_xp_level(this._value[0].xp)));
+			}
+			if (this._value[0].current) {
+				this._element.setAttribute("style", "background-color:linen;");
+			}
+			else {
+				this._element.removeAttribute("style");
+			}
+		}
+		else {
+			if (t_el && t_el.childNodes.length > 1) {
+				t_el.removeChild(t_el.lastChild);
+			}
+			this._element.removeAttribute("style");
+		}
 	}
 
 	// ----- BlockingWidget -----
@@ -649,6 +726,111 @@ function f() {
 		this._element.appendChild(el);
 	}
 
+	// ----- CoursesContainer -----
+
+	function CoursesContainer() {
+		this._courses = null;
+		WidgetContainer.apply(this);
+	}
+
+	CoursesContainer.prototype = Object.create(WidgetContainer.prototype);
+	CoursesContainer.prototype.constructor = CoursesContainer;
+
+	CoursesContainer.prototype.set_data = function(d) {
+		this._courses = {};
+		this._xp_map = {};
+		this._tl_map = {};
+		if (d.courses) {
+			// Fill data
+			for (var i = 0; i < d.courses.list.length; ++i) {
+				var c = d.courses.list[i];
+				var l = {
+					xp: c.xp,
+					id: c.id,
+					from: c.fromLanguage,
+					target: c.learningLanguage,
+					title: c.title
+				};
+				if (l.id === d.courses.id) {
+					l.current = true;
+				}
+				this._xp_map[l.xp] = (this._xp_map[l.xp] || 0) + 1;
+				if (!this._courses[l.target]) {
+					this._courses[l.target] = [];
+					this._tl_map[l.title] = l.target;
+				}
+				this._courses[l.target].push(l);
+			}
+			// Sort data
+			for (var lg in this._courses) {
+				this._courses[lg].sort(function(a, b) {
+					return b.xp - a.xp;
+				});
+			}
+			// --
+			this._courses.count = d.courses.list.length;
+		}
+		this._update();
+	}
+
+	CoursesContainer.prototype.reset = function() {
+		this._courses = {};
+		this._update_widgets();
+		this._widgets = null;
+	}
+
+	CoursesContainer.prototype._update = function() {
+		if (!this._widgets && this._courses && this._courses.count > 0) {
+			this._make_widgets();
+		}
+		this._update_widgets();
+	}
+
+	CoursesContainer.prototype._make_widgets = function() {
+		this._widgets = [];
+		var ul = document.querySelector("div._2_lzu>div.a5SW0>div>ul._3XOcR._3EfBd._3jZBz");
+		if (ul) {
+			ul.querySelectorAll("li").forEach(function(el) {
+				var wid = null;
+				for (var i = 1, lg = CourseWidget.element_language(el); lg && i <= 2; ++i) {
+					if (this._courses[lg]) {
+						wid = new CourseWidget(lg, el);
+						break;
+					}
+					lg = this._tl_map[lg];
+				}
+				if (!wid) {
+					var xp = CourseWidget.element_xp(el);
+					if (this._xp_map[xp] === 1) {
+						for (lg in this._courses) {
+							if (xp === this._courses[lg][0].xp) {
+								wid = new CourseWidget(lg, el);
+								break;
+							}
+						}
+					}
+				}
+				if (wid) {
+					this._widgets.push(wid);
+				}
+			}, this);
+		}
+	}
+
+	CoursesContainer.prototype._update_widgets = function() {
+		if (this._widgets) {
+			this._widgets.forEach(function(wid) {
+				var v = this._courses[wid.tag];
+				if (v !== undefined) {
+					wid.set_value(v);
+				}
+				else {
+					wid.reset();
+				}
+			}, this);
+		}
+	}
+
 	// ----- BlockingContainer -----
 
 	function BlockingContainer() {
@@ -715,6 +897,7 @@ function f() {
 
 	containers.push(new TopContainer());
 	containers.push(new RightContainer());
+	containers.push(new CoursesContainer());
 	containers.push(new BlockingContainer());
 	containers.push(new AchievementsContainer());
 
@@ -753,6 +936,7 @@ function f() {
 		u_dat.lingots      = null;
 		u_dat.block        = { blockers: null, blocking: null };
 		u_dat.achievements = [];
+		u_dat.courses      = { list: [], id: null };
 	}
 
 	var headers = {
@@ -782,7 +966,7 @@ function f() {
 			u_dat.lingots        = d.rupees || 0;
 			u_dat.block.blockers = !d.blockers && -1 || d.blockers.length;
 			u_dat.block.blocking = !d.blocking && -1 || d.blocking.length;
-			return window.fetch("https://www.duolingo.com/2017-06-30/users/" + u_dat.user.id + "?fields=_achievements,blockedUserIds", {
+			return window.fetch("https://www.duolingo.com/2017-06-30/users/" + u_dat.user.id + "?fields=_achievements,blockedUserIds,courses,currentCourseId", {
 				method: "GET",
 				headers: headers,
 				credentials: "include"
@@ -794,6 +978,8 @@ function f() {
 		}).then(function(d) {
 			u_dat.achievements   = d && d._achievements || [];
 			u_dat.block.blocking = !d.blockedUserIds && -1 || d.blockedUserIds.length;
+			u_dat.courses.id     = d.currentCourseId || null;
+			u_dat.courses.list   = d.courses || [];
 		}).catch(function(err) {
 				u_dat.state = -1;
 				console.warn(err.message);
