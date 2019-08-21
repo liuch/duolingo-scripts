@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        1.1.0
+// @version        1.2.0
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -100,6 +100,15 @@ function f() {
 		},
 		"Level" : {
 			"ru" : "уровень"
+		},
+		"Crowns" : {
+			"ru" : "Короны"
+		},
+		"Next level" : {
+			"ru" : "Следующий уровень"
+		},
+		"From language" : {
+			"ru" : "Базовый язык"
 		}
 	};
 
@@ -107,6 +116,30 @@ function f() {
 		if (typeof(duo) == "object" && typeof(duo.uiLanguage) == "string" && trs[t] && trs[t][duo.uiLanguage])
 			return trs[t][duo.uiLanguage];
 		return t;
+	}
+
+	var css_rules = {
+		".dp-tooltip": "position:relative;",
+		".dp-tooltip-content": "visibility:hidden; position:absolute; padding:5px; top:105%; left:10%; width:80%; border-radius:14px; border:2px solid #888; color:#000; background:#fbefac; z-index:1; opacity: 0; transition:opacity 1s;",
+		".dp-tooltip:hover .dp-tooltip-content": "visibility:visible; opacity:1;",
+		".dp-tooltip-content::after": 'content:""; position:absolute; top:-4px; bottom:auto; right:auto; left:53px; border-width:0 4px 4px; border-style:solid; border-color:#fbefac transparent; display:block; width:0;',
+		".dp-tooltip-content::before": 'content:""; position:absolute; top:-7px; bottom:auto; right:auto; left:51px; border-width:0 6px 6px; border-style:solid; border-color:#888 transparent; display:block; width:0;'
+	};
+
+	function create_style_sheet() {
+		var style = document.createElement("style");
+		style.appendChild(document.createTextNode("")); // Webkit hack
+		document.head.appendChild(style);
+		return style.sheet;
+	}
+
+	function add_css_rule(sheet, selector, rules) {
+		if ("addRule" in sheet) {
+			sheet.addRule(selector, rules);
+		}
+		else if ("insertRule" in sheet) {
+			sheet.insertRule(selector + "{" + rules + "}");
+		}
 	}
 
 	// ----- Widget -----
@@ -378,14 +411,19 @@ function f() {
 			}
 			level += 1;
 		}
-		return level + 1;
+		var nl = xp_level_cutoffs[level] || 0;
+		if (nl > 0) {
+			nl -= xp;
+		}
+		return { value: level + 1, next_level: nl };
 	}
 
 	CourseWidget.prototype._update_element = function() {
 		var t_el = CourseWidget.title_element(this._element);
 		if (this._value) {
+			this._level = CourseWidget.get_xp_level(this._value[0].xp);
 			if (t_el && t_el.childNodes.length === 1) {
-				t_el.appendChild(document.createTextNode(" - " + tr("Level") + " " + CourseWidget.get_xp_level(this._value[0].xp)));
+				t_el.appendChild(document.createTextNode(" - " + tr("Level") + " " + this._level.value));
 			}
 			if (this._value[0].current) {
 				this._element.setAttribute("style", "background-color:linen;");
@@ -393,13 +431,45 @@ function f() {
 			else {
 				this._element.removeAttribute("style");
 			}
+			var tooltip = this._make_tooltip_element();
+			this._element.appendChild(tooltip);
+			this._element.classList.add("dp-tooltip");
 		}
 		else {
-			if (t_el && t_el.childNodes.length > 1) {
-				t_el.removeChild(t_el.lastChild);
+			if (t_el) {
+				while (t_el.childNodes.length > 1) {
+					t_el.removeChild(t_el.lastChild);
+				}
 			}
 			this._element.removeAttribute("style");
+			this._remove_tooltip_element();
 		}
+	}
+
+	CourseWidget.prototype._make_tooltip_element = function() {
+		var tte = document.createElement("div");
+		tte.setAttribute("class", "dp-tooltip-content");
+		tte.appendChild(this._make_tooltip_string(tr("Crowns"), this._value[0].crowns));
+		tte.appendChild(this._make_tooltip_string(tr("Next level"), this._level.next_level + " XP"));
+		tte.appendChild(this._make_tooltip_string(tr("From language"), this._value[0].from));
+		return tte;
+	}
+
+	CourseWidget.prototype._remove_tooltip_element = function() {
+		var tte = this._element.querySelector(".dp-tooltip-content");
+		if (tte) {
+			tte.remove();
+		}
+	}
+
+	CourseWidget.prototype._make_tooltip_string = function(text, value) {
+		var te = document.createElement("span");
+		te.appendChild(document.createTextNode(text + ": "));
+		var st = document.createElement("strong");
+		st.appendChild(document.createTextNode(value));
+		te.setAttribute("style", "display:block;");
+		te.appendChild(st);
+		return te;
 	}
 
 	// ----- BlockingWidget -----
@@ -747,9 +817,10 @@ function f() {
 				var l = {
 					xp: c.xp,
 					id: c.id,
+					title: c.title,
+					crowns: c.crowns,
 					from: c.fromLanguage,
-					target: c.learningLanguage,
-					title: c.title
+					target: c.learningLanguage
 				};
 				if (l.id === d.courses.id) {
 					l.current = true;
@@ -1011,6 +1082,10 @@ function f() {
 
 	clear_data();
 	setTimeout(function() {
+		var sheet = create_style_sheet();
+		for (var selector in css_rules) {
+			add_css_rule(sheet, selector, css_rules[selector]);
+		}
 		try_update();
 		observe.set(try_update);
 		observe.start();
