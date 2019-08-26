@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        1.2.2
+// @version        1.2.3
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -121,7 +121,7 @@ function f() {
 	var css_rules = {
 		".dp-tooltip": "position:relative;",
 		".dp-tooltip-content": "visibility:hidden; position:absolute; padding:5px; top:105%; left:10%; width:80%; border-radius:14px; border:2px solid #888; color:#000; background:#fbefac; z-index:1; opacity: 0; transition:opacity 1s;",
-		".dp-tooltip:hover .dp-tooltip-content": "visibility:visible; opacity:1;",
+		".dp-tooltip:hover .dp-tooltip-content:not(:hover)": "visibility:visible; opacity:1;",
 		".dp-tooltip-content::after": 'content:""; position:absolute; top:-4px; bottom:auto; right:auto; left:53px; border-width:0 4px 4px; border-style:solid; border-color:#fbefac transparent; display:block; width:0;',
 		".dp-tooltip-content::before": 'content:""; position:absolute; top:-7px; bottom:auto; right:auto; left:51px; border-width:0 6px 6px; border-style:solid; border-color:#888 transparent; display:block; width:0;'
 	};
