@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        1.2.1
+// @version        1.2.2
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -979,7 +979,7 @@ function f() {
 	}
 
 	function getProfileVersion() {
-		if (document.querySelector("._2RO1n>div>._2MEyI>._2IGH->h1[data-test='profile-username']"))
+		if (document.querySelector("._2RO1n>._2MEyI>._2IGH->h1[data-test='profile-username']"))
 			return 2;
 		if (document.querySelector("div._2RO1n>div>div._23Nhe>div.xjBiS>h1[data-test='profile-username']"))
 			return 3;
