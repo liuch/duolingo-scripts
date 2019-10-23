@@ -9,8 +9,9 @@
 // @updateURL      https://github.com/liuch/duolingo-scripts/raw/master/duolingo_directlinks.meta.js
 // @downloadURL    https://github.com/liuch/duolingo-scripts/raw/master/duolingo_directlinks.user.js
 // @author         FieryCat aka liuch
-// @license        MIT License
 // ==/UserScript==
+
+// @license        MIT License
 
 function inject(f) { //Inject the script into the document
 	var script;
@@ -24,8 +25,8 @@ inject(f);
 
 function f() {
 
-	var loc_reg = new RegExp("^/comment/([0-9]+)");
-	var cid_reg = new RegExp("[$&]comment_id(=|%3D)([0-9]+)");
+	var loc_reg = /^\/comment\/([0-9]+)/;
+	var cid_reg = /[?&]comment_id(=|%3D)([0-9]+)/;
 
 	function create_link_element(url) {
 		var s = document.createElement("span");
