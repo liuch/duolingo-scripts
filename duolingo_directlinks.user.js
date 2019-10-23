@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://forum.duolingo.com/*
-// @version        0.4.7
+// @version        0.4.8
 // @grant          none
 // @description    This script adds the direct links for discussion comments
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах
@@ -74,7 +74,7 @@ function f() {
 	}
 
 	function update_comment(c, t_id, m_id) {
-		var c_id = c.getAttribute("id");
+		var c_id = parseInt(c.getAttribute("id") || -2);
 		var h = c.querySelector("div.PvLN8>div._38HQY");
 		if (h) {
 			h.insertBefore(create_link_element("/comment/" + t_id + "$comment_id=" + c_id), h.firstChild);
@@ -86,8 +86,8 @@ function f() {
 	function update_all_comments(thread_id) {
 		var comments = document.querySelectorAll("div.uMmEI>div[id]:not(.duo-direct-link),div._28es7>div[id]:not(.duo-direct-link)");
 		if (comments.length) {
-			var res = cid_reg.exec(document.location.pathname);
-			var comment_id = res && res[2];
+			var res = cid_reg.exec(document.location.search);
+			var comment_id = res && parseInt(res[2]) || -1;
 			var c;
 			for (var i = 0; i < comments.length; ++i) {
 				c = comments[i];
@@ -101,7 +101,7 @@ function f() {
 		var r = loc_reg.exec(document.location.pathname);
 		if (!r)
 			return;
-		var id = r[1];
+		var id = parseInt(r[1]) || -1;
 		update_post(id);
 		update_all_comments(id);
 	}
