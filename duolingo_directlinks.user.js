@@ -2,7 +2,7 @@
 // @name           DuoDirectLinks
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://forum.duolingo.com/*
-// @version        0.4.8
+// @version        0.5.1
 // @grant          none
 // @description    This script adds the direct links for discussion comments
 // @description:ru Этот скрипт добавляет прямые ссылки на комментария в форумах
@@ -30,8 +30,8 @@ function f() {
 
 	function create_link_element(url) {
 		var s = document.createElement("span");
-		s.className = "cCL9P";
-		s.setAttribute("style", "background-position:-730px -71px;width:12px;height:12px;cursor:pointer;")
+		s.className = "_1-HHf";
+		s.setAttribute("style", "display:inline-block;background-position:-730px -71px;width:12px;height:12px;cursor:pointer;")
 		var a = document.createElement("a");
 		a.setAttribute("style", "float:left;margin-right:0.5em;");
 		a.setAttribute("href", url);
