@@ -77,7 +77,7 @@ function f() {
 		var c_id = parseInt(c.getAttribute("id") || -2);
 		var h = c.querySelector("div.PvLN8>div._38HQY");
 		if (h) {
-			h.insertBefore(create_link_element("/comment/" + t_id + "$comment_id=" + c_id), h.firstChild);
+			h.insertBefore(create_link_element("/comment/" + t_id + "?comment_id=" + c_id), h.firstChild);
 		}
 		if (c_id == m_id)
 			add_marker(c);
