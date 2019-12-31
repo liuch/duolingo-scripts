@@ -77,7 +77,7 @@ function f() {
 	var ui_version = 0;
 	var containers = [];
 
-	var style1 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;";
+	var style1 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;background-image:url(//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-freeze.svg)";
 	var style2 = "vertical-align:middle;margin-left:0.5em;";
 	var style3 = "width:26px;height:30px;background-size:30px;background-position:100%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;";
 
