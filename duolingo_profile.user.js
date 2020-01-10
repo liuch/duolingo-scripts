@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        1.2.4
+// @version        1.2.5
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -138,7 +138,7 @@ function f() {
 			sheet.addRule(selector, rules);
 		}
 		else if ("insertRule" in sheet) {
-			sheet.insertRule(selector + "{" + rules + "}");
+			sheet.insertRule(selector + "{" + rules + "}", 0);
 		}
 	}
 
