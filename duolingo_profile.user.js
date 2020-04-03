@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        1.2.6
+// @version        1.3.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -77,9 +77,9 @@ function f() {
 	var ui_version = 0;
 	var containers = [];
 
-	var style1 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;background-image:url(//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-freeze.svg)";
+	var style1 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;background-image:url(//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-freeze.svg);";
 	var style2 = "vertical-align:middle;margin-left:0.5em;";
-	var style3 = "width:26px;height:30px;background-size:30px;background-position:100%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;";
+	var style3 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;background-image:url(//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-empty.svg);";
 
 	var trs = {
 		"Registered:" : {
@@ -288,14 +288,14 @@ function f() {
 
 	StreakWidget.prototype._update_element = function() {
 		var num = "?"
-		var class_str = "_2D777";
+		var url = "//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-empty.svg";
 		if (this._value) {
 			if (this._value.today)
-				class_str = "_26StQ";
+				url = "//d35aaqx5ub95lt.cloudfront.net/images/icons/streak.svg";
 			if (typeof(this._value.number) == "number")
-				num = this._value.number
+				num = this._value.number;
 		}
-		this._element.children[0].setAttribute("class", class_str);
+		this._element.children[0].style.backgroundImage = "url(" + url + ")";
 		this._element.children[1].children[0].childNodes[0].nodeValue = num;
 	}
 
@@ -345,7 +345,7 @@ function f() {
 	LingotsWidget.prototype._create_element = function() {
 		this._element = document.createElement("div");
 		var el = document.createElement("span");
-		el.setAttribute("class", "_3vtRi _1QdrW _1rEAJ RFe0A");
+		el.setAttribute("class", "_13hfw QemVH _1PTkr m7XUW");
 		el.setAttribute("style", "margin:0;");
 		this._element.appendChild(el);
 		el = document.createElement("span");
@@ -525,36 +525,40 @@ function f() {
 
 	function AchievementItem(id) {
 		this._id = id;
-		this._tier = 0;
+		this._level = 0;
+		this._finished = null;
 		this._element = null;
 	}
 
-	AchievementItem._picture_class = {
-		streak:      "_2wzQU",
-		completion:  "_16Aal",
-		social:      "_23nCr",
-		xp:          "_3dC1N",
-		gold_skills: "UN9bj",
-		spending:    "_3bUu2",
-		time:        "_2mfXg",
-		perfect:     "_1D0uS"
-	};
-
-	AchievementItem._star_num_classes = [
-		[ "_35-xP dw2F4", "_1vlZ7 _35-xP dw2F4" ],
-		[ "ZKmUJ dw2F4", "_3OP3B ZKmUJ dw2F4" ],
-		[ "tD042 dw2F4", "CIzSZ tD042 dw2F4" ]
+	AchievementItem._order = [
+		"wildfire", "sage", "scholar", "regal", "champion", "sharpshooter", "conqueror", "winner", "legendary",
+		"strategist", "friendly", "overtime", "photogenic"
 	];
 
-	AchievementItem._star_on_classes = [ "_2cOts", "_28huv", "_3UINz" ];
+	AchievementItem._picture_class = {
+		wildfire:     [ "_38s-f", "_2dW4w" ],
+		sage:         [ "_2_uNm", "_1OCLu" ],
+		scholar:      [ "_1UEFI", "_17Sw8" ],
+		regal:        [ "_2bKfI", "_2DmuE" ],
+		champion:     [ "_2UPSL", "wjpiv"  ],
+		sharpshooter: [ "_1pGIh", "_24m_z" ],
+		conqueror:    [ "NzA53",  "_3wv96" ],
+		winner:       [ "_3YJ2r", "E6mN_"  ],
+		legendary:    [ "_2j7XQ", "_3Gek4" ],
+		strategist:   [ "WL3iH",  "_3-on6" ],
+		friendly:     [ "_2xjwF", "_2z9FT" ],
+		overtime:     [ "_3FslY", "kDFIZ"  ],
+		photogenic:   [ "_2KzQv", "_2ByTK" ],
+	};
 
 	AchievementItem.is_correct = function(id) {
-		return AchievementItem._picture_class[id] !== undefined;
+		return AchievementItem._order.indexOf(id) !== -1;
 	}
 
 	AchievementItem.prototype.set_value = function(val) {
-		if (this._tier !== val) {
-			this._tier = val;
+		if (this._level !== val.level || this._finished !== val._finished) {
+			this._level = val.level;
+			this._finished = val.finished;
 			if (this._element)
 				this._update_element();
 		}
@@ -570,46 +574,33 @@ function f() {
 
 	AchievementItem.prototype._create_element = function() {
 		this._element = document.createElement("div");
-		this._element.setAttribute("class", "VHE7v");
-		this._element.setAttribute("style", "marging-bottom:10px;");
-		var el = document.createElement("div");
-		el.setAttribute("class", "_3xN15 " + AchievementItem._picture_class[this._id]);
-		this._element.appendChild(el);
+		this._element.setAttribute("class", "_2xnLX");
+		this._element.setAttribute("style", "width:77px; display:inline-block; margin:5px;");
+		var p_el = document.createElement("div");
+		p_el.setAttribute("class", "lkrNd " + AchievementItem._picture_class[this._id][0]);
+		var t_el = document.createElement("div");
+		t_el.setAttribute("class", "_2w0LW _1fADj _2w0LW");
+		t_el.appendChild(document.createTextNode("?"));
+		p_el.appendChild(t_el);
+		this._element.appendChild(p_el);
 		this._update_element();
 	}
 
 	AchievementItem.prototype._update_element = function() {
-		var el = this._element.children[0];
-		if (el.children.length == 0) {
-			this._add_stars(el);
+		this._element.children[0].children[0].childNodes[0].nodeValue = "LEVEL " + (this._level || "?");
+		var text_action = null;
+		var pic_classes = null;
+		if (this._finished) {
+			text_action = "add";
+			pic_classes = [ 0, 1 ];
 		}
-		for (var i = 0; i < el.children.length; ++i) {
-			this._turn_star(el.children[i], i, this._tier > i);
+		else {
+			text_action = "remove";
+			pic_classes = [ 1, 0 ];
 		}
-	}
-
-	AchievementItem.prototype._add_stars = function(par) {
-		for (var i = 0; i < 3; ++i) {
-			par.appendChild(this._create_star_element(i));
-		}
-	}
-
-	AchievementItem.prototype._create_star_element = function(num) {
-		var main_el = document.createElement("div");
-		var el = document.createElement("div");
-		el.setAttribute("class", AchievementItem._star_num_classes[num][0]);
-		main_el.appendChild(el);
-		el = document.createElement("div");
-		el.setAttribute("class", AchievementItem._star_num_classes[num][1]);
-		main_el.appendChild(el);
-		return main_el;
-	}
-
-	AchievementItem.prototype._turn_star = function(el, num, on) {
-		var on_str = on ? AchievementItem._star_on_classes[num] + " " : "";
-		for (var i = 0; i < el.children.length; ++i) {
-			el.children[i].setAttribute("class", on_str + AchievementItem._star_num_classes[num][i]);
-		}
+		this._element.firstChild.firstChild.classList[text_action]("_3A81p");
+		this._element.firstChild.classList.remove(AchievementItem._picture_class[this._id][pic_classes[0]]);
+		this._element.firstChild.classList.add(AchievementItem._picture_class[this._id][pic_classes[1]]);
 	}
 
 	// ----- AchievementsWidget -----
@@ -625,12 +616,12 @@ function f() {
 
 	AchievementsWidget.prototype._create_element = function() {
 		this._element = document.createElement("div");
-		this._element.setAttribute("class", "QZc9N");
 		this._update_element();
 	}
 
 	AchievementsWidget.prototype._update_element = function() {
 		if (this._value) {
+			var need_append = false;
 			for (var i = 0; ; ++i) {
 				var val = this._value[i];
 				if (val === undefined)
@@ -641,12 +632,26 @@ function f() {
 						item = new AchievementItem(val.name);
 						this._items[val.name] = item;
 					}
-					item.set_value(val.tier);
+					var level = val.tier;
+					var finished = false;
+					if (val.tierCounts.length > level)
+						++level;
+					else
+						finished = true;
+					item.set_value({ level: level, finished: finished });
 					if (!this._element.contains(item.element()))
-						this._element.appendChild(item.element());
+						need_append = true;
 				}
-//				else
-//					console.warn("DuoProfile: Unknown achievement '" + val.name + "'");
+				else
+					console.warn("DuoProfile: Unknown achievement '" + val.name + "'");
+			}
+			if (need_append) {
+				while (this._element.childNodes.length > 1)
+					this._element.removeChild(this._element.lastChild);
+				AchievementItem._order.forEach(function(id) {
+					if (this._items[id])
+						this._element.appendChild(this._items[id].element());
+				}, this);
 			}
 		}
 		else {
@@ -752,7 +757,7 @@ function f() {
 
 		if (this._element && !document.body.contains(this._element)) {
 			if (ui_version == 2) {
-				el = document.querySelector("._2_lzu>.a5SW0>h2");
+				el = document.querySelector("div._3Nl60>div.COg1x>h2");
 				if (el) {
 					el.parentNode.insertBefore(this._element, el);
 				}
@@ -861,7 +866,7 @@ function f() {
 
 	CoursesContainer.prototype._make_widgets = function() {
 		this._widgets = [];
-		var ul = document.querySelector("div._2_lzu>div.a5SW0>div>ul._3XOcR._3EfBd._3jZBz");
+		var ul = document.querySelector("div._3Nl60>div.COg1x>div>ul.kcn9s._2G3j1._1Pp27");
 		if (ul) {
 			ul.querySelectorAll("li").forEach(function(el) {
 				var wid = null;
@@ -916,7 +921,7 @@ function f() {
 	BlockingContainer.prototype.constructor = BlockingContainer;
 
 	BlockingContainer.prototype._update = function() {
-		var el = document.querySelector("div.LFfrA._3MLiB div div._2_lzu div.a5SW0 ul._1JZEb._1AM95");
+		var el = document.querySelector("div>div._3Nl60>div.COg1x>ul._3sDCf._1BWZU");
 		if (el) {
 			if (!this._element)
 				this._create_element();
@@ -941,12 +946,12 @@ function f() {
 	AchievementsContainer.prototype.constructor = AchievementsContainer;
 
 	AchievementsContainer.prototype._update = function() {
-		if ((ui_version == 2 && !document.querySelector("div>div._2hEQd._1E3L7>div._2RO1n>div>div._3K6_E>h2"))
+		if ((ui_version == 2 && !document.querySelector("div._2y4G6._2iVqi>div._3blMz>div>div._1_7b8>h2"))
 				|| (ui_version == 3 && !document.querySelector("div>div._2hEQd._1E3L7>div._2RO1n>div._3HO1J>div._34Iqz>h2"))) {
 			if (!this._element)
 				this._create_element();
 			if (!document.body.contains(this._element) || this._element.parentElement.lastChild !== this._element) {
-				var el = document.querySelector("._3MT-S>._1E3L7>._2RO1n");
+				var el = document.querySelector("div._1tEYo>div._2y4G6._2iVqi>div._3blMz");
 				if (el)
 					el.appendChild(this._element);
 			}
@@ -957,11 +962,10 @@ function f() {
 
 	AchievementsContainer.prototype._create_element = function() {
 		this._element = document.createElement("div");
+		this._element.setAttribute("style", "text-align:center;");
 		var el = document.createElement("hr");
-		el.setAttribute("class", "_2rgts");
 		this._element.appendChild(el);
-		el = document.createElement("h1");
-		el.setAttribute("class", "_1Cjfg");
+		el = document.createElement("h2");
 		el.appendChild(document.createTextNode(tr("Achievements")));
 		this._element.appendChild(el);
 		this._element.appendChild(this._widgets[0].element());
@@ -981,7 +985,7 @@ function f() {
 	}
 
 	function getProfileVersion() {
-		if (document.querySelector("._2RO1n>._2MEyI>._2IGH->h1[data-test='profile-username']"))
+		if (document.querySelector("div._3blMz>div.g7QLd>div._2tFvE>h1[data-test='profile-username']"))
 			return 2;
 		if (document.querySelector("div._2RO1n>div>div._23Nhe>div.xjBiS>h1[data-test='profile-username']"))
 			return 3;
@@ -1040,20 +1044,31 @@ function f() {
 			u_dat.lingots        = d.rupees || 0;
 			u_dat.block.blockers = !d.blockers && -1 || d.blockers.length;
 			u_dat.block.blocking = !d.blocking && -1 || d.blocking.length;
-			return window.fetch("https://www.duolingo.com/2017-06-30/users/" + u_dat.user.id + "?fields=_achievements,blockedUserIds,courses,currentCourseId", {
+			return window.fetch("https://www.duolingo.com/2017-06-30/users/" + u_dat.user.id + "?fields=blockedUserIds,courses,currentCourseId", {
 				method: "GET",
 				headers: headers,
 				credentials: "include"
 			});
 		}).then(function(resp) {
 			if (resp.status !== 200)
-				throw new Error("Failed to fetch the user's achivements");
+				throw new Error("Failed to fetch the extra user data");
 			return resp.json();
 		}).then(function(d) {
 			u_dat.achievements   = d && d._achievements || [];
 			u_dat.block.blocking = !d.blockedUserIds && -1 || d.blockedUserIds.length;
 			u_dat.courses.id     = d.currentCourseId || null;
 			u_dat.courses.list   = d.courses || [];
+			return window.fetch("https://duolingo-achievements-prod.duolingo.com/users/" + u_dat.user.id + "/achievements?fromLanguage=en&hasPlus=1&isAgeRestricted=0&isProfilePublic=1&isSchools=0&learningLanguage=es", {
+				method: "GET",
+				headers: headers,
+				credentials: "include"
+			});
+		}).then(function(resp) {
+			if (resp.status !== 200)
+				throw new Error("Failed to fetch the user's achievements")
+			return resp.json();
+		}).then(function(d) {
+			u_dat.achievements = d.achievements || [];
 		}).catch(function(err) {
 				u_dat.state = -1;
 				console.warn(err.message);
