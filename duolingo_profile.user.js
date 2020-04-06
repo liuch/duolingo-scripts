@@ -535,20 +535,20 @@ function f() {
 		"strategist", "friendly", "overtime", "photogenic"
 	];
 
-	AchievementItem._picture_class = {
-		wildfire:     [ "_38s-f", "_2dW4w" ],
-		sage:         [ "_2_uNm", "_1OCLu" ],
-		scholar:      [ "_1UEFI", "_17Sw8" ],
-		regal:        [ "_2bKfI", "_2DmuE" ],
-		champion:     [ "_2UPSL", "wjpiv"  ],
-		sharpshooter: [ "_1pGIh", "_24m_z" ],
-		conqueror:    [ "NzA53",  "_3wv96" ],
-		winner:       [ "_3YJ2r", "E6mN_"  ],
-		legendary:    [ "_2j7XQ", "_3Gek4" ],
-		strategist:   [ "WL3iH",  "_3-on6" ],
-		friendly:     [ "_2xjwF", "_2z9FT" ],
-		overtime:     [ "_3FslY", "kDFIZ"  ],
-		photogenic:   [ "_2KzQv", "_2ByTK" ],
+	AchievementItem._decor = {
+		wildfire:     { picture_class: [ "_38s-f", "_2dW4w" ], title: "Wildfire" },
+		sage:         { picture_class: [ "_2_uNm", "_1OCLu" ], title: "Sage" },
+		scholar:      { picture_class: [ "_1UEFI", "_17Sw8" ], title: "Scholar" },
+		regal:        { picture_class: [ "_2bKfI", "_2DmuE" ], title: "Regal" },
+		champion:     { picture_class: [ "_2UPSL", "wjpiv"  ], title: "Champion" },
+		sharpshooter: { picture_class: [ "_1pGIh", "_24m_z" ], title: "Sharpshooter" },
+		conqueror:    { picture_class: [ "NzA53",  "_3wv96" ], title: "Conqueror" },
+		winner:       { picture_class: [ "_3YJ2r", "E6mN_"  ], title: "Winner" },
+		legendary:    { picture_class: [ "_2j7XQ", "_3Gek4" ], title: "Legendary" },
+		strategist:   { picture_class: [ "WL3iH",  "_3-on6" ], title: "Strategist" },
+		friendly:     { picture_class: [ "_2xjwF", "_2z9FT" ], title: "Friendly" },
+		overtime:     { picture_class: [ "_3FslY", "kDFIZ"  ], title: "Weekend Warrior" },
+		photogenic:   { picture_class: [ "_2KzQv", "_2ByTK" ], title: "Photogenic" },
 	};
 
 	AchievementItem.is_correct = function(id) {
@@ -576,8 +576,9 @@ function f() {
 		this._element = document.createElement("div");
 		this._element.setAttribute("class", "_2xnLX");
 		this._element.setAttribute("style", "width:77px; display:inline-block; margin:5px;");
+		this._element.setAttribute("title", tr(AchievementItem._decor[this._id].title));
 		var p_el = document.createElement("div");
-		p_el.setAttribute("class", "lkrNd " + AchievementItem._picture_class[this._id][0]);
+		p_el.setAttribute("class", "lkrNd " + AchievementItem._decor[this._id].picture_class[0]);
 		var t_el = document.createElement("div");
 		t_el.setAttribute("class", "_2w0LW _1fADj _2w0LW");
 		t_el.appendChild(document.createTextNode("?"));
@@ -587,7 +588,7 @@ function f() {
 	}
 
 	AchievementItem.prototype._update_element = function() {
-		this._element.children[0].children[0].childNodes[0].nodeValue = "LEVEL " + (this._level || "?");
+		this._element.children[0].children[0].childNodes[0].nodeValue = tr("LEVEL") + " " + (this._level || "?");
 		var text_action = null;
 		var pic_classes = null;
 		if (this._finished) {
@@ -599,8 +600,8 @@ function f() {
 			pic_classes = [ 1, 0 ];
 		}
 		this._element.firstChild.firstChild.classList[text_action]("_3A81p");
-		this._element.firstChild.classList.remove(AchievementItem._picture_class[this._id][pic_classes[0]]);
-		this._element.firstChild.classList.add(AchievementItem._picture_class[this._id][pic_classes[1]]);
+		this._element.firstChild.classList.remove(AchievementItem._decor[this._id].picture_class[pic_classes[0]]);
+		this._element.firstChild.classList.add(AchievementItem._decor[this._id].picture_class[pic_classes[1]]);
 	}
 
 	// ----- AchievementsWidget -----
