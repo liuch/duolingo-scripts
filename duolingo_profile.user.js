@@ -99,7 +99,10 @@ function f() {
 			"ru" : "Постоянная"
 		},
 		"Level" : {
-			"ru" : "уровень"
+			"ru" : "ур."
+		},
+		"LEVEL" : {
+			"ru" : "УРОВЕНЬ"
 		},
 		"Crowns" : {
 			"ru" : "Короны"
@@ -109,6 +112,45 @@ function f() {
 		},
 		"From language" : {
 			"ru" : "Базовый язык"
+		},
+		"Wildfire" : {
+			"ru" : "Энтузиаст"
+		},
+		"Sage" : {
+			"ru" : "Мудрец"
+		},
+		"Scholar" : {
+			"ru" : "Эрудит"
+		},
+		"Regal" : {
+			"ru" : "Владыка"
+		},
+		"Champion" : {
+			"ru" : "Триумфатор"
+		},
+		"Sharpshooter" : {
+			"ru" : "Снайпер"
+		},
+		"Conqueror" : {
+			"ru" : "Покоритель"
+		},
+		"Winner" : {
+			"ru" : "Победитель"
+		},
+		"Legendary" : {
+			"ru" : "Легенда"
+		},
+		"Strategist" : {
+			"ru" : "Стратег"
+		},
+		"Friendly" : {
+			"ru" : "Дружелюбный"
+		},
+		"Weekend Warrior" : {
+			"ru" : "Воин выходного дня"
+		},
+		"Photogenic" : {
+			"ru" : "Фотогеничный"
 		}
 	};
 
