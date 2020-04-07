@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        1.3.2
+// @version        1.3.3
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -989,12 +989,12 @@ function f() {
 	AchievementsContainer.prototype.constructor = AchievementsContainer;
 
 	AchievementsContainer.prototype._update = function() {
-		if ((ui_version == 2 && !document.querySelector("div._2y4G6._2iVqi>div._3blMz>div>div._1_7b8>h2"))
+		if ((ui_version == 2 && !document.querySelector("div._2y4G6>div._3blMz>div>div._1_7b8>h2"))
 				|| (ui_version == 3 && !document.querySelector("div>div._2hEQd._1E3L7>div._2RO1n>div._3HO1J>div._34Iqz>h2"))) {
 			if (!this._element)
 				this._create_element();
 			if (!document.body.contains(this._element) || this._element.parentElement.lastChild !== this._element) {
-				var el = document.querySelector("div._1tEYo>div._2y4G6._2iVqi>div._3blMz");
+				var el = document.querySelector("div._1tEYo>div._2y4G6>div._3blMz");
 				if (el)
 					el.appendChild(this._element);
 			}
@@ -1138,7 +1138,7 @@ function f() {
 					update_profile_view();
 				}
 			}
-    }
+		}
 	}
 
 	clear_data();
