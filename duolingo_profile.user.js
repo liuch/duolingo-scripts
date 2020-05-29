@@ -2,7 +2,7 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        1.3.3
+// @version        1.4.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -80,6 +80,8 @@ function f() {
 	var style1 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;background-image:url(//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-freeze.svg);";
 	var style2 = "vertical-align:middle;margin-left:0.5em;";
 	var style3 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;background-image:url(//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-empty.svg);";
+	var style4 = "width:33px;height:40px;background-size:33px;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;";
+	var style5 = "vertical-align:middle;margin-left:0.5em;font-size:large;";
 
 	var trs = {
 		"Registered:" : {
@@ -154,6 +156,42 @@ function f() {
 		},
 		"Photogenic" : {
 			"ru" : "Фотогеничный"
+		},
+		"league" : {
+			"ru" : "лига"
+		},
+		"Bronze" : {
+			"ru" : "Бронзовая"
+		},
+		"Silver" : {
+			"ru" : "Серебряная"
+		},
+		"Gold" : {
+			"ru" : "Золотая"
+		},
+		"Sapphire" : {
+			"ru" : "Сапфировая"
+		},
+		"Ruby" : {
+			"ru" : "Рубиновая"
+		},
+		"Emerald" : {
+			"ru" : "Изумрудная"
+		},
+		"Amethyst" : {
+			"ru" : "Аметистовая"
+		},
+		"Pearl" : {
+			"ru" : "Жемчужная"
+		},
+		"Obsidian" : {
+			"ru" : "Обсидиановая"
+		},
+		"Diamond" : {
+			"ru" : "Брильянтовая"
+		},
+		"Unknown" : {
+			"ru" : "Неизвестная"
 		}
 	};
 
@@ -709,6 +747,60 @@ function f() {
 		}
 	}
 
+	// ----- LeagueWidget -----
+
+	function LeagueWidget() {
+		Widget.apply(this);
+		this.tag = "league";
+	}
+
+	LeagueWidget.prototype = Object.create(Widget.prototype);
+	LeagueWidget.prototype.constructor = LeagueWidget;
+
+	LeagueWidget._names = [
+		{ name: "bronze",   color: "#CF9C6D", title: "Bronze" },
+		{ name: "silver",   color: "#C2D1DD", title: "Silver" },
+		{ name: "gold",     color: "#FEC701", title: "Gold" },
+		{ name: "sapphire", color: "#1CB0F6", title: "Sapphire" },
+		{ name: "ruby",     color: "#FF4B4B", title: "Ruby" },
+		{ name: "emerald",  color: "#78C900", title: "Emerald" },
+		{ name: "amethyst", color: "#CF9C6D", title: "Amethyst" },
+		{ name: "pearl",    color: "#FFAADE", title: "Pearl" },
+		{ name: "obsidian", color: "#494751", title: "Obsidian" },
+		{ name: "diamond",  color: "#87EAEA", title: "Diamond" },
+	];
+
+	LeagueWidget.prototype._create_element = function() {
+		this._element = document.createElement("div");
+		this._element.setAttribute("style", "margin-bottom:1em;");
+		var el = document.createElement("span");
+		el.setAttribute("style", style4);
+		this._element.appendChild(el);
+		el = document.createElement("strong");
+		el.setAttribute("style", style5);
+		this._element.appendChild(el);
+	}
+
+	LeagueWidget.prototype._update_element = function() {
+		var bgi = "none";
+		var text = "";
+		var color = "none";
+		if (typeof(this._value) == "number") {
+			var ln = LeagueWidget._names[this._value];
+			if (ln) {
+				bgi = "url(//d35aaqx5ub95lt.cloudfront.net/images/leagues/badge_" + ln.name + ".svg)";
+				text = tr(ln.title) + " " + tr("league");
+				color = ln.color;
+			}
+			else {
+				text = tr("Unknown") + " " + tr("league");
+			}
+		}
+		this._element.children[0].style.backgroundImage = bgi;
+		this._element.children[1].style.color = color;
+		this._element.children[1].textContent = text;
+	}
+
 	// ----------
 
 	// ----- WidgetContainer -----
@@ -988,6 +1080,7 @@ function f() {
 
 	function AchievementsContainer() {
 		WidgetContainer.apply(this);
+		this._widgets.push(new LeagueWidget());
 		this._widgets.push(new AchievementsWidget());
 	}
 
@@ -1018,6 +1111,7 @@ function f() {
 		el.appendChild(document.createTextNode(tr("Achievements")));
 		this._element.appendChild(el);
 		this._element.appendChild(this._widgets[0].element());
+		this._element.appendChild(this._widgets[1].element());
 	}
 
 	// ----------
@@ -1064,6 +1158,7 @@ function f() {
 		u_dat.block        = { blockers: null, blocking: null };
 		u_dat.achievements = [];
 		u_dat.courses      = { list: [], id: null };
+		u_dat.league       = null;
 	}
 
 	var headers = {
@@ -1107,6 +1202,17 @@ function f() {
 			u_dat.block.blocking = !d.blockedUserIds && -1 || d.blockedUserIds.length;
 			u_dat.courses.id     = d.currentCourseId || null;
 			u_dat.courses.list   = d.courses || [];
+			return window.fetch("https://duolingo-leaderboards-prod.duolingo.com/leaderboards/7d9f5dd1-8423-491a-91f2-2532052038ce/users/" + u_dat.user.id + "?client_unlocked=true", {
+				method: "GET",
+				headers: headers,
+				credentials: "include"
+			});
+		}).then(function(resp) {
+			if (resp.status !== 200)
+				throw new Error("Failed to fetc the user's league");
+			return resp.json();
+		}).then(function(d) {
+			u_dat.league = typeof(d.tier) == "number" ? d.tier : null;
 			return window.fetch("https://duolingo-achievements-prod.duolingo.com/users/" + u_dat.user.id + "/achievements?fromLanguage=en&hasPlus=1&isAgeRestricted=0&isProfilePublic=1&isSchools=0&learningLanguage=es", {
 				method: "GET",
 				headers: headers,
