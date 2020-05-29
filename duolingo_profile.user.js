@@ -113,6 +113,9 @@ function f() {
 		"From language" : {
 			"ru" : "Базовый язык"
 		},
+		"Achievements" : {
+			"ru" : "Достижения"
+		},
 		"Wildfire" : {
 			"ru" : "Энтузиаст"
 		},
@@ -571,6 +574,9 @@ function f() {
 		this._finished = null;
 		this._element = null;
 	}
+
+	AchievementItem.prototype = Object.create(Widget.prototype);
+	AchievementItem.prototype.constructor = AchievementItem;
 
 	AchievementItem._order = [
 		"wildfire", "sage", "scholar", "regal", "champion", "sharpshooter", "conqueror", "winner", "legendary",
@@ -1108,7 +1114,7 @@ function f() {
 			});
 		}).then(function(resp) {
 			if (resp.status !== 200)
-				throw new Error("Failed to fetch the user's achievements")
+				throw new Error("Failed to fetch the user's achievements");
 			return resp.json();
 		}).then(function(d) {
 			u_dat.achievements = d.achievements || [];
