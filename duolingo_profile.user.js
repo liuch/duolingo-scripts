@@ -2,7 +2,8 @@
 // @name           DuoProfile
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
-// @version        1.4.1
+// @include        https://preview.duolingo.com/*
+// @version        1.5.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -1168,7 +1169,7 @@ function f() {
 	function get_user_data(uname, version, callback) {
 		u_dat.state = 1;
 		u_dat.user.name = uname;
-		window.fetch("https://www.duolingo.com/users/" + uname, {
+		window.fetch(window.location.origin + "/users/" + uname, {
 			method: "GET",
 			headers: headers,
 			credentials: "include"
@@ -1188,7 +1189,7 @@ function f() {
 			u_dat.lingots        = d.rupees || 0;
 			u_dat.block.blockers = !d.blockers && -1 || d.blockers.length;
 			u_dat.block.blocking = !d.blocking && -1 || d.blocking.length;
-			return window.fetch("https://www.duolingo.com/2017-06-30/users/" + u_dat.user.id + "?fields=blockedUserIds,courses,currentCourseId", {
+			return window.fetch(window.location.origin + "/2017-06-30/users/" + u_dat.user.id + "?fields=blockedUserIds,courses,currentCourseId", {
 				method: "GET",
 				headers: headers,
 				credentials: "include"
