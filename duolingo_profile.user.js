@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.5.1
+// @version        1.6.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -289,12 +289,18 @@ function f() {
 	}
 
 	CreatedWidget.prototype._update_element = function() {
-		var str = tr("Registered:") + " " + (this._value || "-");
+		var str = tr("Registered:") + " " + (this._value && this._value.str || "-");
 		if (this._element.childNodes.length) {
 			this._element.childNodes[0].nodeValue = str;
 		}
 		else {
 			this._element.appendChild(document.createTextNode(str));
+		}
+		if (this._value && this._value.date) {
+			this._element.setAttribute("title", (new Date(this._value.date)).toLocaleString() || "?");
+		}
+		else {
+			this._element.removeAttribute("title");
 		}
 	}
 
@@ -1152,7 +1158,7 @@ function f() {
 		u_dat.state        = 0; // 0 - ready, 1 - pending, -1 - error;
 		u_dat.version      = 0;
 		u_dat.user         = { id: 0, name: "" };
-		u_dat.created      = "";
+		u_dat.created      = { str: "", date: 0 };
 		u_dat.streak       = { today: false, number: null };
 		u_dat.freeze       = "";
 		u_dat.lingots      = null;
@@ -1182,14 +1188,14 @@ function f() {
 			u_dat.user.id        = d.id || 0;
 			u_dat.user.name      = d.username && d.username.trim() || "";
 			u_dat.version        = version;
-			u_dat.created        = d.created && d.created.trim() || "";
+			u_dat.created.str    = d.created && d.created.trim() || "";
 			u_dat.streak.number  = d.site_streak || 0;
 			u_dat.streak.today   = d.streak_extended_today || false;
 			u_dat.freeze         = d.inventory && d.inventory.streak_freeze || "";
 			u_dat.lingots        = d.rupees || 0;
 			u_dat.block.blockers = !d.blockers && -1 || d.blockers.length;
 			u_dat.block.blocking = !d.blocking && -1 || d.blocking.length;
-			return window.fetch(window.location.origin + "/2017-06-30/users/" + u_dat.user.id + "?fields=blockedUserIds,courses,currentCourseId", {
+			return window.fetch(window.location.origin + "/2017-06-30/users/" + u_dat.user.id + "?fields=blockedUserIds,courses,currentCourseId,creationDate", {
 				method: "GET",
 				headers: headers,
 				credentials: "include"
@@ -1203,6 +1209,7 @@ function f() {
 			u_dat.block.blocking = !d.blockedUserIds && -1 || d.blockedUserIds.length;
 			u_dat.courses.id     = d.currentCourseId || null;
 			u_dat.courses.list   = d.courses || [];
+			u_dat.created.date   = (d.creationDate || 0) * 1000;
 			return window.fetch("https://duolingo-leaderboards-prod.duolingo.com/leaderboards/7d9f5dd1-8423-491a-91f2-2532052038ce/users/" + u_dat.user.id + "?client_unlocked=true", {
 				method: "GET",
 				headers: headers,
