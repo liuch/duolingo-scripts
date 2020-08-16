@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.6.1
+// @version        1.6.2
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -435,7 +435,10 @@ function f() {
 	LingotsWidget.prototype._create_element = function() {
 		this._element = document.createElement("div");
 		var el = document.createElement("span");
-		el.setAttribute("class", "_13hfw QemVH _1PTkr m7XUW");
+		if (ui_version === 2)
+			el.setAttribute("class", "_13hfw QemVH _1PTkr m7XUW");
+		else if (ui_version === 3)
+			el.setAttribute("class", "_2pFNt _3aUCN _1woVy _1fHjR");
 		el.setAttribute("style", "margin:0;");
 		this._element.appendChild(el);
 		el = document.createElement("span");
@@ -629,19 +632,19 @@ function f() {
 	];
 
 	AchievementItem._decor = {
-		wildfire:     { picture_class: [ "_38s-f", "_2dW4w" ], title: "Wildfire" },
-		sage:         { picture_class: [ "_2_uNm", "_1OCLu" ], title: "Sage" },
-		scholar:      { picture_class: [ "_1UEFI", "_17Sw8" ], title: "Scholar" },
-		regal:        { picture_class: [ "_2bKfI", "_2DmuE" ], title: "Regal" },
-		champion:     { picture_class: [ "_2UPSL", "wjpiv"  ], title: "Champion" },
-		sharpshooter: { picture_class: [ "_1pGIh", "_24m_z" ], title: "Sharpshooter" },
-		conqueror:    { picture_class: [ "NzA53",  "_3wv96" ], title: "Conqueror" },
-		winner:       { picture_class: [ "_3YJ2r", "E6mN_"  ], title: "Winner" },
-		legendary:    { picture_class: [ "_2j7XQ", "_3Gek4" ], title: "Legendary" },
-		strategist:   { picture_class: [ "WL3iH",  "_3-on6" ], title: "Strategist" },
-		friendly:     { picture_class: [ "_2xjwF", "_2z9FT" ], title: "Friendly" },
-		overtime:     { picture_class: [ "_3FslY", "kDFIZ"  ], title: "Weekend Warrior" },
-		photogenic:   { picture_class: [ "_2KzQv", "_2ByTK" ], title: "Photogenic" },
+		wildfire:     { picture_class: [ [ "_38s-f", "_2dW4w" ], ["PEvQz",  "YwCyZ"  ] ], title: "Wildfire" },
+		sage:         { picture_class: [ [ "_2_uNm", "_1OCLu" ], ["_20zJn", "T0DDr"  ] ], title: "Sage" },
+		scholar:      { picture_class: [ [ "_1UEFI", "_17Sw8" ], ["_1WucH", "_3Fge_" ] ], title: "Scholar" },
+		regal:        { picture_class: [ [ "_2bKfI", "_2DmuE" ], ["_1OiHp", "y6jP4"  ] ], title: "Regal" },
+		champion:     { picture_class: [ [ "_2UPSL", "wjpiv"  ], ["_2yBMs", "_2N2OI" ] ], title: "Champion" },
+		sharpshooter: { picture_class: [ [ "_1pGIh", "_24m_z" ], ["_1pkpX", "_3c1H2" ] ], title: "Sharpshooter" },
+		conqueror:    { picture_class: [ [ "NzA53",  "_3wv96" ], ["_3upVv", "_3HCUY" ] ], title: "Conqueror" },
+		winner:       { picture_class: [ [ "_3YJ2r", "E6mN_"  ], ["_2S2dm", "R74tF"  ] ], title: "Winner" },
+		legendary:    { picture_class: [ [ "_2j7XQ", "_3Gek4" ], ["_2ik6a", "_2mGoN" ] ], title: "Legendary" },
+		strategist:   { picture_class: [ [ "WL3iH",  "_3-on6" ], ["_34sTq", "_22Ui-" ] ], title: "Strategist" },
+		friendly:     { picture_class: [ [ "_2xjwF", "_2z9FT" ], ["_2zNmn", "_2SNGW" ] ], title: "Friendly" },
+		overtime:     { picture_class: [ [ "_3FslY", "kDFIZ"  ], ["_1dML2", "Sx8mZ"  ] ], title: "Weekend Warrior" },
+		photogenic:   { picture_class: [ [ "_2KzQv", "_2ByTK" ], ["_3Nhfm", "_1X1Kv" ] ], title: "Photogenic" },
 	};
 
 	AchievementItem.is_correct = function(id) {
@@ -667,13 +670,20 @@ function f() {
 
 	AchievementItem.prototype._create_element = function() {
 		this._element = document.createElement("div");
-		this._element.setAttribute("class", "_2xnLX");
 		this._element.setAttribute("style", "width:77px; display:inline-block; margin:5px;");
 		this._element.setAttribute("title", tr(AchievementItem._decor[this._id].title));
 		var p_el = document.createElement("div");
-		p_el.setAttribute("class", "lkrNd " + AchievementItem._decor[this._id].picture_class[0]);
 		var t_el = document.createElement("div");
-		t_el.setAttribute("class", "_2w0LW _1fADj _2w0LW");
+		if (ui_version === 2) {
+			this._element.setAttribute("class", "_2xnLX");
+			p_el.setAttribute("class", "lkrNd " + AchievementItem._decor[this._id].picture_class[0][0]);
+			t_el.setAttribute("class", "_2w0LW _1fADj _2w0LW");
+		}
+		else {
+			this._element.setAttribute("class", "_1qHrn");
+			p_el.setAttribute("class", "_3_QUJ " + AchievementItem._decor[this._id].picture_class[1][0]);
+			t_el.setAttribute("class", "_3SIlB _13kYE _3SIlB");
+		}
 		t_el.appendChild(document.createTextNode("?"));
 		p_el.appendChild(t_el);
 		this._element.appendChild(p_el);
@@ -692,9 +702,10 @@ function f() {
 			text_action = "remove";
 			pic_classes = [ 1, 0 ];
 		}
+		var pc_ver = (ui_version === 3) && 1 || 0;
 		this._element.firstChild.firstChild.classList[text_action]("_3A81p");
-		this._element.firstChild.classList.remove(AchievementItem._decor[this._id].picture_class[pic_classes[0]]);
-		this._element.firstChild.classList.add(AchievementItem._decor[this._id].picture_class[pic_classes[1]]);
+		this._element.firstChild.classList.remove(AchievementItem._decor[this._id].picture_class[pc_ver][pic_classes[0]]);
+		this._element.firstChild.classList.add(AchievementItem._decor[this._id].picture_class[pc_ver][pic_classes[1]]);
 	}
 
 	// ----- AchievementsWidget -----
@@ -906,15 +917,12 @@ function f() {
 		if (this._element && !document.body.contains(this._element)) {
 			if (ui_version == 2) {
 				el = document.querySelector("div._3Nl60>div.COg1x>h2");
-				if (el) {
-					el.parentNode.insertBefore(this._element, el);
-				}
 			}
 			else if (ui_version == 3) {
-				el = document.querySelector("#root>div>div.LFfrA._3MLiB>div>div._2_lzu");
-				if (el) {
-					el.insertBefore(this._element, el.children[0]);
-				}
+				el = document.querySelector("div>div._1YfQ8>div._3Gj5_>h2");
+			}
+			if (el) {
+				el.parentNode.insertBefore(this._element, el);
 			}
 		}
 	}
@@ -941,8 +949,7 @@ function f() {
 		this._element.appendChild(el);
 		this._element.appendChild(this._widgets[2].element());
 
-		if (ui_version == 2)
-			this._append_spacer();
+		this._append_spacer();
 	}
 
 	RightContainer.prototype._append_spacer = function() {
@@ -1014,7 +1021,11 @@ function f() {
 
 	CoursesContainer.prototype._make_widgets = function() {
 		this._widgets = [];
-		var ul = document.querySelector("div._3Nl60>div.COg1x>div>ul.kcn9s._2G3j1._1Pp27");
+		var ul;
+		if (ui_version === 2)
+			ul = document.querySelector("div._3Nl60>div.COg1x>div>ul.kcn9s._2G3j1._1Pp27");
+		else
+			ul = document.querySelector("div._1YfQ8>div._3Gj5_>div>ul._3VE_w._1pZox._3VQM7");
 		if (ul) {
 			ul.querySelectorAll("li").forEach(function(el) {
 				var wid = null;
@@ -1069,7 +1080,11 @@ function f() {
 	BlockingContainer.prototype.constructor = BlockingContainer;
 
 	BlockingContainer.prototype._update = function() {
-		var el = document.querySelector("div>div._3Nl60>div.COg1x>ul._3sDCf._1BWZU");
+		var el;
+		if (ui_version === 2)
+			el = document.querySelector("div>div._3Nl60>div.COg1x>ul._3sDCf._1BWZU");
+		else if (ui_version === 3)
+			el = document.querySelector("div>div._1YfQ8>div._3Gj5_>ul._27avI._3yAjN");
 		if (el) {
 			if (!this._element)
 				this._create_element();
@@ -1096,11 +1111,15 @@ function f() {
 
 	AchievementsContainer.prototype._update = function() {
 		if ((ui_version == 2 && !document.querySelector("div._2y4G6>div._3blMz>div>div._1_7b8>h2"))
-				|| (ui_version == 3 && !document.querySelector("div>div._2hEQd._1E3L7>div._2RO1n>div._3HO1J>div._34Iqz>h2"))) {
+				|| (ui_version == 3 && !document.querySelector("div._2PVaI>div._25dpq>div>div._20-_w>h2"))) {
 			if (!this._element)
 				this._create_element();
 			if (!document.body.contains(this._element) || this._element.parentElement.lastChild !== this._element) {
-				var el = document.querySelector("div._1tEYo>div._2y4G6>div._3blMz");
+				var el;
+				if (ui_version === 2)
+					el = document.querySelector("div._1tEYo>div._2y4G6>div._3blMz");
+				else if (ui_version === 3)
+					el = document.querySelector("div._33Mo9>div._2PVaI>div._25dpq");
 				if (el)
 					el.appendChild(this._element);
 			}
@@ -1135,9 +1154,9 @@ function f() {
 	}
 
 	function getProfileVersion() {
-		if (document.querySelector("div._3blMz>div.g7QLd>div._2tFvE>h1[data-test='profile-username']"))
+		if (document.querySelector("div._3blMz>div.g7QLd>div._2tFvE>h1[data-test='profile-username']")) // www subdomain
 			return 2;
-		if (document.querySelector("div._2RO1n>div>div._23Nhe>div.xjBiS>h1[data-test='profile-username']"))
+		if (document.querySelector("div._25dpq>div._3Ho-0>div._2XFyg>h1[data-test='profile-username']")) // preview subdomain
 			return 3;
 		return 0;
 	}
