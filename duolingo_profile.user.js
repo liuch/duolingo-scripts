@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.6.2
+// @version        1.6.3
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -203,11 +203,9 @@ function f() {
 	}
 
 	var css_rules = {
-		".dp-tooltip": "position:relative;",
-		".dp-tooltip-content": "visibility:hidden; position:absolute; padding:5px; top:105%; left:10%; width:80%; border-radius:14px; border:2px solid #888; color:#000; background:#fbefac; z-index:1; opacity: 0; transition:opacity 1s;",
-		".dp-tooltip:hover .dp-tooltip-content:not(:hover)": "visibility:visible; opacity:1;",
-		".dp-tooltip-content::after": 'content:""; position:absolute; top:-4px; bottom:auto; right:auto; left:53px; border-width:0 4px 4px; border-style:solid; border-color:#fbefac transparent; display:block; width:0;',
-		".dp-tooltip-content::before": 'content:""; position:absolute; top:-7px; bottom:auto; right:auto; left:51px; border-width:0 6px 6px; border-style:solid; border-color:#888 transparent; display:block; width:0;'
+		".dp-course-current": "background-color:linen;",
+		".dp-course-extra": "max-height:0; overflow:hidden; transition: max-height 1s 0.5s;",
+		".dp-course-item:hover .dp-course-extra": "max-height:5em;"
 	};
 
 	function create_style_sheet() {
@@ -460,6 +458,7 @@ function f() {
 		Widget.apply(this);
 		this.tag = tag;
 		this._element = element;
+		this._element.classList.add("dp-course-item");
 	}
 
 	CourseWidget.prototype = Object.create(Widget.prototype);
@@ -512,6 +511,7 @@ function f() {
 	}
 
 	CourseWidget.prototype._update_element = function() {
+		this._remove_extra_info_element();
 		var t_el = CourseWidget.title_element(this._element);
 		if (this._value) {
 			this._level = CourseWidget.get_xp_level(this._value[0].xp);
@@ -519,14 +519,12 @@ function f() {
 				t_el.appendChild(document.createTextNode(" - " + tr("Level") + " " + this._level.value));
 			}
 			if (this._value[0].current) {
-				this._element.setAttribute("style", "background-color:linen;");
+				this._element.classList.add("dp-course-current");
 			}
 			else {
 				this._element.removeAttribute("style");
 			}
-			var tooltip = this._make_tooltip_element();
-			this._element.appendChild(tooltip);
-			this._element.classList.add("dp-tooltip");
+			this._insert_extra_info_element();
 		}
 		else {
 			if (t_el) {
@@ -535,32 +533,38 @@ function f() {
 				}
 			}
 			this._element.removeAttribute("style");
-			this._remove_tooltip_element();
 		}
 	}
 
-	CourseWidget.prototype._make_tooltip_element = function() {
-		var tte = document.createElement("div");
-		tte.setAttribute("class", "dp-tooltip-content");
-		tte.appendChild(this._make_tooltip_string(tr("Crowns"), this._value[0].crowns));
-		tte.appendChild(this._make_tooltip_string(tr("Next level"), this._level.next_level + " XP"));
-		tte.appendChild(this._make_tooltip_string(tr("From language"), this._value[0].from));
-		return tte;
-	}
-
-	CourseWidget.prototype._remove_tooltip_element = function() {
-		var tte = this._element.querySelector(".dp-tooltip-content");
-		if (tte) {
-			tte.remove();
+	CourseWidget.prototype._insert_extra_info_element = function() {
+		if (this._element.children.length === 2) {
+			var c = this._element.children[1];
+			while (c.childNodes.length > 2) {
+				c.removeChild(c.lastChild);
+			}
+			var el = document.createElement("div");
+			el.setAttribute("class", "dp-course-extra");
+			el.appendChild(this._make_info_item(tr("Crowns"), this._value[0].crowns));
+			if (this._level.next_level > 0) {
+				el.appendChild(this._make_info_item(tr("Next level"), this._level.next_level + " XP"));
+			}
+			el.appendChild(this._make_info_item(tr("From language"), this._value[0].from));
+			c.appendChild(el);
 		}
 	}
 
-	CourseWidget.prototype._make_tooltip_string = function(text, value) {
-		var te = document.createElement("span");
+	CourseWidget.prototype._remove_extra_info_element = function() {
+		var eie = this._element.querySelector(".dp-course-extra");
+		if (eie) {
+			eie.remove();
+		}
+	}
+
+	CourseWidget.prototype._make_info_item = function(text, value) {
+		var te = document.createElement("div");
 		te.appendChild(document.createTextNode(text + ": "));
-		var st = document.createElement("strong");
+		var st = document.createElement("span");
 		st.appendChild(document.createTextNode(value));
-		te.setAttribute("style", "display:block;");
 		te.appendChild(st);
 		return te;
 	}
@@ -1051,7 +1055,6 @@ function f() {
 					this._widgets.push(wid);
 				}
 			}, this);
-			ul.setAttribute("style", "overflow:auto; min-height:200px;");
 		}
 	}
 
@@ -1214,7 +1217,7 @@ function f() {
 			u_dat.lingots        = d.rupees || 0;
 			u_dat.block.blockers = !d.blockers && -1 || d.blockers.length;
 			u_dat.block.blocking = !d.blocking && -1 || d.blocking.length;
-			return window.fetch(window.location.origin + "/2017-06-30/users/" + u_dat.user.id + "?fields=blockedUserIds,courses,currentCourseId,creationDate", {
+			return window.fetch(window.location.origin + "/2017-06-30/users/" + u_dat.user.id + "?fields=blockerUserIds,blockedUserIds,courses,currentCourseId,creationDate", {
 				method: "GET",
 				headers: headers,
 				credentials: "include"
@@ -1225,10 +1228,15 @@ function f() {
 			return resp.json();
 		}).then(function(d) {
 			u_dat.achievements   = d && d._achievements || [];
-			u_dat.block.blocking = !d.blockedUserIds && -1 || d.blockedUserIds.length;
 			u_dat.courses.id     = d.currentCourseId || null;
 			u_dat.courses.list   = d.courses || [];
 			u_dat.created.date   = (d.creationDate || 0) * 1000;
+			if (u_dat.block.blockers == -1) {
+				u_dat.block.blockers = !d.blockerUserIds && -1 || d.blockerUserIds.length;
+			}
+			if (u_dat.block.blocking == -1) {
+				u_dat.block.blocking = !d.blockedUserIds && -1 || d.blockedUserIds.length;
+			}
 			return window.fetch("https://duolingo-leaderboards-prod.duolingo.com/leaderboards/7d9f5dd1-8423-491a-91f2-2532052038ce/users/" + u_dat.user.id + "?client_unlocked=true", {
 				method: "GET",
 				headers: headers,
