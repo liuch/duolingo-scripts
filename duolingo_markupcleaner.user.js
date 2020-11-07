@@ -2,7 +2,7 @@
 // @name           DuoMarkupCleaner
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://forum.duolingo.com/*
-// @version        0.1.0
+// @version        0.1.1
 // @grant          none
 // @description    This script removes excessive user markup on the forum (currently only color text).
 // @description:ru Этот скрипт удаляет чрезмерную разметку пользователей на форуме (пока только цветной текст).
@@ -119,7 +119,7 @@ function f() {
 			});
 			if (first) {
 				first = false;
-				var el = cl[0].closest("div[itemprop=mainEntity]");
+				var el = cl[0].closest("section[itemtype]");
 				if (el) {
 					el.addEventListener("click", function(event) {
 						var tg = event.target.parentElement;
