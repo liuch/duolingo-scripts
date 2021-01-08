@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.6.3
+// @version        1.7.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -300,6 +300,37 @@ function f() {
 		else {
 			this._element.removeAttribute("title");
 		}
+	}
+
+	// ----- BioWidget -----
+
+	function BioWidget() {
+		Widget.apply(this);
+		this.tag = "bio";
+	}
+
+	BioWidget.prototype = Object.create(Widget.prototype);
+	BioWidget.prototype.constructor = BioWidget;
+
+	BioWidget.prototype._create_element = function() {
+		this._element = document.createElement("div");
+		this._element.setAttribute("id", "dp-bio");
+		this._element.setAttribute("style", "color:gray");
+		this._element.setAttribute("dir", "auto");
+	}
+
+	BioWidget.prototype._update_element = function() {
+		var str = this._value || "";
+		if (this._element.childNodes.length) {
+			this._element.childNodes[0].nodeValue = str;
+		}
+		else {
+			this._element.appendChild(document.createTextNode(str));
+		}
+	}
+
+	BioWidget.prototype.is_empty = function() {
+		return !this._value || (typeof(this._value) === "string" && this._value.trim() === "");
 	}
 
 	// ----- LinksWidget -----
@@ -854,6 +885,7 @@ function f() {
 	function TopContainer() {
 		WidgetContainer.apply(this);
 		this._widgets.push(new CreatedWidget());
+		this._widgets.push(new BioWidget());
 		this._widgets.push(new LinksWidget());
 	}
 
@@ -866,10 +898,22 @@ function f() {
 			if (!document.getElementById("dp-created-info")) {
 				el.parentNode.insertBefore(this._widgets[0].element(), el.nextSibling);
 			}
-			var el2 = document.getElementById("dp-links");
+
+			var el2 = document.getElementById("dp-bio");
+			if (!el2) {
+				el.parentNode.insertBefore(this._widgets[1].element(), this._widgets[0].element().nextSibling)
+			}
+			if (!this._widgets[1].is_empty()) {
+				el2 = el.parentNode.querySelector("div[dir=auto]:not([id=dp-bio])"); // the original bio
+				if (el2) {
+					el2.remove();
+				}
+			}
+
+			el2 = document.getElementById("dp-links");
 			if (!el2 || el.lastChild != el2) {
 				el2 && el2.remove();
-				el.parentNode.appendChild(this._widgets[1].element());
+				el.parentNode.appendChild(this._widgets[2].element());
 			}
 		}
 	}
@@ -1188,6 +1232,7 @@ function f() {
 		u_dat.achievements = [];
 		u_dat.courses      = { list: [], id: null };
 		u_dat.league       = null;
+		u_dat.bio          = "";
 	}
 
 	var headers = {
@@ -1215,9 +1260,10 @@ function f() {
 			u_dat.streak.today   = d.streak_extended_today || false;
 			u_dat.freeze         = d.inventory && d.inventory.streak_freeze || "";
 			u_dat.lingots        = d.rupees || 0;
+			u_dat.bio            = d.bio || "";
 			u_dat.block.blockers = !d.blockers && -1 || d.blockers.length;
 			u_dat.block.blocking = !d.blocking && -1 || d.blocking.length;
-			return window.fetch(window.location.origin + "/2017-06-30/users/" + u_dat.user.id + "?fields=blockerUserIds,blockedUserIds,courses,currentCourseId,creationDate", {
+			return window.fetch(window.location.origin + "/2017-06-30/users/" + u_dat.user.id + "?fields=blockerUserIds,blockedUserIds,courses,currentCourseId,creationDate,bio", {
 				method: "GET",
 				headers: headers,
 				credentials: "include"
@@ -1231,6 +1277,7 @@ function f() {
 			u_dat.courses.id     = d.currentCourseId || null;
 			u_dat.courses.list   = d.courses || [];
 			u_dat.created.date   = (d.creationDate || 0) * 1000;
+			u_dat.bio            = d.bio || "";
 			if (u_dat.block.blockers == -1) {
 				u_dat.block.blockers = !d.blockerUserIds && -1 || d.blockerUserIds.length;
 			}
