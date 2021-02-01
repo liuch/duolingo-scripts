@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.8.1
+// @version        1.8.2
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -1073,7 +1073,7 @@ function f() {
 		if (ui_version === 2)
 			ul = document.querySelector("div._3Nl60>div.COg1x>div>ul.kcn9s._2G3j1._1Pp27");
 		else
-			ul = document.querySelector("div._1YfQ8>div._3Gj5_>div>ul._3VE_w._1pZox._3VQM7");
+			ul = document.querySelector("div._1YfQ8>div._3Gj5_>div._1cKdX._1ORYU>ul._3VE_w");
 		if (ul) {
 			ul.querySelectorAll("li").forEach(function(el) {
 				var wid = null;
