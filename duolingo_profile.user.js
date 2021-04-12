@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.8.2
+// @version        1.9.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -343,37 +343,70 @@ function f() {
 	LinksWidget.prototype = Object.create(Widget.prototype);
 	LinksWidget.prototype.constructor = LinksWidget;
 
-	LinksWidget.prototype._gen_link_element = function(href, ancor) {
-		var el = document.createElement("a");
-		el.setAttribute("style", "color:gray;margin-left:1em;");
-		el.setAttribute("href", href);
-		el.appendChild(document.createTextNode("\u{1F517} " + ancor));
+	LinksWidget.prototype._gen_link_element = function(href, ancor, marker) {
+		var el = null;
+		var chain = "";
+		var a_el = document.createElement("a");
+		a_el.setAttribute("href", href);
+		if (ui_version === 210301) {
+			a_el.setAttribute("style", "color:gray;");
+			el = document.createElement("li");
+			el.setAttribute("style", "display:inline;");
+			if (marker) {
+				el.appendChild(document.createTextNode(" \u{2022} "));
+			}
+			el.appendChild(a_el);
+		}
+		else {
+			a_el.setAttribute("style", "color:gray;margin-left:1em;");
+			el = a_el;
+			chain = "\u{1F517} ";
+		}
+		a_el.appendChild(document.createTextNode(chain + ancor));
 		return el;
 	}
 
 	LinksWidget.prototype._create_element = function() {
 		this._element = document.createElement("div");
-		this._element.setAttribute("id", "dp-links");
-		this._element.setAttribute("style", "margin-top:1em;");
 		var el = document.createElement("span");
-		el.setAttribute("style", "color:gray;");
-		el.appendChild(document.createTextNode(tr("Links:")));
-		this._element.appendChild(el);
+		if (ui_version === 210301) {
+			el.appendChild(document.createTextNode(tr("\u{1F517}")));
+			el.setAttribute("style", "flex:0 0 15px;margin-right:12px;font-size:15px;");
+			this._element.appendChild(el);
+			var ul_el = document.createElement("ul");
+			ul_el.setAttribute("style", "display:inline;");
+			this._element.appendChild(ul_el);
+			this._element.setAttribute("style", "align-items:center;display:flex;margin-bottom:12px;white-space:nowrap;");
+		}
+		else {
+			el.setAttribute("style", "color:gray;");
+			el.appendChild(document.createTextNode(tr("Links:")));
+			this._element.appendChild(el);
+			this._element.setAttribute("style", "margin-top:1em;");
+		}
+		this._element.setAttribute("id", "dp-links");
 	}
 
 	LinksWidget.prototype._update_element = function() {
-		var el = this._element.children[0];
+		var el = ui_version === 210301 && this._element.children[1] || this._element.children[0];
 		while (el.children.length > 0)
 			el.removeChild(el.children[0]);
 		if (this._value && (this._value.id || this._value.name.length)) {
 			if (this._value.name.length)
-				el.appendChild(this._gen_link_element("https://duome.eu/" + this._value.name, "Duome.eu"));
+				el.appendChild(this._gen_link_element("https://duome.eu/" + this._value.name, "Duome.eu", false));
 			if (this._value.id)
-				el.appendChild(this._gen_link_element("https://www.duolingo.com/users/" + this._value.id + "/redirect", tr("Permanent")));
+				el.appendChild(this._gen_link_element("https://www.duolingo.com/users/" + this._value.id + "/redirect", tr("Permanent"), true));
 		}
 		else {
-			var el2 = document.createElement("span");
-			el2.setAttribute("style", "color:gray;margin-left:1em;");
+			var el2 = null;
+			if (ui_version === 210301) {
+				el2 = document.createElement("li");
+				el2.setAttribute("style", "display:inline;");
+			}
+			else {
+				el2 = document.createElement("span");
+				el2.setAttribute("style", "color:gray;margin-left:1em;");
+			}
 			el2.appendChild(document.createTextNode("-"));
 			el.appendChild(el2);
 		}
@@ -895,25 +928,40 @@ function f() {
 	TopContainer.prototype._update = function() {
 		var el = document.querySelector("h1[data-test='profile-username']");
 		if (el) {
-			if (!document.getElementById("dp-created-info")) {
-				el.parentNode.insertBefore(this._widgets[0].element(), el.nextSibling);
+			if (ui_version === 210301) {
+			}
+			else {
+				if (!document.getElementById("dp-created-info")) {
+					el.parentNode.insertBefore(this._widgets[0].element(), el.nextSibling);
+				}
 			}
 
 			var el2 = document.getElementById("dp-bio");
-			if (!el2) {
-				el.parentNode.insertBefore(this._widgets[1].element(), this._widgets[0].element().nextSibling)
+			if (ui_version === 210301) {
 			}
-			if (!this._widgets[1].is_empty()) {
-				el2 = el.parentNode.querySelector("div[dir=auto]:not([id=dp-bio])"); // the original bio
-				if (el2) {
-					el2.remove();
+			else {
+				if (!el2) {
+					el.parentNode.insertBefore(this._widgets[1].element(), this._widgets[0].element().nextSibling)
+				}
+				if (!this._widgets[1].is_empty()) {
+					el2 = el.parentNode.querySelector("div[dir=auto]:not([id=dp-bio])"); // the original bio
+					if (el2) {
+						el2.remove();
+					}
 				}
 			}
 
 			el2 = document.getElementById("dp-links");
-			if (!el2 || el.lastChild != el2) {
-				el2 && el2.remove();
-				el.parentNode.appendChild(this._widgets[2].element());
+			if (ui_version === 210301) {
+				if (!el2 && el.nextSibling) {
+					el.nextSibling.appendChild(this._widgets[2].element());
+				}
+			}
+			else {
+				if (!el2 || el.lastChild != el2) {
+					el2 && el2.remove();
+					el.parentNode.appendChild(this._widgets[2].element());
+				}
 			}
 		}
 	}
@@ -1205,6 +1253,8 @@ function f() {
 			return 2;
 		if (document.querySelector("div._25dpq>div._3Ho-0>div._2XFyg>h1[data-test='profile-username']")) // preview subdomain
 			return 3;
+		if (document.querySelector("div._2JXBr >div._6yLXC>div._2mVDz>h1[data-test='profile-username']")) // March 2021, www subdomain
+			return 210301;
 		return 0;
 	}
 
