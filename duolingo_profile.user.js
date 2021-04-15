@@ -281,23 +281,52 @@ function f() {
 	CreatedWidget.prototype.constructor = CreatedWidget;
 
 	CreatedWidget.prototype._create_element = function() {
-		this._element = document.createElement("p");
-		this._element.setAttribute("id", "dp-created-info");
-		this._element.setAttribute("style", "color:gray;");
+		if (ui_version === 210301) {
+			var el = document.querySelector("h1[data-test='profile-username']");
+			if (el) {
+				el = el.nextElementSibling;
+				if (el) {
+					this._element = el.children[0] && el.children[0].children[1] || null;
+				}
+			}
+		}
+		else {
+			this._element = document.createElement("p");
+			this._element.setAttribute("id", "dp-created-info");
+			this._element.setAttribute("style", "color:gray;");
+		}
 	}
 
 	CreatedWidget.prototype._update_element = function() {
-		var str = tr("Registered:") + " " + (this._value && this._value.str || "-");
-		if (this._element.childNodes.length) {
-			this._element.childNodes[0].nodeValue = str;
+		var str = null;
+		if (ui_version !== 210301) {
+			str = tr("Registered:") + " " + (this._value && this._value.str || "-");
+			if (this._element.childNodes.length) {
+				this._element.childNodes[0].nodeValue = str;
+			}
+			else {
+				this._element.appendChild(document.createTextNode(str));
+			}
 		}
-		else {
-			this._element.appendChild(document.createTextNode(str));
-		}
-		if (this._value && this._value.date) {
-			this._element.setAttribute("title", (new Date(this._value.date)).toLocaleString() || "?");
-		}
-		else {
+		if (this._element) {
+			if (this._value) {
+				if (ui_version === 210301) {
+					if (this._value.date || this._value.str) {
+						str = this._value.date && (new Date(this._value.date)).toLocaleString() || "?";
+						if (this._value.str) {
+							str = str + " (" + this._value.str + ")";
+						}
+						this._element.setAttribute("title", str);
+						return;
+					}
+				}
+				else {
+					if (this._value.date) {
+						this._element.setAttribute("title", (new Date(this._value.date)).toLocaleString() || "?");
+						return;
+					}
+				}
+			}
 			this._element.removeAttribute("title");
 		}
 	}
@@ -929,6 +958,7 @@ function f() {
 		var el = document.querySelector("h1[data-test='profile-username']");
 		if (el) {
 			if (ui_version === 210301) {
+				this._widgets[0].element();
 			}
 			else {
 				if (!document.getElementById("dp-created-info")) {
