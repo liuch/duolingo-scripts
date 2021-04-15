@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.9.1
+// @version        1.9.2
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -967,17 +967,18 @@ function f() {
 			}
 
 			var el2 = document.getElementById("dp-bio");
-			if (ui_version === 210301) {
-			}
-			else {
-				if (!el2) {
+			if (!el2) {
+				if (ui_version === 210301) {
+					el.parentElement.insertBefore(this._widgets[1].element(), el.parentElement.lastElementChild);
+				}
+				else {
 					el.parentNode.insertBefore(this._widgets[1].element(), this._widgets[0].element().nextSibling)
 				}
-				if (!this._widgets[1].is_empty()) {
-					el2 = el.parentNode.querySelector("div[dir=auto]:not([id=dp-bio])"); // the original bio
-					if (el2) {
-						el2.remove();
-					}
+			}
+			if (!this._widgets[1].is_empty()) {
+				el2 = el.parentNode.querySelector("div[dir=auto]:not([id=dp-bio])"); // the original bio
+				if (el2) {
+					el2.remove();
 				}
 			}
 
