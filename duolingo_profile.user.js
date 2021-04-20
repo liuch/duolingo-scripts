@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.9.2
+// @version        1.9.3
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -37,6 +37,7 @@ function inject(f) { //Inject the script into the document
 	};
 	try_inject();
 })();
+
 
 function f() {
 	var observe = {
@@ -193,6 +194,9 @@ function f() {
 		},
 		"Unknown" : {
 			"ru" : "Неизвестная"
+		},
+		"Total lingots" : {
+			"ru" : "Всего линготов"
 		}
 	};
 
@@ -525,24 +529,51 @@ function f() {
 
 	LingotsWidget.prototype._create_element = function() {
 		this._element = document.createElement("div");
-		var el = document.createElement("span");
-		if (ui_version === 2)
-			el.setAttribute("class", "_13hfw QemVH _1PTkr m7XUW");
-		else if (ui_version === 3)
-			el.setAttribute("class", "_2pFNt _3aUCN _1woVy _1fHjR");
-		el.setAttribute("style", "margin:0;");
-		this._element.appendChild(el);
-		el = document.createElement("span");
-		el.setAttribute("style", style2);
-		var el2 = document.createElement("strong");
-		el2.appendChild(document.createTextNode("?"));
-		el.appendChild(el2);
-		this._element.appendChild(el);
+		var el;
+		var el2;
+		if (ui_version === 210301) {
+			this._element.setAttribute("class", "_3Pm6e");
+			el = document.createElement("img");
+			el.setAttribute("src", "//d35aaqx5ub95lt.cloudfront.net/images/icons/lingot.svg");
+			el.setAttribute("class", "_3Boy6 _2ZI34");
+			this._element.appendChild(el);
+			el2 = document.createElement("div");
+			el2.setAttribute("class", "_30I27");
+			this._element.appendChild(el2);
+			var el3 = document.createElement("h4");
+			el3.setAttribute("class", "_3gX7q");
+			el3.appendChild(document.createTextNode("?"));
+			el2.appendChild(el3);
+			el3 = document.createElement("div");
+			el3.setAttribute("class", "_2nvdt");
+			el3.appendChild(document.createTextNode(tr("Total lingots")));
+			el2.appendChild(el3);
+		}
+		else {
+			el = document.createElement("span");
+			if (ui_version === 2)
+				el.setAttribute("class", "_13hfw QemVH _1PTkr m7XUW");
+			else if (ui_version === 3)
+				el.setAttribute("class", "_2pFNt _3aUCN _1woVy _1fHjR");
+			el.setAttribute("style", "margin:0;");
+			this._element.appendChild(el);
+			el = document.createElement("span");
+			el.setAttribute("style", style2);
+			el2 = document.createElement("strong");
+			el2.appendChild(document.createTextNode("?"));
+			el.appendChild(el2);
+			this._element.appendChild(el);
+		}
 	}
 
 	LingotsWidget.prototype._update_element = function() {
 		var lingots = this._value === null && "?" || this._value;
-		this._element.children[1].children[0].childNodes[0].nodeValue = lingots;
+		if (ui_version === 210301) {
+			this._element.children[1].children[0].textContent = lingots;
+		}
+		else {
+			this._element.children[1].children[0].childNodes[0].nodeValue = lingots;
+		}
 	}
 
 	// ----- CourseWidget -----
@@ -1033,6 +1064,16 @@ function f() {
 	RightContainer.prototype.constructor = RightContainer;
 
 	RightContainer.prototype._update = function() {
+		if (ui_version === 210301) {
+			if (!this._element || !document.body.contains(this._element)) {
+				this._find_element();
+			}
+			if (this._element && !this._element.contains(this._widgets[2].element())) {
+				this._element.appendChild(this._widgets[2].element());
+			}
+			return;
+		}
+
 		var el;
 		if (!this._element || this._version != ui_version) {
 			this._version = ui_version;
@@ -1052,6 +1093,10 @@ function f() {
 				el.parentNode.insertBefore(this._element, el);
 			}
 		}
+	}
+
+	RightContainer.prototype._find_element = function() {
+		this._element = document.querySelector("div._23bl->div>div._1jKLW");
 	}
 
 	RightContainer.prototype._create_element = function() {
