@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.9.3
+// @version        1.9.4
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -197,6 +197,9 @@ function f() {
 		},
 		"Total lingots" : {
 			"ru" : "Всего линготов"
+		},
+		"The last exercise" : {
+			"ru" : "Последнее занятие"
 		}
 	};
 
@@ -226,6 +229,28 @@ function f() {
 		else if ("insertRule" in sheet) {
 			sheet.insertRule(selector + "{" + rules + "}", 0);
 		}
+	}
+
+	var time_since_values = [
+		{ divider: 31536000, tail: "year" },
+		{ divider: 2592000,  tail: "month" },
+		{ divider: 86400,    tail: "day" },
+		{ divider: 3600,     tail: "hour" },
+		{ divider: 60,       tail: "minute" },
+		{ divider: 1,        tail: "second" }
+	];
+
+	function time_since(time) {
+		var secs = Math.floor(((new Date()) - time) / 1000);
+		var tail = null;
+		var num;
+		for (var i = 0; i < time_since_values.length; ++i) {
+			num = Math.floor(secs / time_since_values[i].divider);
+			if (num >= 1) {
+				return num + " " + time_since_values[i].tail + (num > 1 && "s" || "") + " ago";
+			}
+		}
+		return "Just now";
 	}
 
 	// ----- Widget -----
@@ -555,7 +580,6 @@ function f() {
 				el.setAttribute("class", "_13hfw QemVH _1PTkr m7XUW");
 			else if (ui_version === 3)
 				el.setAttribute("class", "_2pFNt _3aUCN _1woVy _1fHjR");
-			el.setAttribute("style", "margin:0;");
 			this._element.appendChild(el);
 			el = document.createElement("span");
 			el.setAttribute("style", style2);
@@ -573,6 +597,49 @@ function f() {
 		}
 		else {
 			this._element.children[1].children[0].childNodes[0].nodeValue = lingots;
+		}
+	}
+
+	// ----- LastExerciseWidget -----
+
+	function LastExerciseWidget() {
+		Widget.apply(this);
+		this.tag = "last_exercise";
+	}
+
+	LastExerciseWidget.prototype = Object.create(Widget.prototype);
+	LastExerciseWidget.prototype.constructor = LastExerciseWidget;
+
+	LastExerciseWidget.prototype._create_element = function() {
+		this._element = document.createElement("div");
+		this._element.setAttribute("class", "_3Pm6e");
+		var el = document.createElement("img");
+		el.setAttribute("src", "//d35aaqx5ub95lt.cloudfront.net/images/icons/words.svg");
+		el.setAttribute("class", "_3Boy6 _2ZI34");
+		this._element.appendChild(el);
+		var el2 = document.createElement("div");
+		el2.setAttribute("class", "_30I27");
+		this._element.appendChild(el2);
+		var el3 = document.createElement("h4");
+		el3.setAttribute("class", "_3gX7q");
+		el3.appendChild(document.createTextNode("?"));
+		el2.appendChild(el3);
+		el3 = document.createElement("div");
+		el3.setAttribute("class", "_2nvdt");
+		el3.appendChild(document.createTextNode(tr("The last exercise")));
+		el2.appendChild(el3);
+	}
+
+	LastExerciseWidget.prototype._update_element = function() {
+		var el = this._element.children[1].children[0];
+		if (this._value) {
+			var etime = new Date(this._value);
+			el.textContent = time_since(etime);
+			el.setAttribute("title", etime.toLocaleString());
+		}
+		else {
+			el.textContent = "?";
+			el.removeAttribute("title");
 		}
 	}
 
@@ -1058,6 +1125,8 @@ function f() {
 		this._widgets.push(freeze);
 
 		this._widgets.push(new LingotsWidget());
+
+		this._widgets.push(new LastExerciseWidget());
 	}
 
 	RightContainer.prototype = Object.create(WidgetContainer.prototype);
@@ -1068,8 +1137,13 @@ function f() {
 			if (!this._element || !document.body.contains(this._element)) {
 				this._find_element();
 			}
-			if (this._element && !this._element.contains(this._widgets[2].element())) {
-				this._element.appendChild(this._widgets[2].element());
+			if (this._element) {
+				if (!this._element.contains(this._widgets[2].element())) {
+					this._element.appendChild(this._widgets[2].element());
+				}
+				if (!this._element.contains(this._widgets[3].element())) {
+					this._element.appendChild(this._widgets[3].element());
+				}
 			}
 			return;
 		}
@@ -1347,18 +1421,19 @@ function f() {
 	}
 
 	function clear_data() {
-		u_dat.state        = 0; // 0 - ready, 1 - pending, -1 - error;
-		u_dat.version      = 0;
-		u_dat.user         = { id: 0, name: "" };
-		u_dat.created      = { str: "", date: 0 };
-		u_dat.streak       = { today: false, number: null };
-		u_dat.freeze       = "";
-		u_dat.lingots      = null;
-		u_dat.block        = { blockers: null, blocking: null };
-		u_dat.achievements = [];
-		u_dat.courses      = { list: [], id: null };
-		u_dat.league       = null;
-		u_dat.bio          = "";
+		u_dat.state         = 0; // 0 - ready, 1 - pending, -1 - error;
+		u_dat.version       = 0;
+		u_dat.user          = { id: 0, name: "" };
+		u_dat.created       = { str: "", date: 0 };
+		u_dat.streak        = { today: false, number: null };
+		u_dat.freeze        = "";
+		u_dat.lingots       = null;
+		u_dat.last_exercise = null;
+		u_dat.block         = { blockers: null, blocking: null };
+		u_dat.achievements  = [];
+		u_dat.courses       = { list: [], id: null };
+		u_dat.league        = null;
+		u_dat.bio           = "";
 	}
 
 	var headers = {
@@ -1389,6 +1464,13 @@ function f() {
 			u_dat.bio            = d.bio || "";
 			u_dat.block.blockers = !d.blockers && -1 || d.blockers.length;
 			u_dat.block.blocking = !d.blocking && -1 || d.blocking.length;
+			if (d.calendar) {
+				d.calendar.forEach(function(it) {
+					if (!u_dat.last_exercise || u_dat.last_exercise < it.datetime) {
+						u_dat.last_exercise = it.datetime;
+					}
+				});
+			}
 			return window.fetch(window.location.origin + "/2017-06-30/users/" + u_dat.user.id + "?fields=blockerUserIds,blockedUserIds,courses,currentCourseId,creationDate,bio", {
 				method: "GET",
 				headers: headers,
