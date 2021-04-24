@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.9.4
+// @version        1.9.5
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -309,17 +309,23 @@ function f() {
 	CreatedWidget.prototype = Object.create(Widget.prototype);
 	CreatedWidget.prototype.constructor = CreatedWidget;
 
-	CreatedWidget.prototype._create_element = function() {
+	CreatedWidget.prototype.element = function() {
 		if (ui_version === 210301) {
-			var el = document.querySelector("h1[data-test='profile-username']");
-			if (el) {
-				el = el.nextElementSibling;
+			if (!this._element || !document.body.contains(this._element)) {
+				var el = document.querySelector("h1[data-test='profile-username']");
 				if (el) {
-					this._element = el.children[0] && el.children[0].children[1] || null;
+					el = el.nextElementSibling;
+					if (el) {
+						this._element = el.children[0] && el.children[0].children[1] || null;
+					}
 				}
 			}
 		}
-		else {
+		return Widget.prototype.element.apply(this);
+	}
+
+	CreatedWidget.prototype._create_element = function() {
+		if (ui_version !== 210301) {
 			this._element = document.createElement("p");
 			this._element.setAttribute("id", "dp-created-info");
 			this._element.setAttribute("style", "color:gray;");
