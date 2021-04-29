@@ -198,7 +198,7 @@ function f() {
 		"Total lingots" : {
 			"ru" : "Всего линготов"
 		},
-		"The last exercise" : {
+		"Last exercise" : {
 			"ru" : "Последнее занятие"
 		}
 	};
@@ -632,7 +632,7 @@ function f() {
 		el2.appendChild(el3);
 		el3 = document.createElement("div");
 		el3.setAttribute("class", "_2nvdt");
-		el3.appendChild(document.createTextNode(tr("The last exercise")));
+		el3.appendChild(document.createTextNode(tr("Last exercise")));
 		el2.appendChild(el3);
 	}
 
