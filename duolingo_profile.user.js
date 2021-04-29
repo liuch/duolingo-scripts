@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.9.5
+// @version        1.9.6
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -84,6 +84,7 @@ function f() {
 	var style3 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;background-image:url(//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-empty.svg);";
 	var style4 = "width:33px;height:40px;background-size:33px;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;";
 	var style5 = "vertical-align:middle;margin-left:0.5em;font-size:large;";
+	var style6 = "display:none;width:30px;margin-top:-5px;margin-bottom:-10px;margin-left:-3px;margin-right:-10px;"
 
 	var trs = {
 		"Registered:" : {
@@ -486,25 +487,83 @@ function f() {
 	StreakWidget.prototype = Object.create(Widget.prototype);
 	StreakWidget.prototype.constructor = StreakWidget;
 
+	StreakWidget.prototype.element = function() {
+		if (ui_version === 210301) {
+			if (!this._element || !document.body.contains(this._element)) {
+				var el = document.getElementById("dp-stat");
+				if (el && el.children.length > 0) {
+					el = el.children[0];
+					this._element = el;
+					var el2 = el.children[0];
+					if (el2.tagName !== "DIV") {
+						el2.setAttribute("style", "margin-top:-2px;");
+						el = document.createElement("div");
+						el.appendChild(el2);
+						el2 = document.createElement("img");
+						el2.setAttribute("src", "//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-freeze.svg");
+						el2.setAttribute("style", style6);
+						el.appendChild(el2);
+						this._element.insertBefore(el, this._element.firstChild);
+						this._update_element();
+						return;
+					}
+				}
+			}
+		}
+		return Widget.prototype.element.apply(this);
+	}
+
 	StreakWidget.prototype._create_element = function() {
-		this._element = document.createElement("div");
-		var el = document.createElement("span");
-		el.setAttribute("class", "_2D777");
-		el.setAttribute("style", style3);
-		this._element.appendChild(el);
-		el = document.createElement("span");
-		el.setAttribute("style", style2);
-		el.setAttribute("id", "dp_streak");
-		var el2 = document.createElement("strong");
-		el2.appendChild(document.createTextNode("?"));
-		el.appendChild(el2);
-		el.appendChild(document.createTextNode(" " + tr("days")));
-		this._element.appendChild(el);
+		if (ui_version !== 210301) {
+			this._element = document.createElement("div");
+			var el = document.createElement("span");
+			el.setAttribute("class", "_2D777");
+			el.setAttribute("style", style3);
+			this._element.appendChild(el);
+			el = document.createElement("span");
+			el.setAttribute("style", style2);
+			el.setAttribute("id", "dp_streak");
+			var el2 = document.createElement("strong");
+			el2.appendChild(document.createTextNode("?"));
+			el.appendChild(el2);
+			el.appendChild(document.createTextNode(" " + tr("days")));
+			this._element.appendChild(el);
+		}
 	}
 
 	StreakWidget.prototype._update_element = function() {
+		var url;
+		if (ui_version === 210301) {
+			if (this._value) {
+				var el = this._element.children[0].children[0];
+				if (typeof(this._value.today) == "boolean") {
+					if (this._value.today) {
+						url = "//d35aaqx5ub95lt.cloudfront.net/images/398e4298a3b39ce566050e5c041949ef.svg";
+						el.style.marginTop = "-2px";
+					}
+					else {
+						url = "//d35aaqx5ub95lt.cloudfront.net/images/969d573d8f995ccb47bbfa7c61a193bd.svg";
+						el.style.marginTop = "-8px";
+					}
+					el.setAttribute("src", url);
+				}
+				el = el.nextElementSibling;
+				if (this._value.freeze.length > 0) {
+					var tm = new Date(this._value.freeze);
+					tm.setMinutes(tm.getMinutes() - tm.getTimezoneOffset());
+					el.style.display = "block";
+					el.style.marginTop = "-7px";
+					el.setAttribute("title", tm.toLocaleString());
+				}
+				else {
+					el.setAttribute("style", style6);
+					el.removeAttribute("title");
+				}
+			}
+			return;
+		}
 		var num = "?"
-		var url = "//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-empty.svg";
+		url = "//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-empty.svg";
 		if (this._value) {
 			if (this._value.today)
 				url = "//d35aaqx5ub95lt.cloudfront.net/images/icons/streak.svg";
@@ -1144,6 +1203,7 @@ function f() {
 				this._find_element();
 			}
 			if (this._element) {
+				this._widgets[0].element();
 				if (!this._element.contains(this._widgets[2].element())) {
 					this._element.appendChild(this._widgets[2].element());
 				}
@@ -1177,6 +1237,7 @@ function f() {
 
 	RightContainer.prototype._find_element = function() {
 		this._element = document.querySelector("div._23bl->div>div._1jKLW");
+		this._element.setAttribute("id", "dp-stat");
 	}
 
 	RightContainer.prototype._create_element = function() {
@@ -1431,7 +1492,7 @@ function f() {
 		u_dat.version       = 0;
 		u_dat.user          = { id: 0, name: "" };
 		u_dat.created       = { str: "", date: 0 };
-		u_dat.streak        = { today: false, number: null };
+		u_dat.streak        = { today: null, number: null, freeze: "" };
 		u_dat.freeze        = "";
 		u_dat.lingots       = null;
 		u_dat.last_exercise = null;
@@ -1465,7 +1526,8 @@ function f() {
 			u_dat.created.str    = d.created && d.created.trim() || "";
 			u_dat.streak.number  = d.site_streak || 0;
 			u_dat.streak.today   = d.streak_extended_today || false;
-			u_dat.freeze         = d.inventory && d.inventory.streak_freeze || "";
+			u_dat.streak.freeze  = d.inventory && d.inventory.streak_freeze || "";
+			u_dat.freeze         = u_dat.streak.freeze;
 			u_dat.lingots        = d.rupees || 0;
 			u_dat.bio            = d.bio || "";
 			u_dat.block.blockers = !d.blockers && -1 || d.blockers.length;
