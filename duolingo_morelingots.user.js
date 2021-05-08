@@ -2,7 +2,7 @@
 // @name           DuoMoreLingots
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://forum.duolingo.com/*
-// @version        0.4.6
+// @version        0.4.7
 // @grant          none
 // @description    This script allows you to give more than one lingot in two clicks.
 // @description:ru Этот скрипт позволяет давать больше одного лингота за раз.
@@ -81,7 +81,7 @@ function f() {
 	function get_toolbar_element() {
 		var el = document.querySelector("div._3mmdn>div>a.XHOsr._3xRJe");
 		if (!el) {
-			el = document.querySelector("div._1HjrE._3QGyY>span._3pokq._1ceG5._3QGyY>span._1Ib6L.CY74G"); // new design
+			el = document.querySelector("div._1vD0u.H_C0j>span._2XMOE.dRGy3.H_C0j>span._2cbOJ._3MxB2"); // new design
 			if (!el)
 				console.warn("DuoMoreLingots: Cannot find a toolbar element");
 		}
