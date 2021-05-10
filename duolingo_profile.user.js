@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.9.6
+// @version        1.9.7
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -1236,8 +1236,10 @@ function f() {
 	}
 
 	RightContainer.prototype._find_element = function() {
-		this._element = document.querySelector("div._23bl->div>div._1jKLW");
-		this._element.setAttribute("id", "dp-stat");
+		this._element = document.querySelector("div._2GPX6>div>div._1jKLW");
+		if (this._element) {
+			this._element.setAttribute("id", "dp-stat");
+		}
 	}
 
 	RightContainer.prototype._create_element = function() {
@@ -1470,7 +1472,7 @@ function f() {
 			return 2;
 		if (document.querySelector("div._25dpq>div._3Ho-0>div._2XFyg>h1[data-test='profile-username']")) // preview subdomain
 			return 3;
-		if (document.querySelector("div._2JXBr >div._6yLXC>div._2mVDz>h1[data-test='profile-username']")) // March 2021, www subdomain
+		if (document.querySelector("div._91Tq4>div._6yLXC>div._2mVDz>h1[data-test='profile-username']")) // March 2021, www subdomain
 			return 210301;
 		return 0;
 	}
