@@ -703,7 +703,7 @@ function f() {
 			el.setAttribute("title", etime.toLocaleString());
 		}
 		else {
-			el.textContent = "?";
+			el.textContent = this._value === 0 && "n/a" || "?";
 			el.removeAttribute("title");
 		}
 	}
@@ -1534,9 +1534,10 @@ function f() {
 			u_dat.bio            = d.bio || "";
 			u_dat.block.blockers = !d.blockers && -1 || d.blockers.length;
 			u_dat.block.blocking = !d.blocking && -1 || d.blocking.length;
+			u_dat.last_exercise  = 0;
 			if (d.calendar) {
 				d.calendar.forEach(function(it) {
-					if (!u_dat.last_exercise || u_dat.last_exercise < it.datetime) {
+					if (u_dat.last_exercise < it.datetime) {
 						u_dat.last_exercise = it.datetime;
 					}
 				});
