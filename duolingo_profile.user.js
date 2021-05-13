@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.9.7
+// @version        1.10.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профиле пользователей.
@@ -84,7 +84,8 @@ function f() {
 	var style3 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;background-image:url(//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-empty.svg);";
 	var style4 = "width:33px;height:40px;background-size:33px;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;";
 	var style5 = "vertical-align:middle;margin-left:0.5em;font-size:large;";
-	var style6 = "display:none;width:30px;margin-top:-5px;margin-bottom:-10px;margin-left:-3px;margin-right:-10px;"
+	var style6 = "display:none;width:30px;margin-top:-5px;margin-bottom:-10px;margin-left:-3px;margin-right:-10px;";
+	var style7 = "display:none;font-size:40%;font-weight:700;margin-left:15px;vertical-align:top;padding:2px 7px;text-transform:uppercase;border-radius:5px;color:#fff;background:#80e000 none repeat;";
 
 	var trs = {
 		"Registered:" : {
@@ -298,6 +299,32 @@ function f() {
 			this._update_element();
 		}
 		return this._element;
+	}
+
+	// ----- OnlineWidget -----
+
+	function OnlineWidget() {
+		Widget.apply(this);
+		this.tag = "online";
+	}
+
+	OnlineWidget.prototype = Object.create(Widget.prototype);
+	OnlineWidget.prototype.constructor = OnlineWidget;
+
+	OnlineWidget.prototype._create_element = function() {
+		this._element = document.createElement("span");
+		this._element.setAttribute("style", style7);
+		this._element.setAttribute("title", "Has activity in the last 15 minutes (not the forum)");
+		this._element.appendChild(document.createTextNode("Online"));
+	}
+
+	OnlineWidget.prototype._update_element = function() {
+		if (this._value) {
+			this._element.style.display = "inline";
+		}
+		else {
+			this._element.style.display = "none";
+		}
 	}
 
 	// ----- CreatedWidget -----
@@ -1109,6 +1136,7 @@ function f() {
 
 	function TopContainer() {
 		WidgetContainer.apply(this);
+		this._widgets.push(new OnlineWidget());
 		this._widgets.push(new CreatedWidget());
 		this._widgets.push(new BioWidget());
 		this._widgets.push(new LinksWidget());
@@ -1121,24 +1149,27 @@ function f() {
 		var el = document.querySelector("h1[data-test='profile-username']");
 		if (el) {
 			if (ui_version === 210301) {
-				this._widgets[0].element();
+				if (el.children.length === 2) {
+					el.insertBefore(this._widgets[0].element(), el.children[1]);
+				}
+				this._widgets[1].element();
 			}
 			else {
 				if (!document.getElementById("dp-created-info")) {
-					el.parentNode.insertBefore(this._widgets[0].element(), el.nextSibling);
+					el.parentNode.insertBefore(this._widgets[1].element(), el.nextSibling);
 				}
 			}
 
 			var el2 = document.getElementById("dp-bio");
 			if (!el2) {
 				if (ui_version === 210301) {
-					el.parentElement.insertBefore(this._widgets[1].element(), el.parentElement.lastElementChild);
+					el.parentElement.insertBefore(this._widgets[2].element(), el.parentElement.lastElementChild);
 				}
 				else {
-					el.parentNode.insertBefore(this._widgets[1].element(), this._widgets[0].element().nextSibling)
+					el.parentNode.insertBefore(this._widgets[2].element(), this._widgets[1].element().nextSibling)
 				}
 			}
-			if (!this._widgets[1].is_empty()) {
+			if (!this._widgets[2].is_empty()) {
 				el2 = el.parentNode.querySelector("div[dir=auto]:not([id=dp-bio])"); // the original bio
 				if (el2) {
 					el2.remove();
@@ -1148,13 +1179,13 @@ function f() {
 			el2 = document.getElementById("dp-links");
 			if (ui_version === 210301) {
 				if (!el2 && el.nextSibling) {
-					el.nextSibling.appendChild(this._widgets[2].element());
+					el.nextSibling.appendChild(this._widgets[3].element());
 				}
 			}
 			else {
 				if (!el2 || el.lastChild != el2) {
 					el2 && el2.remove();
-					el.parentNode.appendChild(this._widgets[2].element());
+					el.parentNode.appendChild(this._widgets[3].element());
 				}
 			}
 		}
@@ -1503,6 +1534,7 @@ function f() {
 		u_dat.courses       = { list: [], id: null };
 		u_dat.league        = null;
 		u_dat.bio           = "";
+		u_dat.online        = false;
 	}
 
 	var headers = {
@@ -1542,7 +1574,7 @@ function f() {
 					}
 				});
 			}
-			return window.fetch(window.location.origin + "/2017-06-30/users/" + u_dat.user.id + "?fields=blockerUserIds,blockedUserIds,courses,currentCourseId,creationDate,bio", {
+			return window.fetch(window.location.origin + "/2017-06-30/users/" + u_dat.user.id + "?fields=blockerUserIds,blockedUserIds,courses,currentCourseId,creationDate,bio,hasRecentActivity15", {
 				method: "GET",
 				headers: headers,
 				credentials: "include"
@@ -1557,6 +1589,7 @@ function f() {
 			u_dat.courses.list   = d.courses || [];
 			u_dat.created.date   = (d.creationDate || 0) * 1000;
 			u_dat.bio            = d.bio || "";
+			u_dat.online         = d.hasRecentActivity15;
 			if (u_dat.block.blockers == -1) {
 				u_dat.block.blockers = !d.blockerUserIds && -1 || d.blockerUserIds.length;
 			}
