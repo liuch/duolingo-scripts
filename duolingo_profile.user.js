@@ -1530,6 +1530,7 @@
 			if (ul) {
 				ul.querySelectorAll("li").forEach(function(el) {
 					let wid = null;
+					let lg;
 					for (let i = 1, lg = CourseWidget.languageElement(el); lg && i <= 2; ++i) {
 						if (this._courses[lg]) {
 							wid = new CourseWidget(lg, el);
