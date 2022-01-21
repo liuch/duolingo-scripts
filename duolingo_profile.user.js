@@ -42,8 +42,7 @@
 	let style1 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;background-image:url(//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-freeze.svg);";
 	let style2 = "vertical-align:middle;margin-left:0.5em;";
 	let style3 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;background-image:url(//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-empty.svg);";
-	let style4 = "width:33px;height:40px;background-size:33px;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;";
-	let style5 = "vertical-align:middle;margin-left:0.5em;font-size:large;";
+	let style4 = "width:53px;height:64px;margin:0 auto; background-repeat:no-repeat;";
 	let style6 = "display:none;width:30px;margin-top:-5px;margin-bottom:-10px;margin-left:-3px;margin-right:-10px;";
 	let style7 = "display:none;font-size:40%;font-weight:700;margin-left:15px;vertical-align:top;padding:2px 7px;text-transform:uppercase;border-radius:5px;color:#fff;background:#80e000 none repeat;";
 
@@ -172,31 +171,137 @@
 	}
 
 	let css_rules = {
+		".dp-hidden": "display:none;",
+		".dp-close-button": "width:35px; height:35px; background:white; border:2px solid #e5e5e5; border-radius:98px; cursor:pointer;",
+		".dp-close-button:after": "transform:rotate(45deg);",
+		".dp-close-button:before": "transform:rotate(-45deg);",
+		".dp-close-button:after, .dp-close-button:before": "content:\"\"; position:absolute; width:3px; height:19px; top:6px; left:15px; border-radius:3px; background-color: #b0b0b0;",
+		".dp-modal": "display:inline-block; position:relative; vertical-align:middle; padding:30px; border-radius:16px; background-color:white;",
+		".dp-modal .dp-container": "padding:10px; text-align:left; white-space:normal;",
+		".dp-modal-overlay": "position:fixed; top:0; left:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.65); text-align:center; white-space:nowrap; z-index:400;",
+		".dp-modal-overlay:after": "display:inline-block; vertical-align:middle; width:0; height:100%; content:\"\";",
+		".dp-modal .dp-close-button": "position:absolute; top:0; right:0; transform:translateX(50%) translateY(-50%);",
+		".dp-modal .dp-close-button:hover": "background-color:#e5e5e5;",
 		".dp-course-current": "background-color:linen;",
 		".dp-course-extra": "max-height:0; overflow:hidden; transition: max-height 1s 0.5s;",
-		".dp-course-item:hover .dp-course-extra": "max-height:5em;"
+		".dp-course-item:hover .dp-course-extra": "max-height:5em;",
+		".dp-league-data-item": "padding:0 6px; margin: 0 1px; border-radius:2px; font-size:14px; font-weight:600;",
+		".dp-data-row": "display:flex; font-size:18px; color:#666; min-height:24px; padding:0 6px; border-bottom:1px dotted #ccc;",
+		".dp-data-title": "margin:auto auto auto 0; padding: 0 6px 0 0;",
+		".dp-data-value": "display:flex; min-width:2em; margin:auto 0; padding:0; justify-content:right;",
 	};
+
+// ---
+
+	class InfoButton
+	{
+		constructor(params) {
+			this._element = null;
+			if (params) {
+				this._on_click = params.on_click || null;
+			}
+		}
+
+		element() {
+			if (!this._element) {
+				this._element = document.createElement("div");
+				this._element.setAttribute("tabindex", 0);
+				this._element.setAttribute("style", InfoButton._style);
+				this._element.appendChild(document.createTextNode("i"));
+				if (this._on_click) {
+					this._element.addEventListener("click", this._on_click);
+				}
+			}
+			return this._element;
+		}
+	}
+
+	InfoButton._style = "display:inline-block; cursor:pointer; margin-left:6px; color:white; background-color:silver; width:18px; height:18px; border-radius:18px; text-align:center; font-size:16px; font-weight:800;";
+
+// ---
+
+	class ModalWindow
+	{
+		constructor(content) {
+			this._element = null;
+			this._content = content;
+		}
+
+		element() {
+			if (!this._element) {
+				let ovl = document.createElement("div");
+				ovl.setAttribute("class", "dp-modal-overlay dp-hidden");
+				//
+				ovl.addEventListener("click", function(event) {
+					if (event.target === ovl) {
+						this.hide();
+					}
+				}.bind(this));
+
+				let wnd = document.createElement("div");
+				wnd.setAttribute("class", "dp-modal");
+				ovl.appendChild(wnd);
+
+				let cbt = document.createElement("div");
+				cbt.setAttribute("class", "dp-close-button");
+				cbt.addEventListener("click", function() {
+					this.hide();
+				}.bind(this));
+				wnd.appendChild(cbt);
+
+				let con = document.createElement("div");
+				con.setAttribute("class", "dp-container");
+				con.appendChild(this._content);
+				wnd.appendChild(con);
+
+				this._element = ovl;
+				ModalWindow._setGlobalHandler();
+			}
+			return this._element;
+		}
+
+		show() {
+			this.element();
+			this._element.querySelector("div.dp-close-button").classList.add("active");
+			this._element.classList.remove("dp-hidden");
+			return new Promise(function(resolve, reject) {
+				this._callback = resolve;
+			}.bind(this));
+		}
+
+		hide() {
+			if (this._element) {
+				this._element.querySelector("div.dp-close-button").classList.remove("active");
+				this._element.classList.add("dp-hidden");
+			}
+			this._callback && this._callback();
+		}
+	}
+
+	ModalWindow._setGlobalHandler = function() {
+		if (!ModalWindow._gHandler) {
+			ModalWindow._gHandler = function(event) {
+				if (event.code == "Escape" && !event.shiftKey && !event.ctrlKey && !event.altKey) {
+					let cbt = document.querySelector(".dp-close-button.active");
+					if (cbt) {
+						cbt.click();
+						event.preventDefault();
+					}
+				}
+			};
+			document.body.addEventListener("keydown", ModalWindow._gHandler);
+		}
+	};
+
 
 // ---
 
 	class Widget
 	{
 		constructor() {
-			this._value = null;
+			this._value   = null;
 			this._element = null;
 			this.onChange = null;
-		}
-
-		static isEqual(a, b) {
-			if (a && b && typeof(a) === "object" && typeof(b) === "object") {
-				for (let prop in a) {
-					if (!Widget.isEqual(a[prop], b[prop])) {
-						return false;
-					}
-				}
-				return true;
-			}
-			return (a === b);
 		}
 
 		setValue(val) {
@@ -224,6 +329,18 @@
 			}
 			return this._element;
 		}
+	}
+
+	Widget.isEqual = function(a, b) {
+		if (a && b && typeof(a) === "object" && typeof(b) === "object") {
+			for (let prop in a) {
+				if (!Widget.isEqual(a[prop], b[prop])) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return (a === b);
 	}
 
 // ---
@@ -983,26 +1100,113 @@
 	{
 		constructor() {
 			super();
-			this.tag = "league";
+			this.tag  = "league";
+			this._btn = new InfoButton({ on_click: this._displayModalWindow.bind(this) });
+			this._info_el = null;
+			this._modal_ct = null;
+		}
+
+		element() {
+			if (ui_version === 210301) {
+				if (!this._element || !document.body.contains(this._element)) {
+					let el = document.getElementById("dp-stat");
+					if (el && el.children.length >= 4) {
+						el = el.children[3];
+						this._element = el;
+						let el2 = el.children[1].children[0];
+						if (el2.tagName === "H4") {
+							el2.style.display = "inline-block";
+							el = document.createElement("div");
+							el.appendChild(el2);
+							el.appendChild(this._infoElement());
+							el2 = this._element.children[1];
+							el2.insertBefore(el, el2.firstChild);
+							this._updateElement();
+							return;
+						}
+					}
+				}
+			}
+			return super.element();
+		}
+
+		_infoElement() {
+			if (!this._info_el) {
+				this._info_el = document.createElement("div");
+				this._info_el.setAttribute("style", "display:block; margin-left:1em; float:right;");
+				LeagueWidget._data_guide.forEach(function(di) {
+					let e = document.createElement("span");
+					e.setAttribute("class", "dp-league-data-item");
+					e.setAttribute("style", "color:" + di.color + "; background-color:" + di.bcolor);
+					e.appendChild(document.createTextNode("?"));
+					this._info_el.appendChild(e);
+				}.bind(this));
+				this._info_el.appendChild(this._btn.element());
+				this._updateElement();
+			}
+			return this._info_el;
 		}
 
 		_createElement() {
-			this._element = document.createElement("div");
-			this._element.setAttribute("style", "margin-bottom:1em;");
-			let el = document.createElement("span");
-			el.setAttribute("style", style4);
-			this._element.appendChild(el);
-			el = document.createElement("strong");
-			el.setAttribute("style", style5);
-			this._element.appendChild(el);
 		}
 
 		_updateElement() {
+			let data = this._value || {};
+			for (let i = 0; i < LeagueWidget._data_guide.length; ++i) {
+				let di = LeagueWidget._data_guide[i];
+				this._info_el.children[i].textContent = typeof(data[di.name]) === "number" ? data[di.name] : "?";
+			}
+			if (this._modal_ct) {
+				this._updateModalContent();
+			}
+		}
+
+		_ensureModalContent() {
+			if (!this._modal_ct) {
+				this._modal_ct = document.createElement("div");
+				this._modal_ct.setAttribute("style", "min-width:260px;");
+				{
+					let badge = document.createElement("div");
+					badge.setAttribute("style", "margin-bottom:1em; text-align:center;");
+					this._modal_ct.appendChild(badge);
+					{
+						let image = document.createElement("div");
+						image.setAttribute("style", style4);
+						badge.appendChild(image);
+					}
+					{
+						let text = document.createElement("h2");
+						text.setAttribute("style", "margin:16px 0;");
+						badge.appendChild(text);
+					}
+				}
+				{
+					let table = document.createElement("div");
+					this._modal_ct.appendChild(table);
+					LeagueWidget._data_guide.forEach(function(di) {
+						let row = document.createElement("div");
+						row.setAttribute("class", "dp-data-row");
+						table.appendChild(row);
+						let title = document.createElement("span");
+						title.setAttribute("class", "dp-data-title");
+						title.appendChild(document.createTextNode(tr(di.title) + ":"));
+						row.appendChild(title);
+						let value = document.createElement("span");
+						value.setAttribute("class", "dp-data-value");
+						value.appendChild(document.createTextNode("?"));
+						row.appendChild(value);
+					});
+				}
+				this._updateModalContent();
+			}
+		}
+
+		_updateModalContent() {
 			let bgi = "none";
 			let text = "";
 			let color = "none";
-			if (typeof(this._value) == "number") {
-				let ln = LeagueWidget._names[this._value];
+			if (this._value && typeof(this._value.tier) == "number") {
+				let ln = LeagueWidget._names[this._value.tier];
 				if (ln) {
 					bgi = "url(//d35aaqx5ub95lt.cloudfront.net/images/leagues/badge_" + ln.name + ".svg)";
 					text = tr(ln.title) + " " + tr("league");
@@ -1012,9 +1216,27 @@
 					text = tr("Unknown") + " " + tr("league");
 				}
 			}
-			this._element.children[0].style.backgroundImage = bgi;
-			this._element.children[1].style.color = color;
-			this._element.children[1].textContent = text;
+			let badge = this._modal_ct.children[0];
+			badge.children[0].style.backgroundImage = bgi;
+			badge.children[1].style.color = color;
+			badge.children[1].textContent = text;
+
+			let data = this._value || {};
+			let rows = this._modal_ct.querySelectorAll(".dp-data-row");
+			for (let i = 0; i < LeagueWidget._data_guide.length; ++i) {
+				let di = LeagueWidget._data_guide[i];
+				rows[i].children[1].textContent = typeof(data[di.name]) === "number" ? data[di.name] : "?";
+			}
+		}
+
+		_displayModalWindow() {
+			this._ensureModalContent();
+			let modal = new ModalWindow(this._modal_ct);
+			let m_el = modal.element();
+			document.body.appendChild(m_el);
+			modal.show().finally(function() {
+				m_el.remove();
+			});
 		}
 	}
 
@@ -1029,6 +1251,12 @@
 		{ name: "pearl",    color: "#FFAADE", title: "Pearl" },
 		{ name: "obsidian", color: "#494751", title: "Obsidian" },
 		{ name: "diamond",  color: "#87EAEA", title: "Diamond" },
+	];
+
+	LeagueWidget._data_guide = [
+		{ name: "num_wins",  color: "#999", bcolor: "#fbf07d", title: "Number of wins" },
+		{ name: "top_three", color: "#999", bcolor: "#fade72", title: "Top 3 finishes" },
+		{ name: "streak",    color: "#999", bcolor: "#f9d467", title: "Week streak" },
 	];
 
 // ---
@@ -1151,6 +1379,7 @@
 
 			this._widgets.push(new LingotsWidget());
 			this._widgets.push(new LastExerciseWidget());
+			this._widgets.push(new LeagueWidget());
 		}
 
 		_update() {
@@ -1166,6 +1395,7 @@
 					if (!this._element.contains(this._widgets[3].element())) {
 						this._element.appendChild(this._widgets[3].element());
 					}
+					this._widgets[4].element();
 				}
 				return;
 			}
