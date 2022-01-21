@@ -788,52 +788,6 @@
 			this._element.classList.add("dp-course-item");
 		}
 
-		static titleElement(el) {
-			return el.querySelector("div:nth-child(2)>div");
-		}
-
-		static languageElement(el) {
-			let e = CourseWidget.titleElement(el);
-			if (e && e.firstChild) {
-				return e.firstChild.nodeValue;
-			}
-		}
-
-		static xpElement(el) {
-			let ex_el = el.querySelector("div:nth-child(2)>div:nth-child(2)");
-			if (ex_el && ex_el.lastChild) {
-				let xp_m = ex_el.lastChild.nodeValue.match(/(\d+)/);
-				if (xp_m) {
-					return Number(xp_m[1]);
-				}
-			}
-		}
-
-		static getXpLevel(xp) {
-			let xp_level_cutoffs = [
-				60, 120, 200, 300, 450, 750, 1125, 1650, 2250, 3e3, 3900, 4900,
-				6e3, 7500, 9e3, 10500, 12e3, 13500, 15e3, 17e3, 19e3, 22500, 26e3, 3e4
-			];
-			let level = xp_level_cutoffs.length - 1;
-			while (xp < xp_level_cutoffs[level]) {
-				level = level - 5;
-				if (level < 0) {
-					break;
-				}
-			}
-			while (level < xp_level_cutoffs.length) {
-				if (xp < xp_level_cutoffs[level]) {
-					break;
-				}
-				level += 1;
-			}
-			let nl = xp_level_cutoffs[level] || 0;
-			if (nl > 0) {
-				nl -= xp;
-			}
-			return { value: level + 1, next_level: nl };
-		}
-
 		_updateElement() {
 			this._removeExtraInfo();
 			let t_el = CourseWidget.titleElement(this._element);
@@ -893,6 +847,52 @@
 			return te;
 			}
 	}
+
+	CourseWidget.titleElement = function(el) {
+		return el.querySelector("div:nth-child(2)>div");
+	};
+
+	CourseWidget.languageElement = function(el) {
+		let e = CourseWidget.titleElement(el);
+		if (e && e.firstChild) {
+			return e.firstChild.nodeValue;
+		}
+	};
+
+	CourseWidget.xpElement = function(el) {
+		let ex_el = el.querySelector("div:nth-child(2)>div:nth-child(2)");
+		if (ex_el && ex_el.lastChild) {
+			let xp_m = ex_el.lastChild.nodeValue.match(/(\d+)/);
+			if (xp_m) {
+				return Number(xp_m[1]);
+			}
+		}
+	};
+
+	CourseWidget.getXpLevel = function(xp) {
+		let xp_level_cutoffs = [
+			60, 120, 200, 300, 450, 750, 1125, 1650, 2250, 3e3, 3900, 4900,
+			6e3, 7500, 9e3, 10500, 12e3, 13500, 15e3, 17e3, 19e3, 22500, 26e3, 3e4
+		];
+		let level = xp_level_cutoffs.length - 1;
+		while (xp < xp_level_cutoffs[level]) {
+			level = level - 5;
+			if (level < 0) {
+				break;
+			}
+		}
+		while (level < xp_level_cutoffs.length) {
+			if (xp < xp_level_cutoffs[level]) {
+				break;
+			}
+			level += 1;
+		}
+		let nl = xp_level_cutoffs[level] || 0;
+		if (nl > 0) {
+			nl -= xp;
+		}
+		return { value: level + 1, next_level: nl };
+	};
 
 // ---
 
@@ -954,10 +954,6 @@
 			this._element = null;
 		}
 
-		static isCorrect(id) {
-			return AchievementItem._order.indexOf(id) !== -1;
-		}
-
 		setValue(val) {
 			if (this._level !== val.level || this._finished !== val._finished) {
 				this._level = val.level;
@@ -1015,6 +1011,11 @@
 			this._element.firstChild.classList.add(AchievementItem._decor[this._id].picture_class[pc_ver][pic_classes[1]]);
 		}
 	}
+
+	AchievementItem.isCorrect = function(id) {
+		return AchievementItem._order.indexOf(id) !== -1;
+	};
+
 
 	AchievementItem._order = [
 		"wildfire", "sage", "scholar", "regal", "champion", "sharpshooter", "conqueror", "winner", "legendary",
