@@ -1134,7 +1134,7 @@
 		_infoElement() {
 			if (!this._info_el) {
 				this._info_el = document.createElement("div");
-				this._info_el.setAttribute("style", "display:block; margin-left:1em; float:right;");
+				this._info_el.setAttribute("style", "display:block; margin-left:6px; float:right;");
 				LeagueWidget._data_guide.forEach(function(di) {
 					let e = document.createElement("span");
 					e.setAttribute("class", "dp-league-data-item");
