@@ -161,13 +161,22 @@
 		},
 		"Last exercise" : {
 			"ru" : "Последнее занятие"
-		}
+		},
+		"Number of wins" : {
+			"ru" : "Количество побед"
+		},
+		"Top 3 finishes" : {
+			"ru" : "В тройке лидеров"
+		},
+		"Week streak" : {
+			"ru" : "Недель подряд"
+		},
 	};
 
+	let duo = null;
+
 	function tr(t) {
-		if (typeof(duo) === "object" && typeof(duo.uiLanguage) === "string" && trs[t] && trs[t][duo.uiLanguage])
-			return trs[t][duo.uiLanguage];
-		return t;
+		return duo && (typeof(duo.uiLanguage) === "string") && trs[t] && trs[t][duo.uiLanguage] || t;
 	}
 
 	let css_rules = {
@@ -2087,7 +2096,15 @@
 
 		observe = new MyObserver(try_update);
 		observe.start();
-		try_update();
+
+		setTimeout(function() {
+			duo = window && typeof(window.duo) === "object" && window.duo;
+			if (!duo) {
+				debug("The duo class is not available, we will try to use Greasemonkey class to reach it");
+				duo = unsafeWindow && typeof(unsafeWindow.duo) === "object" && unsafeWindow.duo || null;
+			}
+			try_update();
+		}, 0);
 	}
 
 // ---
