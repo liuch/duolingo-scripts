@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.11.1
+// @version        1.11.2
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профилях пользователей.
@@ -151,7 +151,7 @@
 			"ru" : "Обсидиановая"
 		},
 		"Diamond" : {
-			"ru" : "Брильянтовая"
+			"ru" : "Алмазная"
 		},
 		"Unknown" : {
 			"ru" : "Неизвестная"
@@ -194,7 +194,6 @@
 		".dp-course-current": "background-color:linen;",
 		".dp-course-extra": "max-height:0; overflow:hidden; transition: max-height 1s 0.5s;",
 		".dp-course-item:hover .dp-course-extra": "max-height:5em;",
-		".dp-league-data-item": "padding:0 6px; margin: 0 1px; border-radius:2px; font-size:14px; font-weight:600;",
 		".dp-data-row": "display:flex; font-size:18px; color:#666; min-height:24px; padding:0 6px; border-bottom:1px dotted #ccc;",
 		".dp-data-title": "margin:auto auto auto 0; padding: 0 6px 0 0;",
 		".dp-data-value": "display:flex; min-width:2em; margin:auto 0; padding:0; justify-content:right;",
@@ -1144,13 +1143,6 @@
 			if (!this._info_el) {
 				this._info_el = document.createElement("div");
 				this._info_el.setAttribute("style", "display:block; margin-left:6px; float:right;");
-				LeagueWidget._data_guide.forEach(function(di) {
-					let e = document.createElement("span");
-					e.setAttribute("class", "dp-league-data-item");
-					e.setAttribute("style", "color:" + di.color + "; background-color:" + di.bcolor);
-					e.appendChild(document.createTextNode("?"));
-					this._info_el.appendChild(e);
-				}.bind(this));
 				this._info_el.appendChild(this._btn.element());
 				this._updateElement();
 			}
@@ -1161,11 +1153,6 @@
 		}
 
 		_updateElement() {
-			let data = this._value || {};
-			for (let i = 0; i < LeagueWidget._data_guide.length; ++i) {
-				let di = LeagueWidget._data_guide[i];
-				this._info_el.children[i].textContent = typeof(data[di.name]) === "number" ? data[di.name] : "?";
-			}
 			if (this._modal_ct) {
 				this._updateModalContent();
 			}
@@ -1212,13 +1199,13 @@
 		}
 
 		_updateModalContent() {
-			let bgi = "none";
+			let bgi = null;
 			let text = "";
 			let color = "none";
 			if (this._value && typeof(this._value.tier) == "number") {
 				let ln = LeagueWidget._names[this._value.tier];
 				if (ln) {
-					bgi = "url(//d35aaqx5ub95lt.cloudfront.net/images/leagues/badge_" + ln.name + ".svg)";
+					bgi = ln.name;
 					text = tr(ln.title) + " " + tr("league");
 					color = ln.color;
 				}
@@ -1227,7 +1214,8 @@
 				}
 			}
 			let badge = this._modal_ct.children[0];
-			badge.children[0].style.backgroundImage = bgi;
+			badge.children[0].style.backgroundImage =
+				"url(//d35aaqx5ub95lt.cloudfront.net/images/leagues/badge_" + (bgi || "locked") + ".svg)"
 			badge.children[1].style.color = color;
 			badge.children[1].textContent = text;
 
