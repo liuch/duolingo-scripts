@@ -181,6 +181,8 @@
 
 	let css_rules = {
 		".dp-hidden": "display:none;",
+		".dp-info-block": "display:block; margin-left:6px; float:right;",
+		".dp-info-button": "display:inline-block; cursor:pointer; margin-left:6px; color:white; background-color:silver; width:18px; height:18px; border-radius:18px; text-align:center; font-size:16px; font-weight:800;",
 		".dp-close-button": "width:35px; height:35px; background:white; border:2px solid #e5e5e5; border-radius:98px; cursor:pointer;",
 		".dp-close-button:after": "transform:rotate(45deg);",
 		".dp-close-button:before": "transform:rotate(-45deg);",
@@ -214,7 +216,7 @@
 			if (!this._element) {
 				this._element = document.createElement("div");
 				this._element.setAttribute("tabindex", 0);
-				this._element.setAttribute("style", InfoButton._style);
+				this._element.setAttribute("class", "dp-info-button");
 				this._element.appendChild(document.createTextNode("i"));
 				if (this._on_click) {
 					this._element.addEventListener("click", this._on_click);
@@ -223,8 +225,6 @@
 			return this._element;
 		}
 	}
-
-	InfoButton._style = "display:inline-block; cursor:pointer; margin-left:6px; color:white; background-color:silver; width:18px; height:18px; border-radius:18px; text-align:center; font-size:16px; font-weight:800;";
 
 // ---
 
@@ -530,8 +530,8 @@
 
 		_updateElement() {
 			let el = ui_version === 210301 && this._element.children[1] || this._element.children[0];
-			while (el.children.length > 0)
-				el.removeChild(el.children[0]);
+			while (el.firstChild)
+				el.lastChild.remove();
 			if (this._value && (this._value.id || this._value.name.length)) {
 				if (this._value.name.length)
 					el.appendChild(this._genLinkElement("https://duome.eu/" + encodeURIComponent(this._value.name), "Duome.eu", false));
@@ -1142,7 +1142,7 @@
 		_infoElement() {
 			if (!this._info_el) {
 				this._info_el = document.createElement("div");
-				this._info_el.setAttribute("style", "display:block; margin-left:6px; float:right;");
+				this._info_el.setAttribute("class", "dp-info-block");
 				this._info_el.appendChild(this._btn.element());
 				this._updateElement();
 			}
@@ -2088,7 +2088,7 @@
 		setTimeout(function() {
 			duo = window && typeof(window.duo) === "object" && window.duo;
 			if (!duo) {
-				debug("The duo class is not available, we will try to use Greasemonkey class to reach it");
+				debug("The duo class is not available via window, so we will try to use Greasemonkey class to reach it");
 				duo = unsafeWindow && typeof(unsafeWindow.duo) === "object" && unsafeWindow.duo || null;
 			}
 			try_update();
