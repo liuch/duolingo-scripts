@@ -34,6 +34,7 @@
 		debug = enable_debug && wrapper(console.debug) || function(){};
 	}
 
+	let u_data     = null;
 	let observe    = null;
 	let p_reg      = new RegExp("^/profile/([a-zA-Z0-9._-]+)$");
 	let ui_version = 0;
@@ -171,6 +172,30 @@
 		"Week streak" : {
 			"ru" : "Недель подряд"
 		},
+		"Total" : {
+			"ru" : "Итого"
+		},
+		"Sunday" : {
+			"ru" : "Воскресенье"
+		},
+		"Monday" : {
+			"ru" : "Понедельник"
+		},
+		"Tuesday" : {
+			"ru" : "Вторник"
+		},
+		"Wednesday" : {
+			"ru" : "Среда"
+		},
+		"Thursday" : {
+			"ru" : "Четверг"
+		},
+		"Friday" : {
+			"ru" : "Пятница"
+		},
+		"Saturday" : {
+			"ru" : "Суббота"
+		},
 	};
 
 	let duo = null;
@@ -189,7 +214,7 @@
 		".dp-close-button:after, .dp-close-button:before": "content:\"\"; position:absolute; width:3px; height:19px; top:6px; left:15px; border-radius:3px; background-color: #b0b0b0;",
 		".dp-modal": "display:inline-block; position:relative; vertical-align:middle; padding:30px; border-radius:16px; background-color:white;",
 		".dp-modal .dp-container": "padding:10px; text-align:left; white-space:normal;",
-		".dp-modal-overlay": "position:fixed; top:0; left:0; width:100%; height:100%; overflow:auto; background-color:rgba(0,0,0,0.65); text-align:center; white-space:nowrap; z-index:400;",
+		".dp-modal-overlay": "position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.65); text-align:center; white-space:nowrap; z-index:400;",
 		".dp-modal-overlay:after": "display:inline-block; vertical-align:middle; width:0; height:100%; content:\"\";",
 		".dp-modal .dp-close-button": "position:absolute; top:0; right:0; transform:translateX(50%) translateY(-50%);",
 		".dp-modal .dp-close-button:hover": "background-color:#e5e5e5;",
@@ -199,6 +224,7 @@
 		".dp-data-row": "display:flex; font-size:18px; color:#666; min-height:24px; padding:0 6px; border-bottom:1px dotted #ccc;",
 		".dp-data-title": "margin:auto auto auto 0; padding: 0 6px 0 0;",
 		".dp-data-value": "display:flex; min-width:2em; margin:auto 0; padding:0; justify-content:right;",
+		".dp-summary": "font-weight:600; background-color:#f6f6f6;",
 	};
 
 // ---
@@ -314,7 +340,19 @@
 
 		setValue(val) {
 			if (!Widget.isEqual(val, this._value)) {
-				this._value = val && (typeof(val) == "object") && Object.assign({}, val) || val;
+				if (val) {
+					if (Array.isArray(val)) {
+						this._value = val.slice();
+					}
+					else if (typeof(val) === "object") {
+						this._value = Object.assign({}, val);
+					}
+					else
+						this._value = val;
+				}
+				else
+					this._value = val;
+
 				if (this._element)
 					this._updateElement();
 				if (typeof(this.onChange) == "function")
@@ -753,40 +791,165 @@
 	{
 		constructor() {
 			super();
-			this.tag = "last_exercise";
+			this.tag = "sessions";
+			this._btn = new InfoButton({ on_click: this._displayModalWindow.bind(this) });
 		}
 
 		_createElement() {
 			this._element = document.createElement("div");
 			this._element.setAttribute("class", "_3Pm6e");
-			let el = document.createElement("img");
-			el.setAttribute("src", "//d35aaqx5ub95lt.cloudfront.net/images/icons/words.svg");
-			el.setAttribute("class", "_3Boy6 _2ZI34");
-			this._element.appendChild(el);
-			let el2 = document.createElement("div");
-			el2.setAttribute("class", "_30I27");
-			this._element.appendChild(el2);
-			let el3 = document.createElement("h4");
-			el3.setAttribute("class", "_3gX7q");
-			el3.appendChild(document.createTextNode("?"));
-			el2.appendChild(el3);
-			el3 = document.createElement("div");
-			el3.setAttribute("class", "_2nvdt");
-			el3.appendChild(document.createTextNode(tr("Last exercise")));
-			el2.appendChild(el3);
+			{
+				let img = document.createElement("img");
+				img.setAttribute("src", "//d35aaqx5ub95lt.cloudfront.net/images/icons/words.svg");
+				img.setAttribute("class", "_3Boy6 _2ZI34");
+				this._element.appendChild(img);
+			}
+			{
+				let r_blk = document.createElement("div");
+				r_blk.setAttribute("class", "_30I27");
+				this._element.appendChild(r_blk);
+				{
+					let h_blk = document.createElement("div");
+					r_blk.appendChild(h_blk);
+					{
+						let hdr = document.createElement("h4");
+						hdr.setAttribute("class", "_3gX7q");
+						hdr.setAttribute("style", "display:inline-block");
+						hdr.appendChild(document.createTextNode("?"));
+						h_blk.appendChild(hdr);
+					}
+					{
+						let i_blk = document.createElement("div");
+						i_blk.setAttribute("class", "dp-info-block");
+						i_blk.appendChild(this._btn.element());
+						h_blk.appendChild(i_blk);
+					}
+				}
+				{
+					let title = document.createElement("div");
+					title.setAttribute("class", "_2nvdt");
+					title.appendChild(document.createTextNode(tr("Last exercise")));
+					r_blk.appendChild(title);
+				}
+			}
 		}
 
 		_updateElement() {
-			let el = this._element.children[1].children[0];
+			let etime = null;
 			if (this._value) {
-				let etime = new Date(this._value);
+				etime = this._value.reduce(function(previousValue, item) {
+					return previousValue < item.datetime ? item.datetime : previousValue;
+				}, 0);
+			}
+			let el = this._element.children[1].children[0].children[0];
+			if (etime) {
+				etime = new Date(etime);
 				el.textContent = timeSince(etime);
 				el.setAttribute("title", etime.toLocaleString());
 			}
 			else {
-				el.textContent = this._value === 0 && "n/a" || "?";
+				el.textContent = etime === 0 ? "n/a" : "?";
 				el.removeAttribute("title");
 			}
+			if (this._modal_ct) {
+				this._updateModalContent();
+			}
+		}
+
+		_displayModalWindow() {
+			this._ensureModalContent();
+			let modal = new ModalWindow(this._modal_ct);
+			let m_el = modal.element();
+			document.body.appendChild(m_el);
+			modal.show().finally(function() {
+				m_el.remove();
+			});
+			this._modal_ct.querySelector("[tabindex]").focus();
+		}
+
+		_ensureModalContent() {
+			if (!this._modal_ct) {
+				this._modal_ct = document.createElement("div");
+				{
+					let header = document.createElement("h2");
+					this._modal_ct.appendChild(header);
+					{
+						let uname = document.createElement("span");
+						header.appendChild(uname);
+					}
+					header.appendChild(document.createTextNode("recent practice sessions"));
+				}
+				{
+					let table = document.createElement("div");
+					table.setAttribute("tabindex", 0);
+					table.setAttribute("style", "max-height:70vh; overflow: visible auto;");
+					this._modal_ct.appendChild(table);
+				}
+				this._updateModalContent();
+			}
+		}
+
+		_updateModalContent() {
+			this._modal_ct.children[0].children[0].textContent = (u_data.user().name || "?") + "'s ";
+			let table = this._modal_ct.children[1];
+			while (table.firstChild)
+				table.lastChild.remove();
+			if (this._value && this._value[0]) {
+				let sorted = this._value.sort(function(a, b) {
+					return a.datetime - b.datetime;
+				});
+				let rd = null;
+				let s_impr = 0;
+				let s_date = new Date(sorted[0].datetime);
+				s_date.setHours(0, 0, 0, 0);
+				sorted.forEach(function(item) {
+					rd = new Date(item.datetime);
+					rd.setHours(0, 0, 0, 0);
+					if (rd.valueOf() !== s_date.valueOf()) {
+						table.appendChild(this._makeDataRowElement(s_date, s_impr, true));
+						s_date = rd;
+						s_impr = 0;
+					}
+					table.appendChild(this._makeDataRowElement(new Date(item.datetime), item.improvement, false));
+					s_impr += item.improvement;
+				}.bind(this));
+				table.appendChild(this._makeDataRowElement(s_date, s_impr, true));
+			}
+			else {
+				let el = document.createElement("span");
+				el.setAttribute("class", "dp-data-row");
+				el.appendChild(document.createTextNode(this._value && "There is no data" || "Getting data from the server..."));
+				table.appendChild(el);
+			}
+		}
+
+		_makeDataRowElement(dt, xp, summary) {
+			let row  = document.createElement("div");
+			let col1 = document.createElement("span");
+			let col2 = document.createElement("span");
+			let ecl  = null;
+			let text = null;
+			if (!summary) {
+				ecl = "";
+				let year = dt.getFullYear();
+				let month = dt.getMonth() + 1;
+				let day = dt.getDate();
+				let dstr = "" + year + "-" + (month < 10 ? "0" : "") + month + "-" + (day < 10 ? "0" : "") + day;
+				text = dstr + " " + dt.toLocaleTimeString();
+			}
+			else {
+				ecl = " dp-summary";
+				text = tr("Total") + " ("
+					+ tr([ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"  ][dt.getDay()]) + ")";
+			}
+			row.setAttribute("class", "dp-data-row" + ecl);
+			col1.setAttribute("class", "dp-data-title");
+			col1.appendChild(document.createTextNode(text));
+			col2.setAttribute("class", "dp-data-value");
+			col2.appendChild(document.createTextNode(xp.toString() + "XP"));
+			row.appendChild(col1);
+			row.appendChild(col2);
+			return row;
 		}
 	}
 
@@ -1774,7 +1937,7 @@
 
 // ---
 
-	let u_data = new class
+	u_data = new class
 	{
 		constructor(on_update, on_reset) {
 			this._data = {};
@@ -1847,18 +2010,18 @@
 		}
 
 		_reset() {
-			this._data.user          = { id: 0, name: "" };
-			this._data.created       = { str: "", date: 0 };
-			this._data.streak        = { today: null, number: null, freeze: "" };
-			this._data.freeze        = "";
-			this._data.lingots       = null;
-			this._data.last_exercise = null;
-			this._data.block         = { blockers: null, blocking: null };
-			this._data.achievements  = [];
-			this._data.courses       = { list: [], id: null };
-			this._data.league        = null;
-			this._data.bio           = "";
-			this._data.online        = false;
+			this._data.user         = { id: 0, name: "" };
+			this._data.created      = { str: "", date: 0 };
+			this._data.streak       = { today: null, number: null, freeze: "" };
+			this._data.freeze       = "";
+			this._data.lingots      = null;
+			this._data.sessions     = null;
+			this._data.block        = { blockers: null, blocking: null };
+			this._data.achievements = [];
+			this._data.courses      = { list: [], id: null };
+			this._data.league       = null;
+			this._data.bio          = "";
+			this._data.online       = false;
 		}
 
 		_fetchData(source) {
@@ -1901,12 +2064,7 @@
 					if (this._data.block.blocking == -1) {
 						this._data.block.blocking = !data.blocking && -1 || data.blocking.length;
 					}
-					this._data.last_exercise  = 0;
-					if (data.calendar) {
-						this._data.last_exercise = data.calendar.reduce(function(previousValue, item) {
-							return previousValue < item.datetime ? item.datetime : previousValue;
-						}, 0);
-					}
+					this._data.sessions       = data.calendar || [];
 					this._handleQueue("user_id", this._data.user.id, null);
 					break;
 				case "new_profile":
