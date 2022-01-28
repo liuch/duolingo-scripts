@@ -389,13 +389,8 @@
 		element() {
 			if (ui_version === 210301) {
 				if (!this._element || !document.body.contains(this._element)) {
-					let el = document.querySelector("h1[data-test='profile-username']");
-					if (el) {
-						el = el.nextElementSibling;
-						if (el) {
-							this._element = el.children[0] && el.children[0].children[1] || null;
-						}
-					}
+					this._findElement();
+					this._updateElement();
 				}
 			}
 			return super.element();
@@ -440,6 +435,16 @@
 					}
 				}
 				this._element.removeAttribute("title");
+			}
+		}
+
+		_findElement() {
+			let el = document.querySelector("h1[data-test='profile-username']");
+			if (el) {
+				el = el.nextElementSibling;
+				if (el) {
+					return this._element = el.children[0] && el.children[0].children[1] || null;
+				}
 			}
 		}
 	}
