@@ -882,7 +882,7 @@
 				{
 					let table = document.createElement("div");
 					table.setAttribute("tabindex", 0);
-					table.setAttribute("style", "max-height:70vh; overflow: visible auto;");
+					table.setAttribute("style", "max-height:70vh; overflow: visible auto; border:1px solid #ccc; border-radius:6px;");
 					this._modal_ct.appendChild(table);
 				}
 				this._updateModalContent();
@@ -935,12 +935,12 @@
 				let month = dt.getMonth() + 1;
 				let day = dt.getDate();
 				let dstr = "" + year + "-" + (month < 10 ? "0" : "") + month + "-" + (day < 10 ? "0" : "") + day;
-				text = dstr + " " + dt.toLocaleTimeString();
+				text = dstr + " " + dt.toLocaleTimeString() + " ";
 			}
 			else {
 				ecl = " dp-summary";
 				text = tr("Total") + " ("
-					+ tr([ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"  ][dt.getDay()]) + ")";
+					+ tr([ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"  ][dt.getDay()]) + ") ";
 			}
 			row.setAttribute("class", "dp-data-row" + ecl);
 			col1.setAttribute("class", "dp-data-title");
