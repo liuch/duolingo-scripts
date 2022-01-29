@@ -36,7 +36,6 @@
 
 	let u_data     = null;
 	let observe    = null;
-	let p_reg      = new RegExp("^/profile/([a-zA-Z0-9._-]+)$");
 	let ui_version = 0;
 	let containers = [];
 
@@ -1835,15 +1834,19 @@
 	class DataSource
 	{
 		constructor(manager) {
-			this._manager   = manager;
-			this.fetching   = false;
-			this.pending    = false;
-			this.controller = null;
+			this._manager    = manager;
+			this.fetching    = false;
+			this.pending     = false;
+			this._controller = null;
 		}
 
 		fetch(user) {
+			if (this.fetching && this._controller) {
+				this._controller.abort();
+			}
 			this.pending = true;
-			this.controller = new AbortController();
+			this.fetching = false;
+			this._controller = new AbortController();
 			return this._manager.asyncGet(this._param_key).then(function(param) {
 				this.fetching = true;
 				this.pending = false;
@@ -1851,7 +1854,7 @@
 					method: "GET",
 					headers: { "Content-Type": "application/json; charset=UTF-8" },
 					credentials: "include",
-					signal: this.controller.signal
+					signal: this._controller.signal
 				}).then(function(resp) {
 					if (resp.status !== 200)
 						throw new Error("Failed to fetch user data");
@@ -1964,17 +1967,18 @@
 		update(user) {
 			this._reset();
 			this._on_reset();
-			for (let key in this._sources) {
-				let source = this._sources[key];
-				if (source.fetching) source.controller.abort();
+			{
+				let err = { name: "Debug", message: "The request queue was reset" };
+				this._handleQueue("user_id", null, err);
+				this._handleQueue("user_name", null, err);
 			}
 			if (!user.id) user.id = 0;
 			if (!user.name) user.name = "";
 			this._data.user = user;
-			this._fetchData(this._sources.old_profile);
-			this._fetchData(this._sources.new_profile);
-			this._fetchData(this._sources.league);
-			this._fetchData(this._sources.achievements);
+			this._fetchData(this._sources.old_profile, true);
+			this._fetchData(this._sources.new_profile, true);
+			this._fetchData(this._sources.league, true);
+			this._fetchData(this._sources.achievements, true);
 		}
 
 		asyncGet(key) {
@@ -2005,7 +2009,7 @@
 			let promise = new Promise(function(resolve, reject) {
 				async_queue.push([ resolve, reject ]);
 			});
-			this._fetchData(source);
+			this._fetchData(source, false);
 			return promise;
 		}
 
@@ -2024,8 +2028,8 @@
 			this._data.online       = false;
 		}
 
-		_fetchData(source) {
-			if (!source.fetching && !source.pending) {
+		_fetchData(source, force) {
+			if (force || (!source.fetching && !source.pending)) {
 				source.fetch(this._data.user).then(function(data) {
 					this._handleData(data);
 					this._on_update(this._data);
@@ -2036,8 +2040,16 @@
 		_handleData(data) {
 			debug("Handle data", data._type);
 			if (data._error) {
-				if (this._handleQueue(data._type, null, data._error) == 0)
-					err(data._error.message);
+				if (data._error.name !== "AbortError") {
+					if (this._handleQueue(data._type, null, data._error) == 0) {
+						if (data._error.name === "Debug") {
+							debug(data._error.message);
+						}
+						else {
+							err(data._error.message);
+						}
+					}
+				}
 				return;
 			}
 			if (data._user !== this._data.user) {
@@ -2138,7 +2150,7 @@
 // ---
 
 	function update_profile_view(data) {
-		debug("Update user profile", data.user);
+		debug("Update user profile view", data.user);
 		observe.stop();
 		containers.forEach(function(c) {
 			c.setData(data);
@@ -2149,12 +2161,15 @@
 // ---
 
 	function try_update() {
-		ui_version = getProfileVersion();
-		if (ui_version !== 0) {
-			let uname = getUserName();
-			if (uname) {
-				if (uname !== u_data.user().name) {
-					u_data.update({ name: uname });
+		let uid    = null;
+		let uname  = null;
+		ui_version = 0;
+		if ((uname = getUserName()) || (uid = getUserId())) {
+			ui_version = getProfileVersion();
+			if (ui_version !== 0) {
+				let user = u_data.user();
+				if ((uname && uname !== user.name) || (uid && uid !== user.id)) {
+					u_data.update({ id: uid, name: uname });
 				}
 				else {
 					update_profile_view(u_data.data());
@@ -2166,8 +2181,15 @@
 // ---
 
 	function getUserName() {
-		let res = p_reg.exec(document.location.pathname);
+		let res = /^\/profile\/([a-zA-Z0-9._-]+)$/.exec(document.location.pathname);
 		return res && res[1] || null;
+	}
+
+// ---
+
+	function getUserId() {
+		let res = /^\/u\/(\d+)$/.exec(document.location.pathname);
+		return res ? Number(res[1]) : null;
 	}
 
 // ---
