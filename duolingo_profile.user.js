@@ -206,7 +206,7 @@
 	let css_rules = {
 		".dp-hidden": "display:none;",
 		".dp-info-block": "display:block; margin-left:6px; float:right;",
-		".dp-info-button": "display:inline-block; cursor:pointer; margin-left:6px; color:white; background-color:silver; width:18px; height:18px; border-radius:18px; text-align:center; font-size:16px; font-weight:800;",
+		".dp-info-button": "display:inline-block; cursor:pointer; margin-left:12px; color:white; background-color:silver; width:18px; height:18px; border-radius:18px; text-align:center; font-size:16px; font-weight:800;",
 		".dp-close-button": "width:35px; height:35px; background:white; border:2px solid #e5e5e5; border-radius:98px; cursor:pointer;",
 		".dp-close-button:after": "transform:rotate(45deg);",
 		".dp-close-button:before": "transform:rotate(-45deg);",
