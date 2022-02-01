@@ -219,8 +219,9 @@
 		".dp-modal .dp-close-button:hover": "background-color:#e5e5e5;",
 		".dp-course-current": "background-color:linen;",
 		".dp-course-extra": "max-height:0; overflow:hidden; transition: max-height 1s 0.5s;",
-		".dp-course-item:hover .dp-course-extra": "max-height:5em;",
-		".dp-data-row": "display:flex; font-size:18px; color:#666; min-height:24px; padding:0 6px; border-bottom:1px dotted #ccc;",
+		".dp-data-row": "padding:0 6px; border-bottom:1px dotted #ccc;",
+		".dp-data-info": "padding:12px;",
+		".dp-data-row, .dp-data-info": "display:flex; font-size:18px; color:#666; min-height:24px;",
 		".dp-data-title": "margin:auto auto auto 0; padding: 0 6px 0 0;",
 		".dp-data-value": "display:flex; min-width:2em; margin:auto 0; padding:0; justify-content:right;",
 		".dp-summary": "font-weight:600; background-color:#f6f6f6;",
@@ -871,12 +872,14 @@
 				this._modal_ct = document.createElement("div");
 				{
 					let header = document.createElement("h2");
+					header.setAttribute("style", "text-align:center;");
 					this._modal_ct.appendChild(header);
 					{
 						let uname = document.createElement("span");
+						uname.setAttribute("style", "color:#00b;");
 						header.appendChild(uname);
 					}
-					header.appendChild(document.createTextNode("recent practice sessions"));
+					header.appendChild(document.createTextNode("'s recent practice sessions"));
 				}
 				{
 					let table = document.createElement("div");
@@ -889,7 +892,7 @@
 		}
 
 		_updateModalContent() {
-			this._modal_ct.children[0].children[0].textContent = (u_data.user().name || "?") + "'s ";
+			this._modal_ct.children[0].children[0].textContent = (u_data.user().name || "?");
 			let table = this._modal_ct.children[1];
 			while (table.firstChild)
 				table.lastChild.remove();
@@ -916,7 +919,7 @@
 			}
 			else {
 				let el = document.createElement("span");
-				el.setAttribute("class", "dp-data-row");
+				el.setAttribute("class", "dp-data-info");
 				el.appendChild(document.createTextNode(this._value && "There is no data" || "Getting data from the server..."));
 				table.appendChild(el);
 			}
