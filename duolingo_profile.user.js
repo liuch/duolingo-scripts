@@ -37,6 +37,7 @@
 	let u_data     = null;
 	let observe    = null;
 	let ui_version = 0;
+	let ui_section = "";
 	let containers = [];
 
 	let style1 = "width:26px;height:30px;background-size:35px;background-position:50%;background-repeat:no-repeat;float:none;display:inline-block;vertical-align:middle;background-image:url(//d35aaqx5ub95lt.cloudfront.net/images/icons/streak-freeze.svg);";
@@ -64,7 +65,7 @@
 			"ru" : "Постоянная"
 		},
 		"Level" : {
-			"ru" : "ур."
+			"ru" : "Уровень"
 		},
 		"LEVEL" : {
 			"ru" : "УРОВЕНЬ"
@@ -195,6 +196,9 @@
 		"Saturday" : {
 			"ru" : "Суббота"
 		},
+		"Current" : {
+			"ru" : "Текущий"
+		},
 	};
 
 	let duo = null;
@@ -217,7 +221,10 @@
 		".dp-modal-overlay:after": "display:inline-block; vertical-align:middle; width:0; height:100%; content:\"\";",
 		".dp-modal .dp-close-button": "position:absolute; top:0; right:0; transform:translateX(50%) translateY(-50%);",
 		".dp-modal .dp-close-button:hover": "background-color:#e5e5e5;",
+		".dp-modal h2, .dp-modal h3": "text-align:center;",
 		".dp-course-current": "background-color:linen;",
+		".dp-course-current:first-child": "border-radius:15px 15px 0 0;",
+		".dp-course-current:last-child": "border-radius:0 0 15px 15px;",
 		".dp-course-extra": "max-height:0; overflow:hidden; transition: max-height 1s 0.5s;",
 		".dp-data-row": "padding:0 6px; border-bottom:1px dotted #ccc;",
 		".dp-data-info": "padding:12px;",
@@ -387,7 +394,7 @@
 			return true;
 		}
 		return (a === b);
-	}
+	};
 
 // ---
 
@@ -872,7 +879,6 @@
 				this._modal_ct = document.createElement("div");
 				{
 					let header = document.createElement("h2");
-					header.setAttribute("style", "text-align:center;");
 					this._modal_ct.appendChild(header);
 					{
 						let uname = document.createElement("span");
@@ -961,88 +967,139 @@
 	{
 		constructor(tag, element) {
 			super();
-			this.tag = tag;
+			this.tag      = tag;
+			this._btn     = new InfoButton({ on_click: this._displayModalWindow.bind(this) });
 			this._element = element;
-			this._element.classList.add("dp-course-item");
+			this._prepareElement();
+			this._updateElement();
+		}
+
+		_prepareElement() {
+			if (this._element.children.length > 2) {
+				let right_side = document.createElement("div");
+				right_side.setAttribute("style", "display:flex; flex-direction:column; align-items:flex-end; margin-left:auto;");
+				let xp_el = this._element.replaceChild(right_side, this._element.children[1])
+				right_side.appendChild(xp_el);
+				let cr_el = document.createElement("div");
+				cr_el.setAttribute("style", "display:flex; margin-top:6px;");
+				let ct_el = xp_el.cloneNode(false);
+				ct_el.textNode = "";
+				cr_el.appendChild(ct_el);
+				let ci_el = document.createElement("img");
+				ci_el.setAttribute("src", "//d35aaqx5ub95lt.cloudfront.net/images/crowns/b3ede3d53c932ee30d981064671c8032.svg");
+				ci_el.setAttribute("style", "width:23px; margin-left:2px;");
+				cr_el.appendChild(ci_el);
+				right_side.appendChild(cr_el);
+				this._element.insertBefore(this._btn.element(), this._element.children[2]);
+			}
 		}
 
 		_updateElement() {
-			this._removeExtraInfo();
-			let t_el = CourseWidget.titleElement(this._element);
+			let crowns  = null;
+			let current = false;
 			if (this._value) {
-				this._level = CourseWidget.getXpLevel(this._value[0].xp);
-				if (t_el && t_el.childNodes.length === 1) {
-					t_el.appendChild(document.createTextNode(" - " + tr("Level") + " " + this._level.value));
+				if (this._value.current) {
+					current = true;
 				}
-				if (this._value[0].current) {
-					this._element.classList.add("dp-course-current");
+				crowns = this._value.crowns;
+			}
+			this._element.classList[current ? "add" : "remove"]("dp-course-current");
+			this._element.children[1].children[1].children[0].textContent = crowns !== null ? crowns.toString() : "?";
+
+			if (this._modal_ct) {
+				this._updateModalContent();
+			}
+		}
+
+		_displayModalWindow(event) {
+			event.preventDefault();
+			this._ensureModalContent();
+			let modal = new ModalWindow(this._modal_ct);
+			let m_el = modal.element();
+			document.body.appendChild(m_el);
+			modal.show().finally(function() {
+				m_el.remove();
+			});
+		}
+
+		_ensureModalContent() {
+			if (!this._modal_ct) {
+				this._modal_ct = document.createElement("div");
+				this._modal_ct.setAttribute("style", "min-width:260px;");
+				{
+					let header = document.createElement("h2");
+					header.setAttribute("style", "color:#00b; margin-bottom:10px;");
+					this._modal_ct.appendChild(header);
 				}
-				else {
-					this._element.removeAttribute("style");
+				{
+					let current = document.createElement("h3");
+					current.setAttribute("style", "color:#0b0;");
+					this._modal_ct.appendChild(current);
 				}
-				this._insertExtraInfo();
+				{
+					let table = document.createElement("div");
+					this._modal_ct.appendChild(table);
+					table.appendChild(this._makeDataRowElement("From language"));
+					table.appendChild(this._makeDataRowElement("Crowns"));
+					table.appendChild(this._makeDataRowElement("Level"));
+					table.appendChild(this._makeDataRowElement("Next level"));
+				}
+				this._updateModalContent();
+			}
+		}
+
+		_updateModalContent() {
+			let title;
+			let xp;
+			let curr = false;
+			let from;
+			let crowns;
+			let level;
+			let next_l;
+			if (this._value) {
+				let value = this._value;
+				xp     = value.xp;
+				curr   = value.current;
+				title  = value.title;
+				from   = value.from;
+				crowns = value.crowns;
+				let xp_level = CourseWidget.getXpLevel(xp);
+				level  = xp_level.value;
+				next_l = xp_level.next_level !== 0 ? (xp_level.next_level + " " + tr("XP")) : "-";
 			}
 			else {
-				if (t_el) {
-					while (t_el.childNodes.length > 1) {
-						t_el.removeChild(t_el.lastChild);
-					}
-				}
-				this._element.removeAttribute("style");
+				xp = title = from = crowns = level = next_l = "?";
 			}
+			this._modal_ct.querySelector("h2").textContent = title + " (" + xp + " " + tr("XP") + ")";
+			this._modal_ct.querySelector("h3").textContent = curr ? tr("Current") : "";
+			let rows = this._modal_ct.children[2].children;
+			rows[0].children[1].textContent = from;
+			rows[1].children[1].textContent = crowns;
+			rows[2].children[1].textContent = level;
+			rows[3].children[1].textContent = next_l;
 		}
 
-		_insertExtraInfo() {
-			if (this._element.children.length === 2) {
-				let c = this._element.children[1];
-				while (c.childNodes.length > 2) {
-					c.removeChild(c.lastChild);
-				}
-				let el = document.createElement("div");
-				el.setAttribute("class", "dp-course-extra");
-				el.appendChild(this._makeInfoItem(tr("Crowns"), this._value[0].crowns));
-				if (this._level.next_level > 0) {
-					el.appendChild(this._makeInfoItem(tr("Next level"), this._level.next_level + " XP"));
-				}
-				el.appendChild(this._makeInfoItem(tr("From language"), this._value[0].from));
-				c.appendChild(el);
-			}
+		_makeDataRowElement(title) {
+			let row_el = document.createElement("div");
+			row_el.setAttribute("class", "dp-data-row");
+			let ttl_el = document.createElement("span");
+			ttl_el.setAttribute("class", "dp-data-title");
+			ttl_el.appendChild(document.createTextNode(tr(title) + ":"));
+			row_el.appendChild(ttl_el);
+			let val_el = document.createElement("span");
+			val_el.setAttribute("class", "dp-data-value");
+			row_el.appendChild(val_el);
+			return row_el;
 		}
-
-		_removeExtraInfo() {
-			let eie = this._element.querySelector(".dp-course-extra");
-			if (eie) {
-				eie.remove();
-			}
-		}
-
-		_makeInfoItem(text, value) {
-			let te = document.createElement("div");
-			te.appendChild(document.createTextNode(text + ": "));
-			let st = document.createElement("span");
-			st.appendChild(document.createTextNode(value));
-			te.appendChild(st);
-			return te;
-			}
 	}
 
-	CourseWidget.titleElement = function(el) {
-		return el.querySelector("div:nth-child(2)>div");
-	};
-
-	CourseWidget.languageElement = function(el) {
-		let e = CourseWidget.titleElement(el);
-		if (e && e.firstChild) {
-			return e.firstChild.nodeValue;
-		}
-	};
-
-	CourseWidget.xpElement = function(el) {
-		let ex_el = el.querySelector("div:nth-child(2)>div:nth-child(2)");
-		if (ex_el && ex_el.lastChild) {
-			let xp_m = ex_el.lastChild.nodeValue.match(/(\d+)/);
-			if (xp_m) {
-				return Number(xp_m[1]);
+	CourseWidget.languageData = function(el) {
+		if (el.tagName === "A") {
+			if (el.href) {
+				let reg = /\/enroll\/([a-zA-Z_-]+)\/([a-zA-Z_-]+)\//.exec(el.href);
+				if (reg) {
+					return { target: reg[1], from: reg[2] };
+				}
 			}
 		}
 	};
@@ -1634,15 +1691,13 @@
 	{
 		constructor() {
 			super();
+			this._widgets = {};
 			this._courses = null;
 		}
 
 		setData(d) {
 			this._courses = {};
-			this._xp_map = {};
-			this._tl_map = {};
 			if (d.courses) {
-				// Fill data
 				for (let i = 0; i < d.courses.list.length; ++i) {
 					let c = d.courses.list[i];
 					let l = {
@@ -1656,85 +1711,51 @@
 					if (l.id === d.courses.id) {
 						l.current = true;
 					}
-					this._xp_map[l.xp] = (this._xp_map[l.xp] || 0) + 1;
-					if (!this._courses[l.target]) {
-						this._courses[l.target] = [];
-						this._tl_map[l.title] = l.target;
-					}
-					this._courses[l.target].push(l);
+					let ckey = l.target + "/" + l.from;
+					this._courses[ckey] = l;
 				}
-				// Sort data
-				for (let lg in this._courses) {
-					this._courses[lg].sort(function(a, b) {
-						return b.xp - a.xp;
-					});
-				}
-				// --
-				this._courses.count = d.courses.list.length;
 			}
-			this._update();
+			this._setWidgets();
 		}
 
 		reset() {
 			this._courses = {};
-			this._updateWidgets();
-			this._widgets = null;
+			this._setWidgets();
 		}
 
 		_update() {
-			if (!this._widgets && this._courses && this._courses.count > 0) {
-				this._makeWidgets();
+			if (ui_section !== "courses") {
+				this._widgets = {};
+				return;
 			}
-			this._updateWidgets();
+			this._setWidgets();
 		}
 
-		_makeWidgets() {
-			this._widgets = [];
-			let ul;
-			if (ui_version === 2)
-				ul = document.querySelector("div._3Nl60>div.COg1x>div>ul.kcn9s._2G3j1._1Pp27");
-			else
-				ul = document.querySelector("div._1YfQ8>div._3Gj5_>div._1cKdX._1ORYU>ul._3VE_w");
-			if (ul) {
-				ul.querySelectorAll("li").forEach(function(el) {
-					let wid = null;
-					let lg;
-					for (let i = 1, lg = CourseWidget.languageElement(el); lg && i <= 2; ++i) {
-						if (this._courses[lg]) {
-							wid = new CourseWidget(lg, el);
-							break;
-						}
-						lg = this._tl_map[lg];
-					}
-					if (!wid) {
-						let xp = CourseWidget.xpElement(el);
-						if (this._xp_map[xp] === 1) {
-							for (lg in this._courses) {
-								if (xp === this._courses[lg][0].xp) {
-									wid = new CourseWidget(lg, el);
-									break;
-								}
-							}
-						}
-					}
-					if (wid) {
-						this._widgets.push(wid);
-					}
-				}, this);
+		_setWidgets() {
+			let list_el;
+			let widgets = this._widgets;
+			this._widgets = {};
+			if (ui_version !== 210301 || !(list_el = document.querySelector("div._2GPX6>div.BMuTY"))) {
+				return;
 			}
-		}
-
-		_updateWidgets() {
-			if (this._widgets) {
-				this._widgets.forEach(function(wid) {
-					let v = this._courses[wid.tag];
-					if (v !== undefined) {
-						wid.setValue(v);
+			for (let i = 0; i < list_el.children.length; ++i) {
+				let course_el = list_el.children[i];
+				let lang_data = CourseWidget.languageData(course_el);
+				if (lang_data) {
+					let lang_key = lang_data.target + "/" + lang_data.from;
+					let widget = widgets[lang_key];
+					if (!widget || widget.element() !== course_el) {
+						widget = new CourseWidget(lang_key, course_el);
+					}
+					let wdata = this._courses[lang_key];
+					if (wdata !== undefined) {
+						widget.setValue(wdata);
 					}
 					else {
-						wid.reset();
+						widget.reset();
 					}
-				}, this);
+					this._widgets[lang_key] = widget;
+				}
 			}
 		}
 	}
@@ -2184,27 +2205,41 @@
 // ---
 
 	function getUserName() {
-		let res = /^\/profile\/([a-zA-Z0-9._-]+)$/.exec(document.location.pathname);
-		return res && res[1] || null;
+		let res = /^\/profile\/([a-zA-Z0-9._-]+)(\/(courses))?$/.exec(document.location.pathname);
+		if (res) {
+			ui_section = res[3] || "";
+			return res[1];
+		}
+		return null;
 	}
 
 // ---
 
 	function getUserId() {
 		let res = /^\/u\/(\d+)$/.exec(document.location.pathname);
-		return res ? Number(res[1]) : null;
+		if (res) {
+			ui_section = "";
+			return Number(res[1]);
+		}
+		return null;
 	}
 
 // ---
 
 	function getProfileVersion() {
 		let ver = 0;
-		if (document.querySelector("div._3blMz>div.g7QLd>div._2tFvE>h1[data-test='profile-username']")) // www subdomain
-			ver = 2;
-		else if (document.querySelector("div._25dpq>div._3Ho-0>div._2XFyg>h1[data-test='profile-username']")) // preview subdomain
-			ver = 3;
-		else if (document.querySelector("div._91Tq4>div._6yLXC>div._2mVDz>h1[data-test='profile-username']")) // March 2021; www, preview
-			ver = 210301;
+		if (ui_section === "") {
+			if (document.querySelector("div._91Tq4>div._6yLXC>div._2mVDz>h1[data-test='profile-username']"))
+				ver = 210301; // March 2021; www, preview
+			else if (document.querySelector("div._3blMz>div.g7QLd>div._2tFvE>h1[data-test='profile-username']"))
+				ver = 2; // www subdomain, the old version
+			else if (document.querySelector("div._25dpq>div._3Ho-0>div._2XFyg>h1[data-test='profile-username']"))
+				ver = 3; // preview subdomain, the old version
+		}
+		else if (ui_section === "courses") {
+			if (document.querySelector("div._3W86r._1Xlh1>div._3sLAg>div._2GPX6>div.BMuTY"))
+				ver = 210301; // March 2021; www, preview
+		}
 		if (ver !== ui_version) {
 			debug("UI version changed: " + ui_version + " >>> " + ver);
 		}
