@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.13.0
+// @version        1.13.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профилях пользователей.
@@ -223,8 +223,8 @@
 		".dp-modal .dp-close-button:hover": "background-color:#e5e5e5;",
 		".dp-modal h2, .dp-modal h3": "text-align:center;",
 		".dp-course-current": "background-color:linen;",
-		".dp-course-current:first-child": "border-radius:15px 15px 0 0;",
-		".dp-course-current:last-child": "border-radius:0 0 15px 15px;",
+		".dp-course-current:first-child": "border-top-left-radius:15px; border-top-right-radius:15px;",
+		".dp-course-current:last-child": "border-bottom-left-radius:15px; border-bottom-right-radius:15px;",
 		".dp-course-extra": "max-height:0; overflow:hidden; transition: max-height 1s 0.5s;",
 		".dp-data-row": "padding:0 6px; border-bottom:1px dotted #ccc;",
 		".dp-data-info": "padding:12px;",
