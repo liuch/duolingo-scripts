@@ -52,12 +52,6 @@
 			"ru" : "Зарегистрирован(а):",
 			"uk" : "Зареєстрований(а):"
 		},
-		"Streak" : {
-			"ru" : "Ударный режим"
-		},
-		"Storage" : {
-			"ru" : "Склад"
-		},
 		"Links:" : {
 			"ru" : "Ссылки:"
 		},
@@ -78,9 +72,6 @@
 		},
 		"From language" : {
 			"ru" : "Базовый язык"
-		},
-		"Achievements" : {
-			"ru" : "Достижения"
 		},
 		"Wildfire" : {
 			"ru" : "Энтузиаст"
@@ -770,29 +761,12 @@
 				el3.appendChild(document.createTextNode(tr("Total lingots")));
 				el2.appendChild(el3);
 			}
-			else {
-				el = document.createElement("span");
-				if (ui_version === 2)
-					el.setAttribute("class", "_13hfw QemVH _1PTkr m7XUW");
-				else if (ui_version === 3)
-					el.setAttribute("class", "_2pFNt _3aUCN _1woVy _1fHjR");
-				this._element.appendChild(el);
-				el = document.createElement("span");
-				el.setAttribute("style", style2);
-				el2 = document.createElement("strong");
-				el2.appendChild(document.createTextNode("?"));
-				el.appendChild(el2);
-				this._element.appendChild(el);
-			}
 		}
 
 		_updateElement() {
 			let lingots = this._value === null && "?" || this._value;
 			if (ui_version === 210301) {
 				this._element.children[1].children[0].textContent = lingots;
-			}
-			else {
-				this._element.children[1].children[0].childNodes[0].nodeValue = lingots;
 			}
 		}
 	}
@@ -1484,19 +1458,11 @@
 					}
 					this._widgets[1].element();
 				}
-				else {
-					if (!document.getElementById("dp-created-info")) {
-						el.parentNode.insertBefore(this._widgets[1].element(), el.nextSibling);
-					}
-				}
 
 				let el2 = document.getElementById("dp-bio");
 				if (!el2) {
 					if (ui_version === 210301) {
 						el.parentElement.insertBefore(this._widgets[2].element(), el.parentElement.lastElementChild);
-					}
-					else {
-						el.parentNode.insertBefore(this._widgets[2].element(), this._widgets[1].element().nextSibling)
 					}
 				}
 				if (!this._widgets[2].isEmpty()) {
@@ -1510,12 +1476,6 @@
 				if (ui_version === 210301) {
 					if (!el2 && el.nextSibling) {
 						el.nextSibling.appendChild(this._widgets[3].element());
-					}
-				}
-				else {
-					if (!el2 || el.lastChild != el2) {
-						el2 && el2.remove();
-						el.parentNode.appendChild(this._widgets[3].element());
 					}
 				}
 			}
@@ -1575,26 +1535,6 @@
 				}
 				return;
 			}
-
-			let el;
-			if (!this._element || this._version != ui_version) {
-				this._version = ui_version;
-				this._element = null;
-				if (ui_version > 0)
-					this._createElement();
-			}
-
-			if (this._element && !document.body.contains(this._element)) {
-				if (ui_version == 2) {
-					el = document.querySelector("div._3Nl60>div.COg1x>h2");
-				}
-				else if (ui_version == 3) {
-					el = document.querySelector("div>div._1YfQ8>div._3Gj5_>h2");
-				}
-				if (el) {
-					el.parentNode.insertBefore(this._element, el);
-				}
-			}
 		}
 
 		_findElement() {
@@ -1602,37 +1542,6 @@
 			if (this._element) {
 				this._element.setAttribute("id", "dp-stat");
 			}
-		}
-
-		_createElement() {
-			this._element = document.createElement("div");
-			if (ui_version == 3) {
-				this._element.setAttribute("class", "a5SW0");
-			}
-
-			let el = document.createElement("h2");
-			el.setAttribute("style", "margin-bottom:10px;");
-			el.appendChild(document.createTextNode(tr("Streak")));
-			this._element.appendChild(el);
-			this._element.appendChild(this._widgets[0].element());
-			if (!this._widgets[1].isNull())
-				this._element.appendChild(this._widgets[1].element());
-
-			this._appendSpacer();
-
-			el = document.createElement("h2");
-			el.setAttribute("style", "margin-bottom:10px;");
-			el.appendChild(document.createTextNode(tr("Storage")));
-			this._element.appendChild(el);
-			this._element.appendChild(this._widgets[2].element());
-
-			this._appendSpacer();
-		}
-
-		_appendSpacer() {
-			let el = document.createElement("div");
-			el.setAttribute("style", "height:15px;");
-			this._element.appendChild(el);
 		}
 	}
 
@@ -2164,10 +2073,6 @@
 		if (ui_section === "") {
 			if (document.querySelector("div._91Tq4>div._6yLXC>div._2mVDz>h1[data-test='profile-username']"))
 				ver = 210301; // March 2021; www, preview
-			else if (document.querySelector("div._3blMz>div.g7QLd>div._2tFvE>h1[data-test='profile-username']"))
-				ver = 2; // www subdomain, the old version
-			else if (document.querySelector("div._25dpq>div._3Ho-0>div._2XFyg>h1[data-test='profile-username']"))
-				ver = 3; // preview subdomain, the old version
 		}
 		else if (ui_section === "courses") {
 			if (document.querySelector("div._3W86r._1Xlh1>div._3sLAg>div._2GPX6>div.BMuTY"))
