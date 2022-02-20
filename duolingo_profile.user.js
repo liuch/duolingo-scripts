@@ -1136,55 +1136,6 @@
 
 // ---
 
-	class BlockingWidget extends Widget
-	{
-		constructor() {
-			super();
-			this.tag = "block";
-		}
-
-		_createElement() {
-			this._element = document.createElement("ul");
-			this._element.setAttribute("style", "border-top:2px solid #dadada;display:table;width:100%;margin-top:30px;");
-			this._element.appendChild(this._createLi("Blocking"));
-			this._element.appendChild(this._createLi("Blockers"));
-		}
-
-		_updateElement() {
-			if (this._value) {
-				this._setLiValue(0, this._value.blocking);
-				this._setLiValue(1, this._value.blockers);
-			}
-			else {
-				this._setLiValue(0, null);
-				this._setLiValue(1, null);
-			}
-		}
-
-		_createLi(text) {
-			let li_el = document.createElement("li");
-			li_el.setAttribute("style", "display:table-cell;padding:12px 10px 0 0;");
-			let sp_el = document.createElement("span");
-			sp_el.appendChild(document.createTextNode(tr(text) + ": "));
-			li_el.appendChild(sp_el);
-			sp_el = document.createElement("span");
-			sp_el.appendChild(document.createTextNode("?"));
-			li_el.appendChild(sp_el);
-			return li_el;
-		}
-
-		_setLiValue(idx, val) {
-			let new_val;
-			if (val === null)
-				new_val = "?";
-			else
-				new_val = (val === -1) && "n/a" || val;
-			this._element.children[idx].children[1].childNodes[0].nodeValue = new_val;
-		}
-	}
-
-// ---
-
 	class AchievementItem
 	{
 		constructor(id) {
@@ -1762,35 +1713,6 @@
 
 // ---
 
-	class BlockingContainer extends WidgetContainer
-	{
-		constructor() {
-			super();
-			this._widgets.push(new BlockingWidget());
-		}
-
-		_update() {
-			let el;
-			if (ui_version === 2)
-				el = document.querySelector("div>div._3Nl60>div.COg1x>ul._3sDCf._1BWZU");
-			else if (ui_version === 3)
-				el = document.querySelector("div>div._1YfQ8>div._3Gj5_>ul._27avI._3yAjN");
-			if (el) {
-				if (!this._element)
-					this._createElement();
-				if (!document.body.contains(this._element))
-					el.parentElement.appendChild(this._element);
-			}
-		}
-
-		_createElement() {
-			this._element = document.createElement("div");
-			this._element.appendChild(this._widgets[0].element());
-		}
-	}
-
-// ---
-
 	class AchievementsContainer extends WidgetContainer
 	{
 		constructor() {
@@ -2313,7 +2235,6 @@
 		containers.push(new TopContainer());
 		containers.push(new CentralContainer());
 		containers.push(new CoursesContainer());
-		containers.push(new BlockingContainer());
 		containers.push(new AchievementsContainer());
 
 		observe = new MyObserver(try_update);
