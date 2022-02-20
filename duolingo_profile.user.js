@@ -199,6 +199,9 @@
 		"Current" : {
 			"ru" : "Текущий"
 		},
+		"View details" : {
+			"ru" : "Подробнее"
+		},
 	};
 
 	let duo = null;
@@ -232,6 +235,8 @@
 		".dp-data-title": "margin:auto auto auto 0; padding: 0 6px 0 0;",
 		".dp-data-value": "display:flex; min-width:2em; margin:auto 0; padding:0; justify-content:right;",
 		".dp-summary": "font-weight:600; background-color:#f6f6f6;",
+		".dp-achievements-list": "text-align:center; margin-bottom:12px; min-height:54px;",
+		".dp-achievements-container": "padding:8px; border:2px solid #e5e5e5; border-radius:16px;",
 	};
 
 // ---
@@ -1208,20 +1213,15 @@
 
 		_createElement() {
 			this._element = document.createElement("div");
-			this._element.setAttribute("style", "width:77px; display:inline-block; margin:5px;");
+			this._element.setAttribute("style", "width:80px; display:inline-block; margin:5px;");
 			this._element.setAttribute("title", tr(AchievementItem._decor[this._id].title));
 			let p_el = document.createElement("div");
 			let t_el = document.createElement("div");
-			if (ui_version === 2) {
-				this._element.setAttribute("class", "_2xnLX");
-				p_el.setAttribute("class", "lkrNd " + AchievementItem._decor[this._id].picture_class[0][0]);
-				t_el.setAttribute("class", "_2w0LW _1fADj _2w0LW");
-			}
-			else {
-				this._element.setAttribute("class", "_1qHrn");
-				p_el.setAttribute("class", "_3_QUJ " + AchievementItem._decor[this._id].picture_class[1][0]);
-				t_el.setAttribute("class", "_3SIlB _13kYE _3SIlB");
-			}
+
+			this._element.setAttribute("class", "_1qHrn");
+			p_el.setAttribute("class", "_3_QUJ " + AchievementItem._decor[this._id].picture_class[0]);
+			t_el.setAttribute("class", "_3SIlB _13kYE");
+
 			t_el.appendChild(document.createTextNode("?"));
 			p_el.appendChild(t_el);
 			this._element.appendChild(p_el);
@@ -1240,10 +1240,9 @@
 				text_action = "remove";
 				pic_classes = [ 1, 0 ];
 			}
-			let pc_ver = (ui_version === 3) && 1 || 0;
-			this._element.firstChild.firstChild.classList[text_action]("_3A81p");
-			this._element.firstChild.classList.remove(AchievementItem._decor[this._id].picture_class[pc_ver][pic_classes[0]]);
-			this._element.firstChild.classList.add(AchievementItem._decor[this._id].picture_class[pc_ver][pic_classes[1]]);
+			this._element.firstChild.firstChild.classList[text_action]("_2Jl4F");
+			this._element.firstChild.classList.remove(AchievementItem._decor[this._id].picture_class[pic_classes[0]]);
+			this._element.firstChild.classList.add(AchievementItem._decor[this._id].picture_class[pic_classes[1]]);
 		}
 	}
 
@@ -1258,19 +1257,19 @@
 	];
 
 	AchievementItem._decor = {
-		wildfire:     { picture_class: [ [ "_38s-f", "_2dW4w" ], ["PEvQz",  "YwCyZ"  ] ], title: "Wildfire" },
-		sage:         { picture_class: [ [ "_2_uNm", "_1OCLu" ], ["_20zJn", "T0DDr"  ] ], title: "Sage" },
-		scholar:      { picture_class: [ [ "_1UEFI", "_17Sw8" ], ["_1WucH", "_3Fge_" ] ], title: "Scholar" },
-		regal:        { picture_class: [ [ "_2bKfI", "_2DmuE" ], ["_1OiHp", "y6jP4"  ] ], title: "Regal" },
-		champion:     { picture_class: [ [ "_2UPSL", "wjpiv"  ], ["_2yBMs", "_2N2OI" ] ], title: "Champion" },
-		sharpshooter: { picture_class: [ [ "_1pGIh", "_24m_z" ], ["_1pkpX", "_3c1H2" ] ], title: "Sharpshooter" },
-		conqueror:    { picture_class: [ [ "NzA53",  "_3wv96" ], ["_3upVv", "_3HCUY" ] ], title: "Conqueror" },
-		winner:       { picture_class: [ [ "_3YJ2r", "E6mN_"  ], ["_2S2dm", "R74tF"  ] ], title: "Winner" },
-		legendary:    { picture_class: [ [ "_2j7XQ", "_3Gek4" ], ["_2ik6a", "_2mGoN" ] ], title: "Legendary" },
-		strategist:   { picture_class: [ [ "WL3iH",  "_3-on6" ], ["_34sTq", "_22Ui-" ] ], title: "Strategist" },
-		friendly:     { picture_class: [ [ "_2xjwF", "_2z9FT" ], ["_2zNmn", "_2SNGW" ] ], title: "Friendly" },
-		overtime:     { picture_class: [ [ "_3FslY", "kDFIZ"  ], ["_1dML2", "Sx8mZ"  ] ], title: "Weekend Warrior" },
-		photogenic:   { picture_class: [ [ "_2KzQv", "_2ByTK" ], ["_3Nhfm", "_1X1Kv" ] ], title: "Photogenic" },
+		wildfire:     { picture_class: [ "PEvQz",  "YwCyZ"  ], title: "Wildfire" },
+		sage:         { picture_class: [ "_20zJn", "T0DDr"  ], title: "Sage" },
+		scholar:      { picture_class: [ "_1WucH", "_3Fge_" ], title: "Scholar" },
+		regal:        { picture_class: [ "_1OiHp", "y6jP4"  ], title: "Regal" },
+		champion:     { picture_class: [ "_2yBMs", "_2N2OI" ], title: "Champion" },
+		sharpshooter: { picture_class: [ "_1pkpX", "_3c1H2" ], title: "Sharpshooter" },
+		conqueror:    { picture_class: [ "_3upVv", "_3HCUY" ], title: "Conqueror" },
+		winner:       { picture_class: [ "_2S2dm", "R74tF"  ], title: "Winner" },
+		legendary:    { picture_class: [ "_2ik6a", "_2mGoN" ], title: "Legendary" },
+		strategist:   { picture_class: [ "_34sTq", "_22Ui-" ], title: "Strategist" },
+		friendly:     { picture_class: [ "_2zNmn", "_2SNGW" ], title: "Friendly" },
+		overtime:     { picture_class: [ "_1dML2", "Sx8mZ"  ], title: "Weekend Warrior" },
+		photogenic:   { picture_class: [ "_3Nhfm", "_1X1Kv" ], title: "Photogenic" },
 	};
 
 // ---
@@ -1285,6 +1284,7 @@
 
 		_createElement() {
 			this._element = document.createElement("div");
+			this._element.setAttribute("class", "dp-achievements-list");
 			this._updateElement();
 		}
 
@@ -1795,39 +1795,50 @@
 	{
 		constructor() {
 			super();
-			this._widgets.push(new LeagueWidget());
 			this._widgets.push(new AchievementsWidget());
 		}
 
 		_update() {
-			if ((ui_version == 2 && !document.querySelector("div._2y4G6>div._3blMz>div>div._1_7b8>h2"))
-					|| (ui_version == 3 && !document.querySelector("div._2PVaI>div._25dpq>div>div._20-_w>h2"))) {
-				if (!this._element)
+			if (ui_version === 210301 && ui_section === "") {
+				if (!this._element) {
 					this._createElement();
-				if (!document.body.contains(this._element) || this._element.parentElement.lastChild !== this._element) {
-					let el;
-					if (ui_version === 2)
-						el = document.querySelector("div._1tEYo>div._2y4G6>div._3blMz");
-					else if (ui_version === 3)
-						el = document.querySelector("div._33Mo9>div._2PVaI>div._25dpq");
-					if (el)
-						el.appendChild(this._element);
 				}
+				if (!document.body.contains(this._element)) {
+					let c_el = document.querySelector("div._25dpq>div._2GPX6>div>div._2tUeO");
+					if (c_el) {
+						while (c_el.firstChild) {
+							c_el.lastChild.remove();
+						}
+						c_el.appendChild(this._element);
+					}
+				}
+				this._updateLink();
 			}
-			else if (this._element && document.body.contains(this._element))
-				this._element.parentElement.removeChild(this._element);
 		}
 
 		_createElement() {
 			this._element = document.createElement("div");
-			this._element.setAttribute("style", "text-align:center;");
-			let el = document.createElement("hr");
-			this._element.appendChild(el);
-			el = document.createElement("h2");
-			el.appendChild(document.createTextNode(tr("Achievements")));
-			this._element.appendChild(el);
+			this._element.setAttribute("class", "dp-achievements-container");
 			this._element.appendChild(this._widgets[0].element());
-			this._element.appendChild(this._widgets[1].element());
+			this._link = document.createElement("a");
+			this._link.setAttribute("class", "SEEvZ");
+			this._link.appendChild(document.createTextNode(tr("View details")));
+			{
+				let arrow = document.createElement("span");
+				arrow.setAttribute("class", "_3s9Ha _3LsFl _2jNpf _1G1lu");
+				this._link.appendChild(arrow);
+			}
+			this._element.appendChild(this._link);
+		}
+
+		_updateLink() {
+			let uname = u_data.user().name;
+			if (uname) {
+				this._link.setAttribute("href", "/profile/" + encodeURIComponent(u_data.user().name) + "/achievements");
+			}
+			else {
+				this._link.removeAttribute("href");
+			}
 		}
 	}
 
