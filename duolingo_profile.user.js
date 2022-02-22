@@ -11,9 +11,8 @@
 // @downloadURL    https://github.com/liuch/duolingo-scripts/raw/master/duolingo_profile.user.js
 // @author         FieryCat aka liuch
 // @run-at         document-start
-// ==/UserScript==
-
 // @license        MIT License
+// ==/UserScript==
 
 (function start() {
 	let enable_debug = false;
