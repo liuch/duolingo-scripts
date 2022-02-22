@@ -163,7 +163,7 @@
 			"ru" : "Недель подряд"
 		},
 		"Total" : {
-			"ru" : "Итого"
+			"ru" : "Всего"
 		},
 		"Sunday" : {
 			"ru" : "Воскресенье"
@@ -224,7 +224,7 @@
 		".dp-data-row, .dp-data-info": "display:flex; font-size:18px; color:#666; min-height:24px;",
 		".dp-data-title": "margin:auto auto auto 0; padding: 0 6px 0 0;",
 		".dp-data-value": "display:flex; min-width:2em; margin:auto 0; padding:0; justify-content:right;",
-		".dp-summary": "font-weight:600; background-color:#f6f6f6;",
+		".dp-data-row.dp-summary": "font-size:115%; font-weight:600; background-color:#f6f6f6; border-color:#000; padding:3px 6px;",
 		".dp-achievements-list": "text-align:center; margin-bottom:12px; min-height:54px;",
 		".dp-achievements-container": "padding:8px; border:2px solid #e5e5e5; border-radius:16px;",
 	};
@@ -868,7 +868,7 @@
 				{
 					let table = document.createElement("div");
 					table.setAttribute("tabindex", 0);
-					table.setAttribute("style", "max-height:70vh; overflow: visible auto; border:1px solid #ccc; border-radius:6px;");
+					table.setAttribute("style", "max-height:65vh; overflow: visible auto; border:1px solid #ccc; border-radius:6px;");
 					this._modal_ct.appendChild(table);
 				}
 				this._updateModalContent();
@@ -932,7 +932,7 @@
 			col1.setAttribute("class", "dp-data-title");
 			col1.appendChild(document.createTextNode(text));
 			col2.setAttribute("class", "dp-data-value");
-			col2.appendChild(document.createTextNode(xp.toString() + "XP"));
+			col2.appendChild(document.createTextNode(xp.toString() + " XP"));
 			row.appendChild(col1);
 			row.appendChild(col2);
 			return row;
