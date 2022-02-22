@@ -72,6 +72,12 @@
 		"From language" : {
 			"ru" : "Базовый язык"
 		},
+		"Skills" : {
+			"ru" : "Навыки"
+		},
+		"Unfinished" : {
+			"ru" : "Незавершенные"
+		},
 		"Wildfire" : {
 			"ru" : "Энтузиаст"
 		},
@@ -222,6 +228,7 @@
 		".dp-data-row": "padding:0 6px; border-bottom:1px dotted #ccc;",
 		".dp-data-info": "padding:12px;",
 		".dp-data-row, .dp-data-info": "display:flex; font-size:18px; color:#666; min-height:24px;",
+		".dp-data-row.dp-subdata": "padding-left:15px; font-size:90%;",
 		".dp-data-title": "margin:auto auto auto 0; padding: 0 6px 0 0;",
 		".dp-data-value": "display:flex; min-width:2em; margin:auto 0; padding:0; justify-content:right;",
 		".dp-data-row.dp-summary": "font-size:115%; font-weight:600; background-color:#f6f6f6; border-color:#000; padding:3px 6px;",
@@ -1050,19 +1057,39 @@
 			}
 			this._modal_ct.querySelector("h2").textContent = title + " (" + xp + " " + tr("XP") + ")";
 			this._modal_ct.querySelector("h3").textContent = curr ? tr("Current") : "";
-			let rows = this._modal_ct.children[2].children;
+			let table = this._modal_ct.children[2];
+			let rows  = table.children;
 			rows[0].children[1].textContent = from;
 			rows[1].children[1].textContent = crowns;
 			rows[2].children[1].textContent = level;
 			rows[3].children[1].textContent = next_l;
+
+			if (curr && this._value.skills) {
+				let skills = this._value.skills;
+				let extra_rows = [ "" ];
+				extra_rows.push(skills.count);
+				for (let i = 0; i < skills.levels.length; ++i) {
+					extra_rows.push(skills.levels[i] || 0);
+				}
+				let start_idx = 4;
+				let titles = [ "Skills", "Total", "Unfinished", null, null, null, null, null, "Legendary" ];
+				extra_rows.forEach(function(row_data, idx) {
+					let row = rows[idx + start_idx];
+					if (!row) {
+						row = this._makeDataRowElement(titles[idx] || (tr("Level") + " " + (idx - 2)), idx !== 0);
+						table.appendChild(row);
+					}
+					row.children[1].textContent = row_data;
+				}, this);
+			}
 		}
 
-		_makeDataRowElement(title) {
+		_makeDataRowElement(title, sub) {
 			let row_el = document.createElement("div");
-			row_el.setAttribute("class", "dp-data-row");
+			row_el.setAttribute("class", "dp-data-row" + (sub && " dp-subdata" || ""));
 			let ttl_el = document.createElement("span");
 			ttl_el.setAttribute("class", "dp-data-title");
-			ttl_el.appendChild(document.createTextNode(tr(title) + ":"));
+			ttl_el.appendChild(document.createTextNode((sub && "\u{2022} " || "") + tr(title) + ":"));
 			row_el.appendChild(ttl_el);
 			let val_el = document.createElement("span");
 			val_el.setAttribute("class", "dp-data-value");
@@ -1569,6 +1596,9 @@
 					};
 					if (l.id === d.courses.id) {
 						l.current = true;
+						if (l.target === d.courses.skills.language) {
+							l.skills = d.courses.skills;
+						}
 					}
 					let ckey = l.target + "/" + l.from;
 					this._courses[ckey] = l;
@@ -1887,7 +1917,7 @@
 			this._data.sessions     = null;
 			this._data.block        = { blockers: null, blocking: null };
 			this._data.achievements = [];
-			this._data.courses      = { list: [], id: null };
+			this._data.courses      = { list: [], id: null, skills: null };
 			this._data.league       = null;
 			this._data.bio          = "";
 			this._data.online       = false;
@@ -1942,6 +1972,24 @@
 						this._data.block.blocking = !data.blocking && -1 || data.blocking.length;
 					}
 					this._data.sessions       = data.calendar || [];
+					this._data.courses.skills = null;
+					if (data.language_data && data.learning_language) {
+						let cc = data.language_data[data.learning_language];
+						if (cc && cc.skills) {
+							let count = 0;
+							this._data.courses.skills = {};
+							this._data.courses.skills.language = data.learning_language;
+							this._data.courses.skills.levels = cc.skills.reduce(function(levels, skill) {
+								if (!skill.bonus) {
+									let lvl = typeof(skill.levels_finished) == "number" ? skill.levels_finished : 0;
+									levels[lvl] = (levels[lvl] || 0) + 1;
+									++count;
+								}
+								return levels;
+							}, []);
+							this._data.courses.skills.count = count;
+						}
+					}
 					this._handleQueue("user_id", this._data.user.id, null);
 					break;
 				case "new_profile":
