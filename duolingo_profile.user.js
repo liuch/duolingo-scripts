@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.15.0
+// @version        1.15.1
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профилях пользователей.
@@ -1596,7 +1596,7 @@
 					};
 					if (l.id === d.courses.id) {
 						l.current = true;
-						if (l.target === d.courses.skills.language) {
+						if (l.target === d.courses.skills.language || l.title === d.courses.skills.title) {
 							l.skills = d.courses.skills;
 						}
 					}
@@ -1978,6 +1978,7 @@
 						if (cc && cc.skills) {
 							let count = 0;
 							this._data.courses.skills = {};
+							this._data.courses.skills.title = cc.language_string || null;
 							this._data.courses.skills.language = data.learning_language;
 							this._data.courses.skills.levels = cc.skills.reduce(function(levels, skill) {
 								if (!skill.bonus) {
