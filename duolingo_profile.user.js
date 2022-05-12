@@ -1798,7 +1798,7 @@
 
 		_makeUrl(param) {
 			return window.location.origin + "/2017-06-30/users/" + param
-				+ "?fields=username,blockerUserIds,blockedUserIds,courses,currentCourseId,creationDate,bio,hasRecentActivity15";
+				+ "?fields=username,courses,currentCourseId,creationDate,bio,hasRecentActivity15";
 		}
 	}
 
@@ -1915,7 +1915,6 @@
 			this._data.freeze       = "";
 			this._data.lingots      = null;
 			this._data.sessions     = null;
-			this._data.block        = { blockers: null, blocking: null };
 			this._data.achievements = [];
 			this._data.courses      = { list: [], id: null, skills: null };
 			this._data.league       = null;
@@ -1965,12 +1964,6 @@
 					if (data.bio && data.bio !== "" && this._data.bio === "") {
 						this._data.bio = data.bio;
 					}
-					if (this._data.block.blockers == -1) {
-						this._data.block.blockers = !data.blockers && -1 || data.blockers.length;
-					}
-					if (this._data.block.blocking == -1) {
-						this._data.block.blocking = !data.blocking && -1 || data.blocking.length;
-					}
 					this._data.sessions       = data.calendar || [];
 					this._data.courses.skills = null;
 					if (data.language_data && data.learning_language) {
@@ -2001,12 +1994,6 @@
 					this._data.online         = data.hasRecentActivity15;
 					if (data.bio && data.bio !== "" && this._data.bio === "") {
 						this._data.bio = data.bio;
-					}
-					if (this._data.block.blockers == -1) {
-						this._data.block.blockers = !data.blockerUserIds && -1 || data.blockerUserIds.length;
-					}
-					if (this._data.block.blocking == -1) {
-						this._data.block.blocking = !data.blockedUserIds && -1 || data.blockedUserIds.length;
 					}
 					this._handleQueue("user_name", this._data.user.name, null);
 					break;
