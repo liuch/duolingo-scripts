@@ -493,7 +493,7 @@
 			if (el) {
 				el = el.nextElementSibling;
 				if (el) {
-					return this._element = el.children[0] && el.children[0].children[1] || null;
+					this._element = el.children[0] && el.children[0].children[1] || null;
 				}
 			}
 		}
@@ -951,7 +951,7 @@
 			else {
 				ecl = " dp-summary";
 				text = tr("Total") + " ("
-					+ tr([ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"  ][dt.getDay()]) + ") ";
+					+ tr([ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ][dt.getDay()]) + ") ";
 			}
 			row.setAttribute("class", "dp-data-row" + ecl);
 			col1.setAttribute("class", "dp-data-title");
