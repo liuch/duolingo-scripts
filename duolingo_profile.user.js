@@ -1530,9 +1530,11 @@
 		}
 
 		onTimer() {
-			this._widgets.forEach(function(wid) {
-				wid.onTimer();
-			});
+			if (Array.isArray(this._widgets)) {
+				this._widgets.forEach(function(wid) {
+					wid.onTimer();
+				});
+			}
 		}
 	}
 
