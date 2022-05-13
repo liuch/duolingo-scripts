@@ -356,6 +356,7 @@
 			this.element();
 			this._element.querySelector("div.dp-close-button").classList.add("active");
 			this._element.classList.remove("dp-hidden");
+			document.body.style.overflow = "hidden";
 			return new Promise(function(resolve, reject) {
 				this._callback = resolve;
 			}.bind(this));
@@ -366,6 +367,7 @@
 				this._element.querySelector("div.dp-close-button").classList.remove("active");
 				this._element.classList.add("dp-hidden");
 			}
+			document.body.style.overflow = "";
 			this._callback && this._callback();
 		}
 	}
