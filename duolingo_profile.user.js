@@ -384,6 +384,9 @@
 			}
 			return this._element;
 		}
+
+		onTimer() {
+		}
 	}
 
 	Widget.isEqual = function(a, b) {
@@ -633,7 +636,7 @@
 							el.appendChild(el2);
 							this._element.insertBefore(el, this._element.firstChild);
 							this._updateElement();
-							return;
+							return this._element;
 						}
 					}
 				}
@@ -687,6 +690,9 @@
 						el.setAttribute("style", style6);
 						el.removeAttribute("title");
 					}
+					if (typeof(this._value.number) === "number") {
+						this._element.children[1].children[0].textContent = this._value.number;
+					}
 				}
 				return;
 			}
@@ -699,7 +705,7 @@
 					num = this._value.number;
 			}
 			this._element.children[0].style.backgroundImage = "url(" + url + ")";
-			this._element.children[1].children[0].childNodes[0].nodeValue = num;
+			this._element.children[1].children[0].textContent = num;
 		}
 	}
 
@@ -785,6 +791,11 @@
 			super();
 			this.tag = "sessions";
 			this._btn = new InfoButton({ on_click: this._displayModalWindow.bind(this) });
+			this._last = null;
+		}
+
+		onTimer() {
+			this._displaySince();
 		}
 
 		_createElement() {
@@ -835,9 +846,9 @@
 			}
 			let el = this._element.children[1].children[0].children[0];
 			if (etime) {
-				etime = new Date(etime);
-				el.textContent = timeSince(etime);
-				el.setAttribute("title", etime.toLocaleString());
+				this._last = new Date(etime);
+				this._displaySince(el);
+				el.setAttribute("title", this._last.toLocaleString());
 			}
 			else {
 				el.textContent = etime === 0 ? "n/a" : "?";
@@ -846,6 +857,13 @@
 			if (this._modal_ct) {
 				this._updateModalContent();
 			}
+		}
+
+		_displaySince(el) {
+			if (!el) {
+				el = this._element.children[1].children[0].children[0];
+			}
+			el.textContent = timeSince(this._last);
 		}
 
 		_displayModalWindow() {
@@ -1461,6 +1479,12 @@
 			});
 			this._update();
 		}
+
+		onTimer() {
+			this._widgets.forEach(function(wid) {
+				wid.onTimer();
+			});
+		}
 	}
 
 // ---
@@ -1838,6 +1862,7 @@
 	u_data = new class
 	{
 		constructor(on_update, on_reset) {
+			this.last_activity = null;
 			this._data = {};
 			this._on_update = on_update;
 			this._on_reset = on_reset;
@@ -1859,9 +1884,11 @@
 			return this._data;
 		}
 
-		update(user) {
-			this._reset();
-			this._on_reset();
+		update(user, soft) {
+			if (!soft) {
+				this._reset();
+				this._on_reset();
+			}
 			{
 				let err = { name: "Debug", message: "The request queue was reset" };
 				this._handleQueue("user_id", null, err);
@@ -1870,6 +1897,7 @@
 			if (!user.id) user.id = 0;
 			if (!user.name) user.name = "";
 			this._data.user = user;
+			this.last_activity = new Date();
 			this._fetchData(this._sources.old_profile, true);
 			this._fetchData(this._sources.new_profile, true);
 			this._fetchData(this._sources.league, true);
@@ -1933,6 +1961,7 @@
 
 		_handleData(data) {
 			debug("Handle data", data._type);
+			this.last_activity = new Date();
 			if (data._error) {
 				if (data._error.name !== "AbortError") {
 					if (this._handleQueue(data._type, null, data._error) == 0) {
@@ -2055,6 +2084,14 @@
 		observe.stop();
 		containers.forEach(function(c) {
 			c.setData(data);
+		});
+		observe.start();
+	}
+
+	function tickContainers() {
+		observe.stop();
+		containers.forEach(function(c) {
+			c.onTimer();
 		});
 		observe.start();
 	}
@@ -2188,12 +2225,47 @@
 			}
 			try_update();
 		}, 0);
+
+		// The update timer only works if the tab is active
+		let timer_id = null;
+		let manage_timer = function() {
+			if (document.visibilityState === "visible") {
+				if (!timer_id) {
+					timer_id = setInterval(function() {
+						let la = u_data.last_activity;
+						if (la && (new Date()) - la >= 5 * 60 * 1000) {
+							// No more than every 5 minutes for the queries
+							u_data.update(u_data.user(), true);
+						}
+						// Every minute for the widgets.
+						// Only one widget currently uses this method and it does not make any request to the server.
+						tickContainers();
+					}, 1 * 60 * 1000);
+					debug("The update timer has been started");
+					let la = u_data.last_activity;
+					if (la && (new Date()) - la >= 1 * 60 * 1000) {
+						// The tab has just been activated and at least one minute has passed since the last update.
+						tickContainers();
+						u_data.update(u_data.user(), true);
+					}
+				}
+			}
+			else if (timer_id) {
+				clearInterval(timer_id);
+				timer_id = null;
+				debug("The update timer has been stopped");
+			}
+		};
+		document.addEventListener("visibilitychange", manage_timer);
+		manage_timer();
 	}
 
 // ---
 
-	window.addEventListener("load", function() {
+	if (document.readyState === "loading") {
+		window.addEventListener("DOMContentLoaded", init);
+	} else {
 		init();
-	});
+	}
 })();
 
