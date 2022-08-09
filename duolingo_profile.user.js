@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.17.1
+// @version        1.17.2
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профилях пользователей.
@@ -1641,7 +1641,7 @@
 		}
 
 		_findElement() {
-			this._element = document.querySelector("div._2GPX6>div>div._1jKLW");
+			this._element = document.querySelector("div._25dpq>div>div>div._1jKLW");
 			if (this._element) {
 				this._element.setAttribute("id", "dp-stat");
 			}
@@ -1701,7 +1701,7 @@
 			let list_el;
 			let widgets = this._widgets;
 			this._widgets = {};
-			if (ui_version !== 210301 || !(list_el = document.querySelector("div._2GPX6>div.BMuTY"))) {
+			if (ui_version !== 210301 || !(list_el = document.querySelector("div._3sLAg>div._2chFf>div.BMuTY"))) {
 				return;
 			}
 			for (let i = 0; i < list_el.children.length; ++i) {
@@ -1741,7 +1741,7 @@
 					this._createElement();
 				}
 				if (!document.body.contains(this._element)) {
-					let c_el = document.querySelector("div._25dpq>div._2GPX6>div>div._2tUeO");
+					let c_el = document.querySelector("div._33Mo9>div._25dpq>div>div>div._2tUeO>div._1Dseq");
 					if (c_el) {
 						while (c_el.firstChild) {
 							c_el.lastChild.remove();
@@ -2200,7 +2200,7 @@
 				ver = 210301; // March 2021; www, preview
 		}
 		else if (ui_section === "courses") {
-			if (document.querySelector("div._3W86r._1Xlh1>div._3sLAg>div._2GPX6>div.BMuTY"))
+			if (document.querySelector("div._3W86r._1Xlh1>div._3sLAg>div._2chFf>div.BMuTY"))
 				ver = 210301; // March 2021; www, preview
 		}
 		if (ver !== ui_version) {
