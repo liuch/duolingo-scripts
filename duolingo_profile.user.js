@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.17.3
+// @version        1.17.4
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профилях пользователей.
@@ -2200,7 +2200,7 @@
 				ver = 210301; // March 2021; www, preview
 		}
 		else if (ui_section === "courses") {
-			if (document.querySelector("div._3W86r._1Xlh1>div._3sLAg>div._2chFf>div.BMuTY"))
+			if (document.querySelector("div>div._3sLAg>div._2chFf>div.BMuTY"))
 				ver = 210301; // March 2021; www, preview
 		}
 		if (ver !== ui_version) {
