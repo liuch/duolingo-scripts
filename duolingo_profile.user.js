@@ -3,7 +3,7 @@
 // @namespace      https://github.com/liuch/duolingo-scripts
 // @include        https://www.duolingo.com/*
 // @include        https://preview.duolingo.com/*
-// @version        1.17.4
+// @version        1.17.5
 // @grant          none
 // @description    This script displays additional information in the users' profile.
 // @description:ru Этот скрипт показывает дополнительную информацию в профилях пользователей.
@@ -846,7 +846,9 @@
 		}
 
 		onTimer() {
-			this._displaySince();
+			if (this._last) {
+				this._displaySince();
+			}
 		}
 
 		_createElement() {
@@ -902,6 +904,7 @@
 				el.setAttribute("title", this._last.toLocaleString());
 			}
 			else {
+				this._last = null;
 				el.textContent = etime === 0 ? "n/a" : "?";
 				el.removeAttribute("title");
 			}
